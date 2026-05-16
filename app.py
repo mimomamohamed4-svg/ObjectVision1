@@ -48,7 +48,7 @@ header { display: none !important; }
 footer { display: none !important; }
 
 /* Contenedor del Login y Registro */
-.login-container { max-width: 450px; margin: 60px auto 20px auto; padding: 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+.login-container { max-width: 450px; margin: 60px auto 20px auto; padding: 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 166px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
 .login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
@@ -113,7 +113,7 @@ div[data-testid="stSlider"] { padding: 10px 20px; background: #0d1422; border: 1
 </style>
 """, unsafe_allow_html=True)
 
-# 4. FLUJO DE CONTROL: CONFIGURACIÓN DE LOGIN / REGISTRO
+# 4. FLUJO DE CONTROL: LOGIN / REGISTRO
 if not st.session_state.autenticado:
     st.markdown("""
     <div class="login-container">
@@ -167,7 +167,7 @@ if not st.session_state.autenticado:
                     st.success(f"¡Usuario '{nuevo_usuario}' registrado! Ya puedes iniciar sesión.")
     st.stop()
 
-# 5. DICCIONARIOS DE IDIOMA Y TRADUCCIONES DE MODELO
+# --- TEXTOS E IDIOMAS ---
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
@@ -213,7 +213,7 @@ TEXTOS = {
     },
     "fr": {
         "titulo": "Vision artificielle qui <em>comprend</em> votre monde.",
-        "subtitulo": "Téléchargez une image et notre IA identifie les objets instantanément.",
+        "subtitulo": "Téléchargez une image y notre IA identifie les objets instantanément.",
         "tab_analizar": "Analyser image",
         "tab_camara": "Caméra live",
         "tab_comparar": "Comparer modèles",
@@ -344,7 +344,7 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
         mensaje_voz = f"Object detected: {nombre_top}, with {prob_top:.0f} percent confidence."
         lang_voz = "en-US"
     else:
-        mensaje_voz = f"Objet détecté: {nombre_top}, avec {prob_top:.0f} pourcent de confiance."
+        mensaje_voz = f"Objet détecté: {nombre_top}, avec {prob_top:.0f} pourcent de confianza."
         lang_voz = "fr-FR"
 
     col_btn1, col_btn2 = st.columns([1, 1])
@@ -368,7 +368,7 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# 7. BARRA DE NAVEGACIÓN SUPERIOR CORREGIDA (Responsive y sin saltos)
+# --- 7. BARRA DE NAVEGACIÓN SUPERIOR BLINDADA (Solución Definitiva) ---
 badge_rol_color = "rgba(255, 75, 75, 0.15)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.15)"
 badge_text_color = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
 badge_border_color = "rgba(255, 75, 75, 0.4)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.4)"
@@ -376,7 +376,7 @@ badge_border_color = "rgba(255, 75, 75, 0.4)" if "ADMIN" in st.session_state.rol
 navbar_html = f"""
 <div style="
     background: #060a12; 
-    padding: 12px 40px; 
+    padding: 15px 40px; 
     border-bottom: 1px solid #1a2744; 
     display: flex; 
     align-items: center; 
@@ -385,33 +385,33 @@ navbar_html = f"""
     font-family: 'Sora', sans-serif;
     box-sizing: border-box;
 ">
-    <div style="font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; flex-shrink: 0;">
+    <div style="font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase;">
         Object<span style="color: #0066ff;">Vision</span>
     </div>
     
-    <div style="display: flex; gap: 8px; align-items: center; justify-content: center; overflow: hidden;">
-        <span style="font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); padding: 4px 10px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">MobileNetV2</span>
-        <span style="font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 4px 10px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">PyTorch</span>
-        <span style="font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 4px 10px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">ImageNet</span>
+    <div style="display: flex; gap: 12px; align-items: center;">
+        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">MobileNetV2</span>
+        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">PyTorch</span>
+        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">ImageNet</span>
     </div>
     
-    <div style="display: flex; align-items: center; flex-shrink: 0;">
+    <div style="display: flex; align-items: center;">
         <span style="
             background: {badge_rol_color};
             color: {badge_text_color};
             border: 1px solid {badge_border_color};
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 6px;
             font-family: 'Space Mono', monospace;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 700;
         ">👤 {st.session_state.rol_usuario}</span>
     </div>
 </div>
 """
-st.components.v1.html(navbar_html, height=65)
+st.components.v1.html(navbar_html, height=70)
 
-# Fila superior de utilidad para Logout colocado sutilmente a la derecha
+# Botón nativo de salida (Logout)
 col_logout_1, col_logout_2 = st.columns([7, 1])
 with col_logout_2:
     if st.button("🔴 SALIR", key="logout_system_btn"):
@@ -564,14 +564,15 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB — PANEL DE ADMINISTRACIÓN CORREGIDO (Seguro y bien renderizado)
+# TAB — PANEL DE ADMINISTRACIÓN (CORREGIDO Y BLINDADO)
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
         st.markdown('<div class="zone-label">— AUDITORÍA DE SEGURIDAD INTERNA</div>', unsafe_allow_html=True)
-        st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de perfiles con enmascaramiento criptográfico simulado para la demostración.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
+        # 1. Generamos el contenido de las filas de forma aislada
         tabla_contenido = ""
         for usr, datos in st.session_state.usuarios_db.items():
             if "ADMIN" in datos["rol"]:
@@ -579,24 +580,22 @@ if es_admin:
             else:
                 badge_style = "background: rgba(0, 212, 170, 0.1); color: #00d4aa; border: 1px solid rgba(0, 212, 170, 0.2);"
             
-            # Reemplazamos la clave real por una máscara bonita para ganar puntos con el tribunal
-            clave_oculta = "••••••••"
-            
             tabla_contenido += f"""
             <tr>
                 <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #e8eaf0; font-family: 'Space Mono', monospace; font-weight: 700;">{usr}</td>
-                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 2px;">{clave_oculta}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #a2b4d2; font-family: 'Space Mono', monospace;">{datos['clave']}</td>
                 <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744;"><span style="font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; {badge_style}">{datos['rol']}</span></td>
             </tr>
             """
         
+        # 2. Estructuramos la tabla web completa dentro de un único string contenedor
         html_completo = f"""
         <div style="padding: 0 80px; background: #080c14; box-sizing: border-box;">
             <table style="width: 100%; border-collapse: collapse; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; font-family: 'Sora', sans-serif;">
                 <thead>
                     <tr style="background: #111a2e; color: #0066ff; font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: left; letter-spacing: 1px;">
                         <th style="padding: 12px 16px;">ID USUARIO</th>
-                        <th style="padding: 12px 16px;">CONTRASEÑA (SHA-256 MASK)</th>
+                        <th style="padding: 12px 16px;">CONTRASEÑA EN CLARO</th>
                         <th style="padding: 12px 16px;">ROL ASIGNADO</th>
                     </tr>
                 </thead>
@@ -606,7 +605,9 @@ if es_admin:
             </table>
         </div>
         """
-        st.components.v1.html(html_completo, height=280, scrolling=False)
+        
+        # 3. CRÍTICO: Forzamos a Streamlit a interpretar el código como una web real (Evita el texto plano)
+        st.components.v1.html(html_completo, height=350, scrolling=True)
 
 # 10. PIE DE PÁGINA (FOOTER CORPORATIVO)
 st.markdown("""
