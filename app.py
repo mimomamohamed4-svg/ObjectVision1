@@ -9,7 +9,7 @@ import base64
 import time
 from datetime import datetime
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
+# 1. CONFIGURACIÓN DE LA PÁGINA (Debe ser lo primero)
 st.set_page_config(
     page_title="ObjectVision AI",
     page_icon="🔍",
@@ -35,21 +35,21 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# 3. INTERFAZ CSS GLOBAL (Limpio, plano y estable)
+# 3. INTERFAZ CSS GLOBAL (Sólida, limpia y sin parches experimentales)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght=300;400;500;600;700&family=Space+Mono:wght=400;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
 
-/* Ocultar elementos nativos */
+/* Ocultar elementos nativos molestos */
 [data-testid="stSidebar"] { display: none; }
 [data-testid="collapsedControl"] { display: none; }
 header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Barra de navegación superior */
+/* Barra de navegación superior integrada mediante CSS Puro */
 .custom-navbar {
     background: #060a12; 
     padding: 15px 80px; 
@@ -66,7 +66,7 @@ footer { display: none !important; }
 .nav-badge-active { color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); }
 .nav-user { font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; }
 
-/* CONTENEDOR INTEGRAL DEL LOGIN (HTML PURE BLOCK) */
+/* CONTENEDOR INTEGRAL DEL LOGIN (Diseño blindado en una sola pieza) */
 .login-card-integral {
     background: #0d1422;
     border: 1px solid #1a2744;
@@ -79,44 +79,9 @@ footer { display: none !important; }
 .login-card-integral .title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-card-integral .subtitle { font-size: 0.8rem; color: #4a6080; text-align: center; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 30px; }
 
-/* Ocultar etiquetas molestas de Streamlit en el login */
+/* Ocultar etiquetas nativas molestas dentro del formulario */
 div[data-testid="stForm"] { border: none !important; padding: 0 !important; background: transparent !important; }
 div[data-testid="stForm"] label { display: none !important; }
-
-/* Estilización forzada y unificada de inputs en login */
-div[data-testid="stTextInput"] input { 
-    background: #080c14 !important; 
-    color: #fff !important; 
-    border: 1px solid #1a2744 !important; 
-    border-radius: 8px !important;
-    padding: 12px !important;
-    height: 45px !important;
-}
-div[data-testid="stTextInput"] input:focus {
-    border-color: #0066ff !important;
-}
-
-/* Botón de login unificado */
-.stButton > button, button[data-testid="stFormSubmitButton"] { 
-    background: rgba(0, 102, 255, 0.1) !important; 
-    color: #0066ff !important; 
-    border: 1px solid #0066ff !important; 
-    padding: 12px 20px !important; 
-    border-radius: 8px !important; 
-    font-family: 'Space Mono', monospace !important; 
-    font-size: 0.8rem !important; 
-    font-weight: 700 !important; 
-    text-transform: uppercase !important; 
-    width: 100% !important; 
-    height: 48px !important;
-    margin-top: 10px !important; 
-}
-.stButton > button:hover, button[data-testid="stFormSubmitButton"]:hover { 
-    background: linear-gradient(90deg, #0066ff, #00d4aa) !important; 
-    color: white !important; 
-    border: none !important; 
-    box-shadow: 0 4px 15px rgba(0,102,255,0.3); 
-}
 
 /* Hero Principal */
 .hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 40px 80px; border-bottom: 1px solid #1a2744; }
@@ -130,7 +95,7 @@ div[data-testid="stTextInput"] input:focus {
 .stat-number { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; }
 .stat-label { font-size: 0.7rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
 
-/* Secciones modulos */
+/* Secciones de análisis y resultados */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 20px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -158,53 +123,63 @@ div[data-testid="stTextInput"] input:focus {
 .bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
-/* File Uploader nativo controlado */
+/* Inputs controlados */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
+div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
+
+/* Botones universales nativos estilizados */
+.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 12px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; margin-top: 15px; }
+.stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
+
+/* RESET COMPLETO DE TABS NATIVAS */
+.stTabs [data-baseweb="tab-list"] { padding-left: 80px; background: #060a10; gap: 10px; }
+.stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
+.stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# 4. PORTAL DE ACCESO INTEGRAL (UNIFICADO EN UNA SOLA TARJETA SIN SEPARACIONES)
+# 4. PORTAL DE ACCESO INTEGRAL (DISEÑO BLINDADO)
 if not st.session_state.autenticado:
     col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
-        # Metemos la apertura de la caja y los textos, e inmediatamente los inputs dentro para que flexbox los unifique
+        # Iniciamos el contenedor integral HTML
         st.markdown("""
         <div class="login-card-integral">
             <div class="title">Object<span>Vision</span> AI</div>
             <div class="subtitle">Control de Acceso de Investigadores</div>
+        </div>
         """, unsafe_allow_html=True)
         
-        with st.form("security_access_form_integral"):
+        # Formulario limpio de recolección de credenciales justo debajo (Inmune a saltos Flexbox)
+        with st.form("security_access_form"):
             usuario_input = st.text_input("Usuario", placeholder="Introduce tu ID de usuario (ej: mohamed)").strip().lower()
             contrasena_input = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
-            btn_login = st.form_submit_button("Verificar Identidad y Acceder")
+            btn_login = st.button("Verificar Identidad y Acceder")
             
             if btn_login:
                 if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
                     st.session_state.autenticado = True
                     st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
-                    st.success("Acceso concedido. Conectando...")
-                    time.sleep(0.4)
+                    st.success("Acceso autorizado. Conectando con los módulos de visión...")
+                    time.sleep(0.5)
                     st.rerun()
                 else:
-                    st.error("Credenciales incorrectas.")
-        
-        st.markdown("</div>", unsafe_allow_html=True) # Cierre del div integral
+                    st.error("Credenciales incorrectas o usuario no registrado.")
                     
     st.stop()
 
 # --- TEXTOS E IDIOMAS ---
 TEXTOS = {
     "es": {
-        "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
+        "titulo": "Visión artificial que <em>entiende</em> tu world.",
         "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante.",
-        "tab_analizar": "🔍 Analizar imagen",
-        "tab_camara": "📷 Cámara en vivo",
-        "tab_comparar": "📊 Comparar modelos",
-        "tab_historial": "🕐 Historial",
+        "tab_analizar": "Analizar imagen",
+        "tab_camara": "Cámara en vivo",
+        "tab_comparar": "Comparar modelos",
+        "tab_historial": "Historial",
         "entrada": "— Entrada",
         "analisis": "— Análisis",
         "alta": "CONFIANZA ALTA",
@@ -222,10 +197,10 @@ TEXTOS = {
     "en": {
         "titulo": "Artificial vision that <em>understands</em> your world.",
         "subtitulo": "Upload any image and our AI instantly identifies objects.",
-        "tab_analizar": "🔍 Analyze image",
-        "tab_camara": "📷 Live camera",
-        "tab_comparar": "📊 Compare models",
-        "tab_historial": "🕐 History",
+        "tab_analizar": "Analyze image",
+        "tab_camara": "Live camera",
+        "tab_comparar": "Compare models",
+        "tab_historial": "History",
         "entrada": "— Input",
         "analisis": "— Analysis",
         "alta": "HIGH CONFIDENCE",
@@ -366,7 +341,7 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- 5. BARRA DE NAVEGACIÓN SUPERIOR ---
+# --- 5. BARRA DE NAVEGACIÓN SUPERIOR CON FLUJO NATIVO ---
 badge_bg = "rgba(255, 75, 75, 0.15)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.15)"
 badge_txt = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
 badge_border = "rgba(255, 75, 75, 0.4)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.4)"
@@ -385,7 +360,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Controles de navegación nativos superiores
+# Botones nativos de acciones superiores
 col_nav_actions = st.columns([6, 1, 1])
 with col_nav_actions[1]:
     lang_map = {"Español": "es", "English": "en"}
@@ -414,26 +389,23 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 7. PANEL DE CONTROL DE NAVEGACIÓN PRINCIPAL
-lista_modulos = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
+# Filtro de certeza mínimo
+st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
+umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
+st.markdown("</div>", unsafe_allow_html=True)
+
+# 7. GESTIÓN DE PESTAÑAS (PANEL GENERAL PRINCIPAL POST-LOGIN)
+lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 
 if es_admin:
-    lista_modulos.append("👥 Panel Admin (Usuarios)")
+    lista_tabs.append("👥 Panel Admin (Usuarios)")
 
-st.markdown("<div style='padding: 30px 80px 0 80px;'>", unsafe_allow_html=True)
-col_panel1, col_panel2 = st.columns([2, 1], gap="large")
+tabs_render = st.tabs(lista_tabs)
 
-with col_panel1:
-    modulo_seleccionado = st.selectbox("🎛️ SELECCIONAR MÓDULO DE TRABAJO", lista_modulos)
-
-with col_panel2:
-    umbral_sel = st.slider("🎯 Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
-st.markdown("</div>", unsafe_allow_html=True)
-
-# LÓGICA DE RENDERIZADO DEL SELECTBOX
-if modulo_seleccionado == t["tab_analizar"]:
-    st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
+# TAB — ANALIZAR IMAGEN
+with tabs_render[0]:
+    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     with col1:
         st.markdown(f'<div class="zone-label">{t["entrada"]}</div>', unsafe_allow_html=True)
@@ -471,8 +443,9 @@ if modulo_seleccionado == t["tab_analizar"]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["esperando"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-elif modulo_seleccionado == t["tab_camara"]:
-    st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
+# TAB — CÁMARA EN VIVO
+with tabs_render[1]:
+    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     with col1:
         st.markdown(f'<div class="zone-label">{t["entrada"]}</div>', unsafe_allow_html=True)
@@ -492,8 +465,9 @@ elif modulo_seleccionado == t["tab_camara"]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-elif modulo_seleccionado == t["tab_comparar"]:
-    st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
+# TAB — COMPARAR MODELOS
+with tabs_render[2]:
+    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="upload2")
     if archivo_comp:
         imagen_comp = Image.open(archivo_comp).convert("RGB")
@@ -515,8 +489,9 @@ elif modulo_seleccionado == t["tab_comparar"]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-elif modulo_seleccionado == t["tab_historial"]:
-    st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
+# TAB — HISTORIAL DE CONSULTAS
+with tabs_render[3]:
+    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
     if st.session_state.historial:
@@ -534,39 +509,46 @@ elif modulo_seleccionado == t["tab_historial"]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-elif modulo_seleccionado == "👥 Panel Admin (Usuarios)" and es_admin:
-    st.markdown("<div style='padding: 20px 80px 10px 80px;'>", unsafe_allow_html=True)
-    st.markdown('<div class="zone-label">— AUDITORÍA DE SEGURIDAD INTERNA</div>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    tabla_contenido = ""
-    for usr, datos in st.session_state.usuarios_db.items():
-        badge_style = "background: rgba(255, 75, 75, 0.1); color: #ff4b4b; border: 1px solid rgba(255, 75, 75, 0.2);" if "ADMIN" in datos["rol"] else "background: rgba(0, 212, 170, 0.1); color: #00d4aa; border: 1px solid rgba(0, 212, 170, 0.2);"
-        tabla_contenido += f"""
-        <tr>
-            <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #e8eaf0; font-family: 'Space Mono', monospace; font-weight: 700;">{usr}</td>
-            <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #a2b4d2; font-family: 'Space Mono', monospace;">{datos['clave']}</td>
-            <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744;"><span style="font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; {badge_style}">{datos['rol']}</span></td>
-        </tr>
+# TAB — PANEL DE ADMINISTRACIÓN
+if es_admin:
+    with tabs_render[4]:
+        st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
+        st.markdown('<div class="zone-label">— AUDITORÍA DE SEGURIDAD INTERNA</div>', unsafe_allow_html=True)
+        st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+        
+        tabla_contenido = ""
+        for usr, datos in st.session_state.usuarios_db.items():
+            if "ADMIN" in datos["rol"]:
+                badge_style = "background: rgba(255, 75, 75, 0.1); color: #ff4b4b; border: 1px solid rgba(255, 75, 75, 0.2);"
+            else:
+                badge_style = "background: rgba(0, 212, 170, 0.1); color: #00d4aa; border: 1px solid rgba(0, 212, 170, 0.2);"
+            
+            tabla_contenido += f"""
+            <tr>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #e8eaf0; font-family: 'Space Mono', monospace; font-weight: 700;">{usr}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #a2b4d2; font-family: 'Space Mono', monospace;">{datos['clave']}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744;"><span style="font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; {badge_style}">{datos['rol']}</span></td>
+            </tr>
+            """
+        
+        html_completo = f"""
+        <div style="padding: 0 80px; background: #080c14; box-sizing: border-box;">
+            <table style="width: 100%; border-collapse: collapse; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; font-family: 'Sora', sans-serif;">
+                <thead>
+                    <tr style="background: #111a2e; color: #0066ff; font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: left; letter-spacing: 1px;">
+                        <th style="padding: 12px 16px;">ID USUARIO</th>
+                        <th style="padding: 12px 16px;">CONTRASEÑA EN CLARO</th>
+                        <th style="padding: 12px 16px;">ROL ASIGNADO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {tabla_contenido}
+                </tbody>
+            </table>
+        </div>
         """
-    
-    html_completo = f"""
-    <div style="padding: 0 80px; background: #080c14; box-sizing: border-box;">
-        <table style="width: 100%; border-collapse: collapse; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; font-family: 'Sora', sans-serif;">
-            <thead>
-                <tr style="background: #111a2e; color: #0066ff; font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: left; letter-spacing: 1px;">
-                    <th style="padding: 12px 16px;">ID USUARIO</th>
-                    <th style="padding: 12px 16px;">CONTRASEÑA EN CLARO</th>
-                    <th style="padding: 12px 16px;">ROL ASIGNADO</th>
-                </tr>
-            </thead>
-            <tbody>
-                {tabla_contenido}
-            </tbody>
-        </table>
-    </div>
-    """
-    st.components.v1.html(html_completo, height=350, scrolling=True)
+        st.components.v1.html(html_completo, height=350, scrolling=True)
 
 # 8. PIE DE PÁGINA (FOOTER CORPORATIVO)
 st.markdown("""
