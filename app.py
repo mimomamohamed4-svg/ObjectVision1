@@ -16,15 +16,24 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- CONTROL DE SESIÓN / AUTENTICACIÓN ---
+# --- PERSISTENCIA DE DATOS Y GESTIÓN DE SESIÓN ---
+if "usuarios_db" not in st.session_state:
+    st.session_state.usuarios_db = {
+        "mohamed": {"clave": "admin2026", "rol": "MOHAMED (ADMIN)"},
+        "profesora": {"clave": "tribunal10", "rol": "PROFESORA (EVALUADOR)"},
+        "invitado": {"clave": "invitado123", "rol": "INVITADO"}
+    }
+
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
+if "rol_usuario" not in st.session_state:
+    st.session_state.rol_usuario = ""
 if "historial" not in st.session_state:
     st.session_state.historial = []
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# INTERFAZ CSS POTENCIADA (Incluye estilos para el Login Cyberpunk)
+# INTERFAZ CSS POTENCIADA (Incluye Login, Registro y Ajustes de Inputs)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -36,11 +45,11 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Contenedor del Login */
-.login-container { max-width: 450px; margin: 100px auto; padding: 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+/* Contenedor del Login y Registro */
+.login-container { max-width: 450px; margin: 60px auto 20px auto; padding: 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
 .login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
-.login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 30px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
+.login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
 
 /* Hero Principal */
 .hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%); padding: 50px 80px 40px 80px; border-bottom: 1px solid #1a2744; position: relative; overflow: hidden; }
@@ -111,31 +120,61 @@ div[data-testid="stSlider"] { padding: 10px 20px; background: #0d1422; border: 1
 </style>
 """, unsafe_allow_html=True)
 
-# --- FLUJO DE CONTROL 1: VERIFICAR LOGIN ---
+# --- FLUJO DE CONTROL 1: PANTALLA DE ACCESO / REGISTRO ---
 if not st.session_state.autenticado:
     st.markdown("""
     <div class="login-container">
         <div class="login-title">Object<span>Vision</span> AI</div>
-        <div class="login-subtitle">SISTEMA DE AUTENTICACIÓN CENTRALIZADO</div>
+        <div class="login-subtitle">PORTAL DE ACCESO Y REGISTRO DE USUARIOS</div>
     </div>
     """, unsafe_allow_html=True)
     
     col_f1, col_f2, col_f3 = st.columns([1, 2, 1])
+    
     with col_f2:
-        usuario = st.text_input("Usuario del Sistema", placeholder="Introduce tu ID", label_visibility="visible")
-        contrasena = st.text_input("Clave de Acceso", type="password", placeholder="••••••••", label_visibility="visible")
-        btn_login = st.button("Validar Credenciales")
+        tab_login, tab_registro = st.tabs(["🔑 Iniciar Sesión", "📝 Crear Cuenta"])
         
-        if btn_login:
-            if usuario == "admin" and contrasena == "objectvision2026":
-                st.session_state.autenticado = True
-                st.rerun()
-            else:
-                st.error("Acceso denegado: Credenciales incorrectas o usuario no registrado.")
-    st.stop()  # Detiene la ejecución para que no se cargue nada de la IA si no te logueas
+        with tab_login:
+            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+            usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="login_user").strip().lower()
+            contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="login_pass")
+            btn_login = st.button("Acceder al Sistema")
+            
+            if btn_login:
+                if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
+                    st.session_state.autenticado = True
+                    st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
+                    st.success("Acceso autorizado. Cargando interfaz...")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("Credenciales incorrectas o usuario no registrado.")
+                    
+        with tab_registro:
+            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+            nuevo_usuario = st.text_input("Elige un Nombre de Usuario", placeholder="Ej: pedro99", key="reg_user").strip().lower()
+            nueva_contrasena = st.text_input("Crea una Contraseña Segura", type="password", placeholder="Mínimo 4 caracteres", key="reg_pass")
+            confirmar_pass = st.text_input("Repite la Contraseña", type="password", placeholder="••••••••", key="reg_pass_conf")
+            btn_registrar = st.button("Finalizar Registro")
+            
+            if btn_registrar:
+                if not nuevo_usuario or not nueva_contrasena:
+                    st.warning("Por favor, rellena todos los campos.")
+                elif len(nueva_contrasena) < 4:
+                    st.error("La contraseña debe tener al menos 4 caracteres.")
+                elif nueva_contrasena != confirmar_pass:
+                    st.error("Las contraseñas no coinciden.")
+                elif nuevo_usuario in st.session_state.usuarios_db:
+                    st.error("Ese nombre de usuario ya está ocupado.")
+                else:
+                    st.session_state.usuarios_db[nuevo_usuario] = {
+                        "clave": nueva_contrasena,
+                        "rol": f"{nuevo_usuario.upper()} (CLIENTE)"
+                    }
+                    st.success(f"¡Usuario '{nuevo_usuario}' registrado! Ya puedes iniciar sesión.")
+    st.stop()
 
-# --- FLUJO DE CONTROL 2: PLATAFORMA PRINCIPAL (Solo si está autenticado) ---
-
+# --- LÓGICA CORE DE INTELIGENCIA ARTIFICIAL ---
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
@@ -335,7 +374,7 @@ def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# RENDERIZADO HERO
+# RENDERIZADO DEL HERO E INFORMACIÓN DE ROL DINÁMICO
 idioma = st.session_state.idioma
 t = TEXTOS[idioma]
 
@@ -344,7 +383,7 @@ st.markdown(f"""
     <div class="nav">
         <div class="logo">Object<span>Vision</span></div>
         <div class="nav-tags">
-            <div class="nav-tag" style="color: #ff4b4b; background: rgba(255,75,75,0.1); border-color: rgba(255,75,75,0.3)">AUTH: ADMIN</div>
+            <div class="nav-tag" style="color: #ff4b4b; background: rgba(255,75,75,0.1); border-color: rgba(255,75,75,0.3)">AUTH: {st.session_state.rol_usuario}</div>
             <div class="nav-tag">MobileNetV2</div>
             <div class="nav-tag">PyTorch</div>
             <div class="nav-tag">ImageNet</div>
@@ -361,7 +400,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# BARRA DE CONTROLES SUPERIORES (Incluye desconexión)
+# CONTROLES INTERACTIVOS SUPERIORES (Filtros, Idioma y Cierre de Sesión)
 col_controles = st.columns([2, 1, 1, 1])
 with col_controles[0]:
     umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
@@ -376,6 +415,7 @@ with col_controles[3]:
     st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
     if st.button("🔒 Salir"):
         st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
         st.rerun()
 
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -487,6 +527,7 @@ with tab4:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# FOOTER DE MARCA PERSONAL
 st.markdown("""
 <div class="bottom-bar">
     <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
