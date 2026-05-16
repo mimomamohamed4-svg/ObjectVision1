@@ -35,7 +35,7 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# 3. INTERFAZ CSS GLOBAL (Estilos de la aplicación con separación corregida en pestañas de login)
+# 3. INTERFAZ CSS GLOBAL (Con selectores ultra-específicos para el Login)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -73,16 +73,14 @@ footer { display: none !important; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
 
-/* SEPARACIÓN DE PESTAÑAS DENTRO DEL LOGIN */
-.stTabs [data-baseweb="tab-list"] { 
-    gap: 10px; 
-    border-bottom: 1px solid #1a2744; 
+/* FIX DEFINITIVO: SEPARACIÓN DE PESTAÑAS EN EL PORTAL DE LOGIN */
+.login-tabs-container div[data-baseweb="tab-list"] {
+    gap: 40px !important; /* Fuerza la separación del bloque de la barra base */
 }
-/* Separador para las pestañas de login (las segundas que aparecen en el árbol DOM) */
-div.stTabs [data-baseweb="tab"] {
-    margin-right: 35px !important;  /* Forzamos una separación elegante entre botones */
-    padding-left: 5px !important;
-    padding-right: 5px !important;
+.login-tabs-container button[data-baseweb="tab"] {
+    margin-right: 35px !important; /* Margen forzado entre pestañas de login */
+    padding-left: 0px !important;
+    padding-right: 0px !important;
 }
 
 /* Hero Principal con padding corregido */
@@ -135,7 +133,7 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
-/* Ajuste específico para las pestañas de navegación internas una vez logueado */
+/* Ajuste específico para las pestañas de navegación internas del panel principal (Post-Login) */
 .stTabs [data-baseweb="tab-list"] { padding-left: 80px; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
@@ -154,6 +152,8 @@ if not st.session_state.autenticado:
     col_f1, col_f2, col_f3 = st.columns([1, 2, 1])
     
     with col_f2:
+        # Envolvemos las pestañas nativas en un contenedor HTML con una clase única identificable
+        st.markdown('<div class="login-tabs-container">', unsafe_allow_html=True)
         tab_login, tab_registro = st.tabs(["🔑 Iniciar Sesión", "📝 Crear Cuenta"])
         
         with tab_login:
@@ -194,6 +194,7 @@ if not st.session_state.autenticado:
                         "rol": f"{nuevo_usuario.upper()} (CLIENTE)"
                     }
                     st.success(f"¡Usuario '{nuevo_usuario}' registrado! Ya puedes iniciar sesión.")
+        st.markdown('</div>', unsafe_allow_html=True) # Cierre del contenedor de pestañas de login
     st.stop()
 
 # --- TEXTOS E IDIOMAS ---
