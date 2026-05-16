@@ -9,6 +9,7 @@ import base64
 import time
 from datetime import datetime
 
+# 1. CONFIGURACIÓN DE LA PÁGINA (Debe ser lo primero)
 st.set_page_config(
     page_title="ObjectVision AI",
     page_icon="🔍",
@@ -16,6 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# 2. GESTIÓN DE SESIÓN Y USUARIOS
 if "usuarios_db" not in st.session_state:
     st.session_state.usuarios_db = {
         "mohamed": {"clave": "admin2026", "rol": "MOHAMED (ADMIN)"},
@@ -31,16 +33,40 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
+# 3. INTERFAZ CSS GLOBAL TRABAJADA
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght=300;400;500;600;700&family=Space+Mono:wght=400;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
+
+/* Ocultar elementos nativos */
 [data-testid="stSidebar"] { display: none; }
 [data-testid="collapsedControl"] { display: none; }
 header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
+
+/* Contenedor unificado para la Navbar superior */
+.navbar-container {
+    background: #060a12;
+    border-bottom: 1px solid #1a2744;
+    padding: 10px 60px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* Tarjeta contenedora para el Login */
+.login-box {
+    background: #0d1422;
+    border: 1px solid #1a2744;
+    border-radius: 16px;
+    padding: 40px;
+    margin-top: 50px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 22px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -57,39 +83,60 @@ footer { display: none !important; }
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 15px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
 .empty-icon { font-size: 2.5rem; opacity: 0.2; }
 .empty-text { font-size: 0.85rem; color: #4a6080; font-family: 'Space Mono', monospace; }
-.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 70px 80px 50px 80px; border-bottom: 1px solid #1a2744; }
+
+/* Hero principal */
+.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 60px 80px; border-bottom: 1px solid #1a2744; }
 .hero-title { font-size: clamp(2rem, 4vw, 3.8rem); font-weight: 700; line-height: 1.15; letter-spacing: -2px; color: #fff; max-width: 800px; margin-bottom: 18px; }
 .hero-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .hero-sub { font-size: 1.05rem; color: #6b7c96; max-width: 520px; line-height: 1.7; margin-bottom: 40px; }
 .stats-bar { display: flex; gap: 50px; padding-top: 30px; border-top: 1px solid #1a2744; }
 .stat-number { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #fff; }
 .stat-label { font-size: 0.68rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
-.bottom-bar { padding: 28px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; background: #05080f; }
+
+/* Footer barra inferior */
+.bottom-bar { padding: 28px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; background: #05080f; margin-top: 40px; }
 .bottom-left { font-size: 0.78rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.72rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; }
+
+/* Inputs controlados */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
+
+/* Pestañas */
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
+
+/* Estilo para los botones nativos */
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
+
+/* Botón de cerrar sesión específico (Rojo estilizado) */
+div.stButton > button[key^="logout_btn"] {
+    background: rgba(255, 75, 75, 0.08) !important;
+    color: #ff4b4b !important;
+    border: 1px solid rgba(255, 75, 75, 0.3) !important;
+}
+div.stButton > button[key^="logout_btn"]:hover {
+    background: #ff4b4b !important;
+    color: #fff !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ── LOGIN ──────────────────────────────────────────────────────────────────────
 if not st.session_state.autenticado:
-    col1, col2, col3 = st.columns([1, 1.2, 1])
+    col1, col2, col3 = st.columns([1, 1.3, 1])
     with col2:
-        st.markdown("<div style='height:80px'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="login-box">', unsafe_allow_html=True)
         st.markdown("""
-        <div style="text-align:center; margin-bottom:30px;">
+        <div style="text-align:center; margin-bottom:20px;">
             <div style="font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:#fff;">
                 Object<span style="color:#0066ff">Vision</span> <span style="color:#4a6080; font-size:1rem;">AI</span>
             </div>
-            <div style="font-size:0.72rem; color:#2a3a54; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
+            <div style="font-size:0.72rem; color:#4a6080; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
                 Portal de acceso · 2026
             </div>
             <div style="height:1px; background:#1a2744; margin:24px 0;"></div>
@@ -138,33 +185,55 @@ if not st.session_state.autenticado:
                         "rol": f"{nuevo_u.upper()} (CLIENTE)"
                     }
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
+        st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
-# ── NAVBAR ─────────────────────────────────────────────────────────────────────
-st.markdown(f"""
-<div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
+# ── NAVBAR INTEGRADA (ALINEADA EN UNA SOLA FILA REAL) ──────────────────────────
+# Maquetamos la barra superior usando columnas nativas para que los botones funcionen perfectamente sin saltar de línea
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([2.5, 3.5, 2, 1.5, 1.2])
+
+with nav_col1:
+    st.markdown("""
+    <div style="padding-top: 15px; padding-left: 60px; font-family:'Space Mono',monospace; font-size:1.1rem; font-weight:700; color:#fff; letter-spacing:2px;">
         Object<span style="color:#0066ff">Vision</span>
     </div>
-    <div style="display:flex;gap:10px;">
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">MobileNetV2</span>
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">PyTorch</span>
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">ImageNet</span>
+    """, unsafe_allow_html=True)
+
+with nav_col2:
+    st.markdown("""
+    <div style="display:flex; gap:8px; padding-top: 18px;">
+        <span style="font-size:0.62rem; color:#4a6080; background:rgba(26,39,68,0.4); border:1px solid #1a2744; padding:4px 10px; border-radius:5px; font-family:'Space Mono',monospace; font-weight:700;">MobileNetV2</span>
+        <span style="font-size:0.62rem; color:#4a6080; background:rgba(26,39,68,0.4); border:1px solid #1a2744; padding:4px 10px; border-radius:5px; font-family:'Space Mono',monospace; font-weight:700;">PyTorch</span>
+        <span style="font-size:0.62rem; color:#4a6080; background:rgba(26,39,68,0.4); border:1px solid #1a2744; padding:4px 10px; border-radius:5px; font-family:'Space Mono',monospace; font-weight:700;">ImageNet</span>
     </div>
-    <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;">
+    """, unsafe_allow_html=True)
+
+with nav_col3:
+    st.markdown(f"""
+    <div style="padding-top: 16px; text-align: right; font-family:'Space Mono',monospace; font-size:0.75rem; color:#00d4aa; font-weight:700;">
         ● {st.session_state.rol_usuario}
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-col_logout = st.columns([6, 1])
-with col_logout[1]:
-    if st.button("🔴 Cerrar sesión", key="logout"):
+with nav_col4:
+    # Selector de idioma limpio integrado directamente en la barra
+    st.markdown("<div style='padding-top: 8px;'></div>", unsafe_allow_html=True)
+    lang_map = {"Español": "es", "English": "en", "Français": "fr"}
+    lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed", index=0, key="nav_lang")
+    st.session_state.idioma = lang_map[lang_sel]
+
+with nav_col5:
+    # El botón de cerrar sesión ahora está perfectamente alineado a la derecha en la misma barra
+    st.markdown("<div style='padding-top: 10px;'></div>", unsafe_allow_html=True)
+    if st.button("🔴 SALIR", key="logout_btn", use_container_width=True):
         st.session_state.autenticado = False
         st.session_state.rol_usuario = ""
         st.rerun()
 
-# ── TEXTOS ─────────────────────────────────────────────────────────────────────
+# Línea divisoria inferior de la barra de navegación
+st.markdown("<div style='border-bottom: 1px solid #1a2744; margin-bottom: 0px; width: 100%;'></div>", unsafe_allow_html=True)
+
+# ── TEXTOS DEPENDIENTES DEL IDIOMA ─────────────────────────────────────────────
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
@@ -217,7 +286,6 @@ TRADUCCIONES = {
     "soccer ball": "Balón de fútbol", "keyboard": "Teclado", "bottle": "Botella",
     "cup": "Taza", "book": "Libro", "clock": "Reloj", "horse": "Caballo",
     "kuvasz": "Kuvasz", "shield": "Escudo", "minivan": "Minivan",
-    "chesapeake bay retriever": "Chesapeake Bay Retriever",
     "computer mouse": "Ratón de ordenador", "sunglasses": "Gafas de sol",
     "backpack": "Mochila", "table lamp": "Lámpara"
 }
@@ -319,7 +387,7 @@ def mostrar_resultados(top3, t, idm, umbral):
 
     col_b1, col_b2 = st.columns(2)
     with col_b1:
-        if st.button(t["boton_voz"], key=f"voz_{nombre_top}_{idm}"):
+        if st.button(TEXTOS[idm]["boton_voz"], key=f"voz_{nombre_top}_{idm}"):
             st.components.v1.html(f"""
             <script>
                 var msg = new SpeechSynthesisUtterance("{msg_voz}");
@@ -333,16 +401,10 @@ def mostrar_resultados(top3, t, idm, umbral):
                            file_name="reporte_objectvision.txt", mime="text/plain",
                            key=f"dl_{nombre_top}_{idm}")
 
-# ── IDIOMA Y HERO ──────────────────────────────────────────────────────────────
-col_lang = st.columns([5, 1])
-with col_lang[1]:
-    lang_map = {"Español": "es", "English": "en", "Français": "fr"}
-    lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed")
-    st.session_state.idioma = lang_map[lang_sel]
-
 idioma = st.session_state.idioma
 t = TEXTOS[idioma]
 
+# ── HERO ───────────────────────────────────────────────────────────────────────
 st.markdown(f"""
 <div class="hero">
     <div class="hero-title">{t["titulo"]}</div>
@@ -454,8 +516,10 @@ with tabs_render[3]:
             st.markdown(f"""
             <div class="history-card">
                 <img class="history-thumb" src="data:image/jpeg;base64,{item['img']}" />
-                <div><div class="history-name">{item['nombre']}</div>
-                <div class="history-meta">{item['prob']*100:.1f}% · {item['hora']}</div></div>
+                <div style="padding-left:10px;">
+                    <div class="history-name">{item['nombre']}</div>
+                    <div class="history-meta">{item['prob']*100:.1f}% · {item['hora']}</div>
+                </div>
             </div>
             """, unsafe_allow_html=True)
     else:
