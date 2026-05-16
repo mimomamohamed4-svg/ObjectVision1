@@ -15,9 +15,10 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# INTERFAZ CSS MEJORADA (Fuentes, botones y espacios optimizados)
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
 [data-testid="stSidebar"] { display: none; }
@@ -25,44 +26,69 @@ html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; 
 header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
-.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%); padding: 40px 80px 30px 80px; border-bottom: 1px solid #1a2744; position: relative; overflow: hidden; }
+
+/* Hero principal */
+.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%); padding: 50px 80px 40px 80px; border-bottom: 1px solid #1a2744; position: relative; overflow: hidden; }
 .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 40%, rgba(0,100,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,200,150,0.05) 0%, transparent 50%); pointer-events: none; }
 .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-.logo { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
+.logo { font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
 .logo span { color: #0066ff; }
 .nav-tags { display: flex; gap: 12px; }
-.nav-tag { font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: #4a6080; border: 1px solid #1a2744; padding: 6px 14px; border-radius: 20px; font-family: 'Space Mono', monospace; }
-.hero-title { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; line-height: 1.1; letter-spacing: -2px; color: #fff; max-width: 700px; margin-bottom: 16px; }
+.nav-tag { font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: #5efaf2; background: rgba(0,102,255,0.1); border: 1px solid #1a2744; padding: 6px 16px; border-radius: 20px; font-family: 'Space Mono', monospace; font-weight: 700; }
+
+.hero-title { font-size: clamp(2.2rem, 4.5vw, 3.8rem); font-weight: 700; line-height: 1.15; letter-spacing: -1.5px; color: #fff; max-width: 800px; margin-bottom: 20px; }
 .hero-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero-sub { font-size: 1rem; color: #4a6080; max-width: 480px; line-height: 1.7; font-weight: 300; }
-.stats-bar { display: flex; gap: 40px; margin-top: 30px; padding-top: 30px; border-top: 1px solid #1a2744; }
-.stat { display: flex; flex-direction: column; gap: 4px; }
-.stat-number { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; }
-.stat-label { font-size: 0.72rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; }
-.zone-label { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 16px; }
-.result-item { padding: 20px 0; border-bottom: 1px solid #1a2744; }
+.hero-sub { font-size: 1.05rem; color: #6b7c96; max-width: 520px; line-height: 1.7; font-weight: 400; }
+
+/* Contadores barra */
+.stats-bar { display: flex; gap: 50px; margin-top: 35px; padding-top: 35px; border-top: 1px solid #1a2744; }
+.stat { display: flex; flex-direction: column; gap: 6px; }
+.stat-number { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+.stat-label { font-size: 0.75rem; color: #4a6080; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
+
+/* Secciones de análisis */
+.zone-label { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
+.result-item { padding: 22px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
-.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.result-name { font-size: 1.1rem; font-weight: 600; color: #e8eaf0; }
-.result-pct { font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
-.bar-track { height: 4px; background: #1a2744; border-radius: 2px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 2px; }
-.rank-badge { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-right: 10px; }
-.history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
-.history-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.result-name { font-size: 1.15rem; font-weight: 500; color: #e8eaf0; letter-spacing: -0.3px; }
+.result-pct { font-family: 'Space Mono', monospace; font-size: 0.95rem; font-weight: 700; }
+.bar-track { height: 6px; background: #1a2744; border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease-in-out; }
+.rank-badge { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-right: 12px; font-weight: 700; }
+
+/* Historial */
+.history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 18px; margin-bottom: 14px; transition: transform 0.2s; }
+.history-card:hover { transform: translateY(-2px); border-color: #0066ff; }
+.history-thumb { width: 65px; height: 65px; object-fit: cover; border-radius: 8px; border: 1px solid #1a2744; }
 .history-info { flex: 1; }
-.history-name { font-weight: 600; color: #e8eaf0; font-size: 0.9rem; }
-.history-meta { font-size: 0.72rem; color: #4a6080; font-family: 'Space Mono', monospace; margin-top: 4px; }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 16px; }
-.empty-icon { font-size: 3rem; opacity: 0.2; }
-.empty-text { font-size: 0.85rem; color: #2a3a54; font-family: 'Space Mono', monospace; letter-spacing: 1px; }
-.bottom-bar { padding: 20px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; }
-.bottom-left { font-size: 0.75rem; color: #2a3a54; font-family: 'Space Mono', monospace; }
-.bottom-tag { font-size: 0.7rem; color: #2a3a54; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 24px; }
-.stFileUploader > div { background: #080c14 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; color: #4a6080 !important; }
-.stImage img { border-radius: 12px !important; }
-.stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
-.stButton > button { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; padding: 12px 28px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.8rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; width: 100% !important; margin-top: 20px !important; cursor: pointer !important; }
+.history-name { font-weight: 600; color: #e8eaf0; font-size: 0.95rem; }
+.history-meta { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; margin-top: 6px; }
+
+/* Estados vacíos */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; gap: 20px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
+.empty-icon { font-size: 3.5rem; opacity: 0.15; color: #0066ff; }
+.empty-text { font-size: 0.9rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; }
+
+/* Footer barra inferior */
+.bottom-bar { padding: 30px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; background: #05080f; }
+.bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
+.bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
+
+/* Elementos nativos de Streamlit modificados por CSS */
+.stFileUploader { padding: 10px 0; }
+.stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; padding: 20px !important; }
+.stImage img { border-radius: 16px !important; border: 1px solid #1a2744; }
+.stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; border-radius: 8px !important; }
+
+/* Botón de Voz estilizado con estilo Cyberpunk */
+.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; width: auto !important; margin-top: 16px !important; font-weight: 700 !important; transition: all 0.3s; }
+.stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
+
+/* Ajuste fino de pestañas (Tabs) */
+.stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
+.stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+.stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -119,7 +145,7 @@ TEXTOS = {
         "entrada": "— Entrée",
         "analisis": "— Analyse",
         "alta": "HAUTE CONFIANCE",
-        "media": "CONFIANCE MOYENNE",
+        "media": "CONFIANZA MOYENNE",
         "baja": "FAIBLE CONFIANCE",
         "esperando": "En attente...",
         "procesando": "Traitement...",
@@ -218,7 +244,7 @@ def mostrar_resultados(top3, t, idioma):
             <div class="bar-track">
                 <div class="bar-fill" style="width:{pct}%;background:{color_bar}"></div>
             </div>
-            <div style="margin-top:6px;font-size:0.7rem;color:#2a3a54;font-family:'Space Mono',monospace;letter-spacing:1px">{nivel}</div>
+            <div style="margin-top:6px;font-size:0.75rem;color:#4a6080;font-family:'Space Mono',monospace;letter-spacing:1px">{nivel}</div>
         </div>
         """, unsafe_allow_html=True)
 
