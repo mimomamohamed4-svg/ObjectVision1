@@ -35,14 +35,14 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# 3. INTERFAZ CSS GLOBAL (Estilos de la aplicación corregidos para evitar solapamientos)
+# 3. INTERFAZ CSS GLOBAL (Estilos de la aplicación con separación corregida en pestañas de login)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
 
-/* Ocultar elementos molestos de Streamlit pero manteniendo el flujo limpio */
+/* Ocultar elementos molestos de Streamlit */
 [data-testid="stSidebar"] { display: none; }
 [data-testid="collapsedControl"] { display: none; }
 header { display: none !important; }
@@ -68,10 +68,22 @@ footer { display: none !important; }
 .nav-user { font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; }
 
 /* Contenedor del Login y Registro */
-.login-container { max-width: 450px; margin: 60px auto 20px auto; padding: 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+.login-container { max-width: 450px; margin: 60px auto 20px auto; padding: 40px 40px 10px 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 16px; text-align: center; }
 .login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
+
+/* SEPARACIÓN DE PESTAÑAS DENTRO DEL LOGIN */
+.stTabs [data-baseweb="tab-list"] { 
+    gap: 10px; 
+    border-bottom: 1px solid #1a2744; 
+}
+/* Separador para las pestañas de login (las segundas que aparecen en el árbol DOM) */
+div.stTabs [data-baseweb="tab"] {
+    margin-right: 35px !important;  /* Forzamos una separación elegante entre botones */
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
 
 /* Hero Principal con padding corregido */
 .hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 40px 80px; border-bottom: 1px solid #1a2744; }
@@ -123,8 +135,8 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
-/* Pestañas (Tabs) */
-.stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
+/* Ajuste específico para las pestañas de navegación internas una vez logueado */
+.stTabs [data-baseweb="tab-list"] { padding-left: 80px; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
 </style>
@@ -354,7 +366,7 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- 5. NUEVA BARRA DE NAVEGACIÓN SUPERIOR CON FLUJO NATIVO (Adiós solapamientos) ---
+# --- 5. BARRA DE NAVEGACIÓN SUPERIOR CON FLUJO NATIVO ---
 badge_bg = "rgba(255, 75, 75, 0.15)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.15)"
 badge_txt = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
 badge_border = "rgba(255, 75, 75, 0.4)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.4)"
@@ -373,7 +385,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Botón nativo de Cerrar Sesión y Cambiar Idioma en línea justo debajo de la Navbar
+# Botones nativos de acciones
 col_nav_actions = st.columns([6, 1, 1])
 with col_nav_actions[1]:
     lang_map = {"Español": "es", "English": "en"}
@@ -402,7 +414,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Filtro de certeza mínimo justo arriba de las pestañas
+# Filtro de certeza mínimo
 st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
 umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 st.markdown("</div>", unsafe_allow_html=True)
@@ -522,7 +534,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB — PANEL DE ADMINISTRACIÓN (Renderizado estricto)
+# TAB — PANEL DE ADMINISTRACIÓN
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
