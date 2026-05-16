@@ -18,7 +18,6 @@ st.set_page_config(
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
 [data-testid="stSidebar"] { display: none; }
@@ -26,23 +25,8 @@ html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; 
 header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
-
-.hero {
-    background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%);
-    padding: 40px 80px 30px 80px;
-    border-bottom: 1px solid #1a2744;
-    position: relative;
-    overflow: hidden;
-}
-.hero::before {
-    content: '';
-    position: absolute;
-    top: -50%; left: -50%;
-    width: 200%; height: 200%;
-    background: radial-gradient(ellipse at 30% 40%, rgba(0,100,255,0.08) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(0,200,150,0.05) 0%, transparent 50%);
-    pointer-events: none;
-}
+.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%); padding: 40px 80px 30px 80px; border-bottom: 1px solid #1a2744; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 40%, rgba(0,100,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,200,150,0.05) 0%, transparent 50%); pointer-events: none; }
 .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
 .logo { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
 .logo span { color: #0066ff; }
@@ -55,13 +39,7 @@ footer { display: none !important; }
 .stat { display: flex; flex-direction: column; gap: 4px; }
 .stat-number { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; }
 .stat-label { font-size: 0.72rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; }
-
-.tabs-bar { display: flex; gap: 0; border-bottom: 1px solid #1a2744; padding: 0 80px; background: #080c14; }
-.tab-btn { padding: 16px 28px; font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: #4a6080; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
-.tab-btn.active { color: #0066ff; border-bottom-color: #0066ff; }
-
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 16px; }
-
 .result-item { padding: 20px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
 .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -70,102 +48,87 @@ footer { display: none !important; }
 .bar-track { height: 4px; background: #1a2744; border-radius: 2px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 2px; }
 .rank-badge { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-right: 10px; }
-
 .history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
 .history-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
 .history-info { flex: 1; }
 .history-name { font-weight: 600; color: #e8eaf0; font-size: 0.9rem; }
 .history-meta { font-size: 0.72rem; color: #4a6080; font-family: 'Space Mono', monospace; margin-top: 4px; }
-
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 16px; }
 .empty-icon { font-size: 3rem; opacity: 0.2; }
 .empty-text { font-size: 0.85rem; color: #2a3a54; font-family: 'Space Mono', monospace; letter-spacing: 1px; }
-
 .bottom-bar { padding: 20px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; }
 .bottom-left { font-size: 0.75rem; color: #2a3a54; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.7rem; color: #2a3a54; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 24px; }
-
 .stFileUploader > div { background: #080c14 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; color: #4a6080 !important; }
 .stImage img { border-radius: 12px !important; }
-div[data-testid="stImage"] img { border-radius: 12px; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
-.stRadio > div { gap: 12px; }
+.stButton > button { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; padding: 12px 28px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.8rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; width: 100% !important; margin-top: 20px !important; cursor: pointer !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# TEXTOS MULTIIDIOMA
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
-        "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante con datos de confianza en tiempo real.",
+        "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante.",
         "tab_analizar": "Analizar imagen",
         "tab_camara": "Cámara en vivo",
         "tab_comparar": "Comparar modelos",
         "tab_historial": "Historial",
         "entrada": "— Entrada",
         "analisis": "— Análisis",
-        "resultados": "Resultados del análisis",
-        "confianza": "Confianza",
         "alta": "CONFIANZA ALTA",
         "media": "CONFIANZA MEDIA",
         "baja": "CONFIANZA BAJA",
         "esperando": "Esperando imagen...",
-        "subir": "Sube una imagen para analizar",
         "procesando": "Procesando...",
         "historial_vacio": "Sin análisis todavía",
-        "camara_info": "Activa la cámara y toma una foto para analizarla",
-        "comparar_info": "Sube una imagen para comparar ambos modelos",
+        "camara_info": "Activa la cámara y toma una foto",
+        "comparar_info": "Sube una imagen para comparar modelos",
         "modelo_a": "— MobileNetV2 (Rápido)",
         "modelo_b": "— ResNet50 (Preciso)",
-        "idioma": "Idioma",
+        "boton_voz": "🔊 Escuchar resultado",
     },
     "en": {
         "titulo": "Artificial vision that <em>understands</em> your world.",
-        "subtitulo": "Upload any image and our AI instantly identifies objects with real-time confidence data.",
+        "subtitulo": "Upload any image and our AI instantly identifies objects.",
         "tab_analizar": "Analyze image",
         "tab_camara": "Live camera",
         "tab_comparar": "Compare models",
         "tab_historial": "History",
         "entrada": "— Input",
         "analisis": "— Analysis",
-        "resultados": "Analysis results",
-        "confianza": "Confidence",
         "alta": "HIGH CONFIDENCE",
         "media": "MEDIUM CONFIDENCE",
         "baja": "LOW CONFIDENCE",
         "esperando": "Waiting for image...",
-        "subir": "Upload an image to analyze",
         "procesando": "Processing...",
         "historial_vacio": "No analysis yet",
-        "camara_info": "Activate the camera and take a photo to analyze it",
-        "comparar_info": "Upload an image to compare both models",
+        "camara_info": "Activate camera and take a photo",
+        "comparar_info": "Upload an image to compare models",
         "modelo_a": "— MobileNetV2 (Fast)",
         "modelo_b": "— ResNet50 (Accurate)",
-        "idioma": "Language",
+        "boton_voz": "🔊 Listen to result",
     },
     "fr": {
         "titulo": "Vision artificielle qui <em>comprend</em> votre monde.",
-        "subtitulo": "Téléchargez n'importe quelle image et notre IA identifie les objets instantanément.",
+        "subtitulo": "Téléchargez une image et notre IA identifie les objets instantanément.",
         "tab_analizar": "Analyser image",
         "tab_camara": "Caméra live",
         "tab_comparar": "Comparer modèles",
         "tab_historial": "Historique",
         "entrada": "— Entrée",
         "analisis": "— Analyse",
-        "resultados": "Résultats de l'analyse",
-        "confianza": "Confiance",
         "alta": "HAUTE CONFIANCE",
         "media": "CONFIANCE MOYENNE",
         "baja": "FAIBLE CONFIANCE",
-        "esperando": "En attente d'image...",
-        "subir": "Téléchargez une image à analyser",
+        "esperando": "En attente...",
         "procesando": "Traitement...",
         "historial_vacio": "Pas encore d'analyse",
-        "camara_info": "Activez la caméra et prenez une photo pour l'analyser",
-        "comparar_info": "Téléchargez une image pour comparer les deux modèles",
+        "camara_info": "Activez la caméra et prenez une photo",
+        "comparar_info": "Téléchargez une image pour comparer",
         "modelo_a": "— MobileNetV2 (Rapide)",
         "modelo_b": "— ResNet50 (Précis)",
-        "idioma": "Langue",
+        "boton_voz": "🔊 Écouter le résultat",
     }
 }
 
@@ -180,8 +143,8 @@ TRADUCCIONES = {
     "cup": "Taza", "book": "Libro", "clock": "Reloj", "horse": "Caballo",
     "kuvasz": "Kuvasz", "shield": "Escudo", "minivan": "Minivan",
     "chesapeake bay retriever": "Chesapeake Bay Retriever",
-    "computer mouse": "Ratón de ordenador", "table lamp": "Lámpara",
-    "sunglasses": "Gafas de sol", "backpack": "Mochila"
+    "computer mouse": "Ratón de ordenador", "sunglasses": "Gafas de sol",
+    "backpack": "Mochila", "table lamp": "Lámpara"
 }
 
 def traducir(n, idioma="es"):
@@ -197,15 +160,11 @@ def nivel_confianza(prob, t):
     else:
         return "#dc3545", t["baja"]
 
-# Session state
 if "historial" not in st.session_state:
     st.session_state.historial = []
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
-if "tab" not in st.session_state:
-    st.session_state.tab = "analizar"
 
-# Modelos
 @st.cache_resource
 def cargar_mobilenet():
     m = models.mobilenet_v2(weights="IMAGENET1K_V1")
@@ -238,8 +197,7 @@ def predecir(imagen, modelo):
     with torch.no_grad():
         salida = modelo(tensor)
     probs = torch.nn.functional.softmax(salida[0], dim=0)
-    top3 = torch.topk(probs, 3)
-    return top3
+    return torch.topk(probs, 3)
 
 def mostrar_resultados(top3, t, idioma):
     badge_colors = ["#0066ff", "#00d4aa", "#6644ff"]
@@ -263,6 +221,31 @@ def mostrar_resultados(top3, t, idioma):
             <div style="margin-top:6px;font-size:0.7rem;color:#2a3a54;font-family:'Space Mono',monospace;letter-spacing:1px">{nivel}</div>
         </div>
         """, unsafe_allow_html=True)
+
+    nombre_top = traducir(etiquetas[top3.indices[0].item()], idioma)
+    prob_top = top3.values[0].item() * 100
+
+    if idioma == "es":
+        mensaje_voz = f"Objeto detectado: {nombre_top}, con un {prob_top:.0f} por ciento de certeza."
+        lang_voz = "es-ES"
+    elif idioma == "en":
+        mensaje_voz = f"Object detected: {nombre_top}, with {prob_top:.0f} percent confidence."
+        lang_voz = "en-US"
+    else:
+        mensaje_voz = f"Objet détecté: {nombre_top}, avec {prob_top:.0f} pourcent de confiance."
+        lang_voz = "fr-FR"
+
+    if st.button(t["boton_voz"], key=f"voz_{nombre_top}"):
+        st.components.v1.html(f"""
+        <script>
+            var msg = new SpeechSynthesisUtterance("{mensaje_voz}");
+            msg.lang = "{lang_voz}";
+            msg.rate = 0.95;
+            msg.pitch = 1.0;
+            msg.volume = 1.0;
+            window.speechSynthesis.speak(msg);
+        </script>
+        """, height=0)
 
 # HERO
 idioma = st.session_state.idioma
@@ -289,7 +272,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# SELECTOR DE IDIOMA
 col_lang = st.columns([4, 1])
 with col_lang[1]:
     lang_map = {"Español": "es", "English": "en", "Français": "fr"}
@@ -298,12 +280,8 @@ with col_lang[1]:
     idioma = st.session_state.idioma
     t = TEXTOS[idioma]
 
-# TABS
 tab1, tab2, tab3, tab4 = st.tabs([
-    t["tab_analizar"],
-    t["tab_camara"],
-    t["tab_comparar"],
-    t["tab_historial"]
+    t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]
 ])
 
 # TAB 1 — ANALIZAR
@@ -322,7 +300,6 @@ with tab1:
             with st.spinner(t["procesando"]):
                 top3 = predecir(imagen, mobilenet)
             mostrar_resultados(top3, t, idioma)
-            # Guardar en historial
             buf = io.BytesIO()
             imagen.save(buf, format="JPEG")
             img_b64 = base64.b64encode(buf.getvalue()).decode()
@@ -343,15 +320,14 @@ with tab1:
 # TAB 2 — CÁMARA
 with tab2:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
-    st.markdown(f'<div class="zone-label">{t["tab_camara"]}</div>', unsafe_allow_html=True)
-    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     with col1:
+        st.markdown(f'<div class="zone-label">{t["entrada"]}</div>', unsafe_allow_html=True)
         foto = st.camera_input("", label_visibility="collapsed")
+    with col2:
+        st.markdown(f'<div class="zone-label">{t["analisis"]}</div>', unsafe_allow_html=True)
         if foto:
             imagen_cam = Image.open(foto).convert("RGB")
-    with col2:
-        if foto:
             with st.spinner(t["procesando"]):
                 top3_cam = predecir(imagen_cam, mobilenet)
             mostrar_resultados(top3_cam, t, idioma)
@@ -403,7 +379,6 @@ with tab4:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# FOOTER
 st.markdown("""
 <div class="bottom-bar">
     <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
