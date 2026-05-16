@@ -16,7 +16,24 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# INTERFAZ CSS POTENCIADA
+# --- PERSISTENCIA DE DATOS Y GESTIÓN DE SESIÓN ---
+if "usuarios_db" not in st.session_state:
+    st.session_state.usuarios_db = {
+        "mohamed": {"clave": "admin2026", "rol": "MOHAMED (ADMIN)"},
+        "profesora": {"clave": "tribunal10", "rol": "PROFESORA (EVALUADOR)"},
+        "invitado": {"clave": "invitado123", "rol": "INVITADO"}
+    }
+
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
+if "rol_usuario" not in st.session_state:
+    st.session_state.rol_usuario = ""
+if "historial" not in st.session_state:
+    st.session_state.historial = []
+if "idioma" not in st.session_state:
+    st.session_state.idioma = "es"
+
+# INTERFAZ CSS POTENCIADA (Incluye Login, Registro y Ajustes de Inputs)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -28,13 +45,19 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
+/* Contenedor del Login y Registro */
+.login-container { max-width: 450px; margin: 60px auto 20px auto; padding: 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+.login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
+.login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
+.login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
+
 /* Hero Principal */
 .hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%); padding: 50px 80px 40px 80px; border-bottom: 1px solid #1a2744; position: relative; overflow: hidden; }
 .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 40%, rgba(0,100,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,200,150,0.05) 0%, transparent 50%); pointer-events: none; }
 .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
 .logo { font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
 .logo span { color: #0066ff; }
-.nav-tags { display: flex; gap: 12px; }
+.nav-tags { display: flex; gap: 12px; align-items: center; }
 .nav-tag { font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: #5efaf2; background: rgba(0,102,255,0.1); border: 1px solid #1a2744; padding: 6px 16px; border-radius: 20px; font-family: 'Space Mono', monospace; font-weight: 700; }
 
 .hero-title { font-size: clamp(2.2rem, 4.5vw, 3.8rem); font-weight: 700; line-height: 1.15; letter-spacing: -1.5px; color: #fff; max-width: 800px; margin-bottom: 20px; }
@@ -81,8 +104,9 @@ footer { display: none !important; }
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; padding: 20px !important; }
 .stImage img { border-radius: 16px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; border-radius: 8px !important; }
+div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
 
-/* Botón de Voz Estilizado */
+/* Botones Estilizados */
 .stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; width: auto !important; margin-top: 16px !important; font-weight: 700 !important; transition: all 0.3s; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
@@ -96,6 +120,61 @@ div[data-testid="stSlider"] { padding: 10px 20px; background: #0d1422; border: 1
 </style>
 """, unsafe_allow_html=True)
 
+# --- FLUJO DE CONTROL 1: PANTALLA DE ACCESO / REGISTRO ---
+if not st.session_state.autenticado:
+    st.markdown("""
+    <div class="login-container">
+        <div class="login-title">Object<span>Vision</span> AI</div>
+        <div class="login-subtitle">PORTAL DE ACCESO Y REGISTRO DE USUARIOS</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col_f1, col_f2, col_f3 = st.columns([1, 2, 1])
+    
+    with col_f2:
+        tab_login, tab_registro = st.tabs(["🔑 Iniciar Sesión", "📝 Crear Cuenta"])
+        
+        with tab_login:
+            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+            usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="login_user").strip().lower()
+            contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="login_pass")
+            btn_login = st.button("Acceder al Sistema")
+            
+            if btn_login:
+                if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
+                    st.session_state.autenticado = True
+                    st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
+                    st.success("Acceso autorizado. Cargando interfaz...")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("Credenciales incorrectas o usuario no registrado.")
+                    
+        with tab_registro:
+            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+            nuevo_usuario = st.text_input("Elige un Nombre de Usuario", placeholder="Ej: pedro99", key="reg_user").strip().lower()
+            nueva_contrasena = st.text_input("Crea una Contraseña Segura", type="password", placeholder="Mínimo 4 caracteres", key="reg_pass")
+            confirmar_pass = st.text_input("Repite la Contraseña", type="password", placeholder="••••••••", key="reg_pass_conf")
+            btn_registrar = st.button("Finalizar Registro")
+            
+            if btn_registrar:
+                if not nuevo_usuario or not nueva_contrasena:
+                    st.warning("Por favor, rellena todos los campos.")
+                elif len(nueva_contrasena) < 4:
+                    st.error("La contraseña debe tener al menos 4 caracteres.")
+                elif nueva_contrasena != confirmar_pass:
+                    st.error("Las contraseñas no coinciden.")
+                elif nuevo_usuario in st.session_state.usuarios_db:
+                    st.error("Ese nombre de usuario ya está ocupado.")
+                else:
+                    st.session_state.usuarios_db[nuevo_usuario] = {
+                        "clave": nueva_contrasena,
+                        "rol": f"{nuevo_usuario.upper()} (CLIENTE)"
+                    }
+                    st.success(f"¡Usuario '{nuevo_usuario}' registrado! Ya puedes iniciar sesión.")
+    st.stop()
+
+# --- LÓGICA CORE DE INTELIGENCIA ARTIFICIAL ---
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
@@ -190,11 +269,6 @@ def nivel_confianza(prob, t):
     else:
         return "#dc3545", t["baja"]
 
-if "historial" not in st.session_state:
-    st.session_state.historial = []
-if "idioma" not in st.session_state:
-    st.session_state.idioma = "es"
-
 @st.cache_resource
 def cargar_mobilenet():
     m = models.mobilenet_v2(weights="IMAGENET1K_V1")
@@ -242,7 +316,6 @@ def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
         prob = top3.values[i].item()
         pct = prob * 100
         
-        # FILTRO MEJORADO: Validación de umbral
         if pct >= umbral_minimo:
             elementos_visibles += 1
             color_bar, nivel = nivel_confianza(prob, t)
@@ -267,7 +340,6 @@ def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Ningún objeto supera el {umbral_minimo}% de confianza establecido.</div></div>', unsafe_allow_html=True)
         return
 
-    # Módulo de Voz Integrado
     nombre_top = traducir(etiquetas[top3.indices[0].item()], idioma)
     prob_top = top3.values[0].item() * 100
 
@@ -293,7 +365,6 @@ def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
             </script>
             """, height=0)
             
-    # MEJORA: Botón de descarga de informe integrado
     with col_btn2:
         st.download_button(
             label="📥 Descargar Reporte",
@@ -303,7 +374,7 @@ def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# HERO
+# RENDERIZADO DEL HERO E INFORMACIÓN DE ROL DINÁMICO
 idioma = st.session_state.idioma
 t = TEXTOS[idioma]
 
@@ -312,6 +383,7 @@ st.markdown(f"""
     <div class="nav">
         <div class="logo">Object<span>Vision</span></div>
         <div class="nav-tags">
+            <div class="nav-tag" style="color: #ff4b4b; background: rgba(255,75,75,0.1); border-color: rgba(255,75,75,0.3)">AUTH: {st.session_state.rol_usuario}</div>
             <div class="nav-tag">MobileNetV2</div>
             <div class="nav-tag">PyTorch</div>
             <div class="nav-tag">ImageNet</div>
@@ -328,11 +400,10 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# CONTROLES INTERACTIVOS SUPERIORES
-col_controles = st.columns([2, 2, 1])
+# CONTROLES INTERACTIVOS SUPERIORES (Filtros, Idioma y Cierre de Sesión)
+col_controles = st.columns([2, 1, 1, 1])
 with col_controles[0]:
-    # MEJORA: Slider de umbral de confianza integrado elegantemente
-    umbral_sel = st.slider("Filtro de Certreza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
+    umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 with col_controles[2]:
     st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
     lang_map = {"Español": "es", "English": "en", "Français": "fr"}
@@ -340,6 +411,12 @@ with col_controles[2]:
     st.session_state.idioma = lang_map[lang_sel]
     idioma = st.session_state.idioma
     t = TEXTOS[idioma]
+with col_controles[3]:
+    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+    if st.button("🔒 Salir"):
+        st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
+        st.rerun()
 
 tab1, tab2, tab3, tab4 = st.tabs([
     t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]
@@ -359,7 +436,6 @@ with tab1:
         st.markdown(f'<div class="zone-label">{t["analisis"]}</div>', unsafe_allow_html=True)
         if archivo:
             with st.spinner(t["procesando"]):
-                # MEJORA: Métricas de tiempo de inferencia en vivo
                 t_inicio = time.time()
                 top3 = predecir(imagen, mobilenet)
                 t_final = time.time()
@@ -451,6 +527,7 @@ with tab4:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# FOOTER DE MARCA PERSONAL
 st.markdown("""
 <div class="bottom-bar">
     <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
