@@ -38,7 +38,7 @@ if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
 # ==========================================
-# 3. TRUCO DE INYECCIÓN CSS CRÍTICO
+# 3. TRUCO DE INYECCIÓN CSS CRÍTICO (OPTIMIZADO)
 # ==========================================
 st.markdown("""
 <style>
@@ -51,23 +51,106 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* === SOLUCIÓN MAESTRA PARA LA TARJETA DE LOGIN === */
-/* Detecta el contenedor vertical donde están las pestañas del login y le aplica el diseño de tarjeta encapsulada */
+/* === PROPUESTA 3: LIMPIEZA LOGIN (Eliminado bloques fantasmas) === */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
     background-color: #0d1422 !important;
     border: 1px solid #1a2744 !important;
     border-radius: 16px !important;
     padding: 35px 30px !important;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
-    margin-top: 10px !important;
+    margin-top: 30px !important;
 }
 
-/* Forzar que las pestañas dentro del contenedor de login no tengan padding lateral heredado */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [data-baseweb="tab-list"] {
     padding-left: 0px !important;
     background: transparent !important;
 }
 
+/* === ESTRUCTURA HEADER REORGANIZADA (3 COLUMNAS) === */
+.custom-navbar {
+    width: 100%;
+    background: #05080f;
+    border-bottom: 1px solid #1a2744;
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+.nav-tech-pills {
+    display: flex;
+    gap: 8px;
+    background: #0c1322;
+    padding: 6px 14px;
+    border-radius: 30px;
+    border: 1px solid #1a2744;
+}
+.tech-tag {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #00d4aa;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+}
+.tech-tag:not(:last-child)::after {
+    content: "  |";
+    color: #1a2744;
+}
+.nav-user-zone {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.user-role {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: #fff;
+    background: rgba(0, 102, 255, 0.1);
+    border: 1px solid rgba(0, 102, 255, 0.3);
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+/* === PROPUESTA 2: ESTILOS MINIMALISTAS PARA SELECTOR Y BOTÓN SALIR === */
+/* Estilizar el selectbox de idioma para que sea diminuto y limpio */
+.stSelectbox div[data-baseweb="select"] {
+    background: #0c1322 !important;
+    border: 1px solid #1a2744 !important;
+    border-radius: 6px !important;
+    width: 120px !important;
+}
+.stSelectbox div[data-baseweb="select"] * {
+    color: #6b7c96 !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 0.75rem !important;
+}
+
+/* Rediseño completo al botón Cerrar Sesión (Outlined Minimalist) */
+div.nav-user-zone .stButton > button {
+    background: transparent !important;
+    color: #ff4b4b !important;
+    border: 1px solid rgba(255, 75, 75, 0.3) !important;
+    border-radius: 6px !important;
+    padding: 4px 12px !important;
+    font-size: 0.72rem !important;
+    transition: all 0.3s ease;
+}
+div.nav-user-zone .stButton > button:hover {
+    background: #ff4b4b !important;
+    color: #fff !important;
+    border-color: #ff4b4b !important;
+    box-shadow: 0 0 15px rgba(255, 75, 75, 0.4);
+}
+
+/* Clases genéricas del cuerpo */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 22px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -84,8 +167,8 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 15px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
 .empty-icon { font-size: 2.5rem; opacity: 0.2; }
 .empty-text { font-size: 0.85rem; color: #4a6080; font-family: 'Space Mono', monospace; }
-.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 70px 80px 50px 80px; border-bottom: 1px solid #1a2744; }
-.hero-title { font-size: clamp(2rem, 4vw, 3.8rem); font-weight: 700; line-height: 1.15; letter-spacing: -2px; color: #fff; max-width: 800px; margin-bottom: 18px; }
+.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 60px 80px 40px 80px; border-bottom: 1px solid #1a2744; }
+.hero-title { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; line-height: 1.15; letter-spacing: -2px; color: #fff; max-width: 800px; margin-bottom: 18px; }
 .hero-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .hero-sub { font-size: 1.05rem; color: #6b7c96; max-width: 520px; line-height: 1.7; margin-bottom: 40px; }
 .stats-bar { display: flex; gap: 50px; padding-top: 30px; border-top: 1px solid #1a2744; }
@@ -96,13 +179,9 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
 .bottom-tag { font-size: 0.72rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; }
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
-.stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
-div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
-.stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
-.stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -110,16 +189,15 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 if not st.session_state.autenticado:
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
-        st.markdown("<div style='height:80px'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:40px'></div>", unsafe_allow_html=True)
         st.markdown("""
-        <div style="text-align:center; margin-bottom:30px;">
+        <div style="text-align:center; margin-bottom:15px;">
             <div style="font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:#fff;">
                 Object<span style="color:#0066ff">Vision</span> <span style="color:#4a6080; font-size:1rem;">AI</span>
             </div>
-            <div style="font-size:0.72rem; color:#2a3a54; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
+            <div style="font-size:0.72rem; color:#4a6080; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
                 Portal de acceso · 2026
             </div>
-            <div style="height:1px; background:#1a2744; margin:24px 0;"></div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -167,31 +245,51 @@ if not st.session_state.autenticado:
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── NAVBAR ─────────────────────────────────────────────────────────────────────
-st.markdown(f"""
-<div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
-        Object<span style="color:#0066ff">Vision</span>
-    </div>
-    <div style="display:flex;gap:10px;">
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">MobileNetV2</span>
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">PyTorch</span>
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">ImageNet</span>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;">
-        ● {st.session_state.rol_usuario}
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# ── SOLUCIÓN MAESTRA: NAVBAR REORGANIZADO EN COLUMNAS MATRICIALES DE STREAMLIT ──
+# Con esta estructura integramos widgets interactivos nativos dentro de tu contenedor CSS
+st.markdown('<div class="custom-navbar">', unsafe_allow_html=True)
 
-col_logout = st.columns([6, 1])
-with col_logout[1]:
-    if st.button("🔴 Cerrar sesión", key="logout"):
-        st.session_state.autenticado = False
-        st.session_state.rol_usuario = ""
-        st.rerun()
+# Usamos columnas globales con proporciones específicas para forzar una única línea limpia
+nav_col1, nav_col2, nav_col3 = st.columns([2, 3, 3.5])
 
-# ── TEXTOS ─────────────────────────────────────────────────────────────────────
+with nav_col1:
+    st.markdown('<div class="nav-logo">Object<span style="color:#0066ff">Vision</span></div>', unsafe_allow_html=True)
+
+with nav_col2:
+    st.markdown("""
+    <div style="display:flex; justify-content:center;">
+        <div class="nav-tech-pills">
+            <span class="tech-tag">MobileNetV2</span>
+            <span class="tech-tag">PyTorch</span>
+            <span class="tech-tag">ImageNet</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with nav_col3:
+    # Contenedor flex nativo para alinear el rol, el selector y el botón en un solo bloque derecho
+    st.markdown('<div class="nav-user-zone" style="justify-content:flex-end;">', unsafe_allow_html=True)
+    sub_c1, sub_c2, sub_c3 = st.columns([2, 1.3, 1.2])
+    
+    with sub_c1:
+        st.markdown(f'<div class="user-role">● {st.session_state.rol_usuario}</div>', unsafe_allow_html=True)
+        
+    with sub_c2:
+        lang_map = {"Español": "es", "English": "en", "Français": "fr"}
+        lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed", key="nav_lang")
+        st.session_state.idioma = lang_map[lang_sel]
+        
+    with sub_c3:
+        if st.button("🚪 Salir", key="logout"):
+            st.session_state.autenticado = False
+            st.session_state.rol_usuario = ""
+            st.rerun()
+            
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ── TEXTOS Y LOGICA DE DICCIONARIOS (Se mantiene intacta) ──────────────────────
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
@@ -360,13 +458,7 @@ def mostrar_resultados(top3, t, idm, umbral):
                            file_name="reporte_objectvision.txt", mime="text/plain",
                            key=f"dl_{nombre_top}_{idm}")
 
-# ── IDIOMA Y HERO ──────────────────────────────────────────────────────────────
-col_lang = st.columns([5, 1])
-with col_lang[1]:
-    lang_map = {"Español": "es", "English": "en", "Français": "fr"}
-    lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed")
-    st.session_state.idioma = lang_map[lang_sel]
-
+# ── HERO Y RESTO DEL SISTEMA ──────────────────────────────────────────────────
 idioma = st.session_state.idioma
 t = TEXTOS[idioma]
 
