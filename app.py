@@ -9,7 +9,7 @@ import base64
 import time
 from datetime import datetime
 
-# 1. CONFIGURACIÓN DE LA PÁGINA (Debe ser lo primero)
+# 1. CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(
     page_title="ObjectVision AI",
     page_icon="🔍",
@@ -34,8 +34,10 @@ if "historial" not in st.session_state:
     st.session_state.historial = []
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
+if "login_mode" not in st.session_state:
+    st.session_state.login_mode = "login"  # Puede ser 'login' o 'registro'
 
-# 3. INTERFAZ CSS GLOBAL (Aislamiento absoluto de componentes)
+# 3. INTERFAZ CSS GLOBAL (Reducido y enfocado a no romper componentes)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght=300;400;500;600;700&family=Space+Mono:wght=400;700&display=swap');
@@ -49,7 +51,7 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Barra de navegación superior integrada mediante CSS Puro */
+/* Barra de navegación superior integrada */
 .custom-navbar {
     background: #060a12; 
     padding: 15px 80px; 
@@ -58,7 +60,6 @@ footer { display: none !important; }
     align-items: center; 
     justify-content: space-between;
     width: 100%;
-    margin-bottom: 0px;
 }
 .nav-logo { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
 .nav-logo span { color: #0066ff; }
@@ -71,78 +72,14 @@ footer { display: none !important; }
 .login-box-container { 
     background: #0d1422 !important; 
     border: 1px solid #1a2744 !important; 
-    border-radius: 16px 16px 0 0 !important; 
-    padding: 35px 35px 15px 35px !important; 
-    margin-top: 50px;
+    border-radius: 16px !important; 
+    padding: 35px !important; 
+    margin-top: 60px;
 }
-.login-header-text { text-align: center; }
+.login-header-text { text-align: center; margin-bottom: 25px; }
 .login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -1px; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-subtitle { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; text-transform: uppercase; }
-
-/* Wrapper seguro para envolver las pestañas del login */
-.login-tabs-wrapper {
-    background: #0d1422 !important;
-    border-left: 1px solid #1a2744 !important;
-    border-right: 1px solid #1a2744 !important;
-    border-bottom: 1px solid #1a2744 !important;
-    border-radius: 0 0 16px 16px !important;
-    padding: 0px 35px 35px 35px !important;
-}
-
-# --- SOLUCIÓN DE AISLAMIENTO CSS --- #
-
-/* 1. ESTILOS EXCLUSIVOS PARA LAS PESTAÑAS DEL LOGIN */
-.login-tabs-wrapper div[data-baseweb="tab-list"] {
-    background-color: transparent !important;
-    border-bottom: 1px solid #1a2744 !important;
-    gap: 10px !important;
-    justify-content: center !important;
-    width: 100% !important;
-}
-.login-tabs-wrapper div[data-baseweb="tab"] {
-    background-color: transparent !important;
-    color: #4a6080 !important;
-    font-family: 'Space Mono', monospace !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    padding: 12px 20px !important;
-    flex-grow: 1 !important;
-    text-align: center !important;
-}
-.login-tabs-wrapper div[data-baseweb="tab"][aria-selected="true"] {
-    color: #fff !important;
-    border-bottom: 2px solid #0066ff !important;
-    font-weight: 700 !important;
-}
-
-/* 2. ESTILOS EXCLUSIVOS PARA LAS PESTAÑAS DEL PANEL PRINCIPAL (POST-LOGIN) */
-.main-interface-tabs div[data-baseweb="tab-list"] {
-    padding-left: 80px !important;
-    background: #060a10 !important;
-    border-bottom: 1px solid #1a2744 !important;
-    gap: 20px !important;
-    justify-content: flex-start !important;
-    width: 100% !important;
-}
-.main-interface-tabs div[data-baseweb="tab"] {
-    background-color: transparent !important;
-    color: #4a6080 !important;
-    font-family: 'Space Mono', monospace !important;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    padding: 16px 24px !important;
-    flex-grow: 0 !important;
-    text-align: left !important;
-}
-.main-interface-tabs div[data-baseweb="tab"][aria-selected="true"] {
-    color: #fff !important;
-    border-bottom: 2px solid #0066ff !important;
-    font-weight: 700 !important;
-}
-
-/* Forzar reset global de paneles de pestañas */
-div[data-baseweb="tab-panel"] { padding: 20px 0 0 0 !important; }
 
 /* Hero Principal */
 .hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 40px 80px; border-bottom: 1px solid #1a2744; }
@@ -165,7 +102,7 @@ div[data-baseweb="tab-panel"] { padding: 20px 0 0 0 !important; }
 .result-pct { font-family: 'Space Mono', monospace; font-size: 0.95rem; font-weight: 700; }
 .bar-track { height: 6px; background: #1a2744; border-radius: 3px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 3px; }
-.rank-badge { font-family: 'Space Mono', monospace; font-size: 0.7------rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-right: 12px; font-weight: 700; }
+.rank-badge { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-right: 12px; font-weight: 700; }
 
 /* Historial */
 .history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
@@ -184,75 +121,86 @@ div[data-baseweb="tab-panel"] { padding: 20px 0 0 0 !important; }
 .bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
-/* Reescritura de componentes nativos standard */
+/* Reescritura inputs estables */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
 
-/* Botones de acción general */
+/* Botones universales */
 .stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; margin-top: 10px; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 </style>
 """, unsafe_allow_html=True)
 
-# 4. FLUJO DE CONTROL: LOGIN / REGISTRO
+# 4. FLUJO DE CONTROL: LOGIN / REGISTRO (CON LÓGICA PURA PYTHON)
 if not st.session_state.autenticado:
-    col_l1, col_l2, col_l3 = st.columns([1, 1.4, 1])
+    col_l1, col_l2, col_l3 = st.columns([1, 1.3, 1])
     
     with col_l2:
-        st.markdown("""
-        <div class="login-box-container">
-            <div class="login-header-text">
-                <div class="login-title">Object<span>Vision</span> AI</div>
-                <div class="login-subtitle">Sistema de Control de Acceso</div>
+        with st.container():
+            st.markdown("""
+            <div class="login-box-container">
+                <div class="login-header-text">
+                    <div class="login-title">Object<span>Vision</span> AI</div>
+                    <div class="login-subtitle">Sistema de Control de Acceso</div>
+                </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # El truco: Envolvemos las pestañas de login en una clase contenedora exclusiva
-        st.markdown('<div class="login-tabs-wrapper">', unsafe_allow_html=True)
-        login_tabs = st.tabs(["🔑 INICIAR SESIÓN", "📝 CREAR CUENTA"])
-        
-        # SUB-PANEL 1: INICIAR SESIÓN
-        with login_tabs[0]:
-            usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="login_user").strip().lower()
-            contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="login_pass")
-            btn_login = st.button("Acceder al Sistema", key="btn_execute_login")
+            """, unsafe_allow_html=True)
             
-            if btn_login:
-                if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
-                    st.session_state.autenticado = True
-                    st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
-                    st.success("Acceso autorizado. Cargando interfaz...")
-                    time.sleep(0.4)
-                    st.rerun()
-                else:
-                    st.error("Credenciales incorrectas o usuario no registrado.")
-        
-        # SUB-PANEL 2: CREAR CUENTA
-        with login_tabs[1]:
-            nuevo_usuario = st.text_input("Elige un Nombre de Usuario", placeholder="Ej: pedro99", key="reg_user").strip().lower()
-            nueva_contrasena = st.text_input("Crea una Contraseña Segura", type="password", placeholder="Mínimo 4 caracteres", key="reg_pass")
-            confirmar_pass = st.text_input("Repite la Contraseña", type="password", placeholder="••••••••", key="reg_pass_conf")
-            btn_registrar = st.button("Finalizar Registro", key="btn_execute_register")
+            # Selectores de modo usando botones nativos limpios
+            col_mode1, col_mode2 = st.columns(2)
+            with col_mode1:
+                if st.button("🔑 Iniciar Sesión", key="go_to_login"):
+                    st.session_state.login_mode = "login"
+            with col_mode2:
+                if st.button("📝 Crear Cuenta", key="go_to_reg"):
+                    st.session_state.login_mode = "registro"
             
-            if btn_registrar:
-                if not nuevo_usuario or not nueva_contrasena:
-                    st.warning("Por favor, rellena todos los campos.")
-                elif len(nueva_contrasena) < 4:
-                    st.error("La contraseña debe tener al menos 4 caracteres.")
-                elif nueva_contrasena != confirmar_pass:
-                    st.error("Las contraseñas no coinciden.")
-                elif nuevo_usuario in st.session_state.usuarios_db:
-                    st.error("Ese nombre de usuario ya está ocupado.")
-                else:
-                    st.session_state.usuarios_db[nuevo_usuario] = {
-                        "clave": nueva_contrasena,
-                        "rol": f"{nuevo_usuario.upper()} (CLIENTE)"
-                    }
-                    st.success(f"¡Usuario '{nuevo_usuario}' registrado! Pasa a la pestaña de Iniciar Sesión.")
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+            
+            # MODO 1: INICIAR SESIÓN
+            if st.session_state.login_mode == "login":
+                usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="login_user").strip().lower()
+                contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="login_pass")
+                btn_login = st.button("Acceder al Sistema", key="btn_execute_login")
+                
+                if btn_login:
+                    if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
+                        st.session_state.autenticado = True
+                        st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
+                        st.success("Acceso autorizado. Cargando interfaz...")
+                        time.sleep(0.4)
+                        st.rerun()
+                    else:
+                        st.error("Credenciales incorrectas o usuario no registrado.")
+            
+            # MODO 2: REGISTRO
+            else:
+                nuevo_usuario = st.text_input("Elige un Nombre de Usuario", placeholder="Ej: pedro99", key="reg_user").strip().lower()
+                nueva_contrasena = st.text_input("Crea una Contraseña Segura", type="password", placeholder="Mínimo 4 caracteres", key="reg_pass")
+                confirmar_pass = st.text_input("Repite la Contraseña", type="password", placeholder="••••••••", key="reg_pass_conf")
+                btn_registrar = st.button("Finalizar Registro", key="btn_execute_register")
+                
+                if btn_registrar:
+                    if not nuevo_usuario or not nueva_contrasena:
+                        st.warning("Por favor, rellena todos los campos.")
+                    elif len(nueva_contrasena) < 4:
+                        st.error("La contraseña debe tener al menos 4 caracteres.")
+                    elif nueva_contrasena != confirmar_pass:
+                        st.error("Las contraseñas no coinciden.")
+                    elif nuevo_usuario in st.session_state.usuarios_db:
+                        st.error("Ese nombre de usuario ya está ocupado.")
+                    else:
+                        st.session_state.usuarios_db[nuevo_usuario] = {
+                            "clave": nueva_contrasena,
+                            "rol": f"{nuevo_usuario.upper()} (CLIENTE)"
+                        }
+                        st.success(f"¡Usuario '{nuevo_usuario}' registrado! Haz clic en Iniciar Sesión.")
+                        st.session_state.login_mode = "login"
+                        time.sleep(0.5)
+                        st.rerun()
+                        
     st.stop()
 
 # --- TEXTOS E IDIOMAS ---
@@ -260,10 +208,10 @@ TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
         "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante.",
-        "tab_analizar": "Analizar imagen",
-        "tab_camara": "Cámara en vivo",
-        "tab_comparar": "Comparar modelos",
-        "tab_historial": "Historial",
+        "tab_analizar": "🔍 Analizar imagen",
+        "tab_camara": "📷 Cámara en vivo",
+        "tab_comparar": "📊 Comparar modelos",
+        "tab_historial": "🕐 Historial",
         "entrada": "— Entrada",
         "analisis": "— Análisis",
         "alta": "CONFIANZA ALTA",
@@ -281,10 +229,10 @@ TEXTOS = {
     "en": {
         "titulo": "Artificial vision that <em>understands</em> your world.",
         "subtitulo": "Upload any image and our AI instantly identifies objects.",
-        "tab_analizar": "Analyze image",
-        "tab_camara": "Live camera",
-        "tab_comparar": "Compare models",
-        "tab_historial": "History",
+        "tab_analizar": "🔍 Analyze image",
+        "tab_camara": "📷 Live camera",
+        "tab_comparar": "📊 Compare models",
+        "tab_historial": "🕐 History",
         "entrada": "— Input",
         "analisis": "— Analysis",
         "alta": "HIGH CONFIDENCE",
@@ -425,7 +373,7 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- 5. BARRA DE NAVEGACIÓN SUPERIOR CON FLUJO NATIVO ---
+# --- 5. BARRA DE NAVEGACIÓN SUPERIOR ---
 badge_bg = "rgba(255, 75, 75, 0.15)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.15)"
 badge_txt = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
 badge_border = "rgba(255, 75, 75, 0.4)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.4)"
@@ -444,7 +392,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Botones nativos de acciones
+# Botones nativos de acciones superiores
 col_nav_actions = st.columns([6, 1, 1])
 with col_nav_actions[1]:
     lang_map = {"Español": "es", "English": "en"}
@@ -473,26 +421,29 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Filtro de certeza mínimo
-st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
-umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
-st.markdown("</div>", unsafe_allow_html=True)
-
-# 7. GESTIÓN DE PESTAÑAS (PANEL GENERAL PRINCIPAL POST-LOGIN)
-lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
+# --- 7. PANEL DE CONTROL DE NAVEGACIÓN (Python Puro, Cero problemas de CSS) ---
+lista_modulos = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 
 if es_admin:
-    lista_tabs.append("👥 Panel Admin (Usuarios)")
+    lista_modulos.append("👥 Panel Admin (Usuarios)")
 
-# Envolvemos las pestañas principales en un div exclusivo para proteger su estilo original ancho
-st.markdown('<div class="main-interface-tabs">', unsafe_allow_html=True)
-tabs_render = st.tabs(lista_tabs)
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<div style='padding: 30px 80px 0 80px;'>", unsafe_allow_html=True)
+col_panel1, col_panel2 = st.columns([2, 1], gap="large")
 
-# TAB — ANALIZAR IMAGEN
-with tabs_render[0]:
-    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+with col_panel1:
+    modulo_seleccionado = st.selectbox("🎛️ SELECCIONAR MÓDULO DE TRABAJO", lista_modulos)
+
+with col_panel2:
+    umbral_sel = st.slider("🎯 Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
+st.markdown("</div>", unsafe_allow_html=True)
+
+
+# LÓGICA DE RENDERIZADO BASADA EN EL SELECTBOX (Inmune a bugs visuales)
+
+# MODULO — ANALIZAR IMAGEN
+if modulo_seleccionado == t["tab_analizar"]:
+    st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     with col1:
         st.markdown(f'<div class="zone-label">{t["entrada"]}</div>', unsafe_allow_html=True)
@@ -530,9 +481,9 @@ with tabs_render[0]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["esperando"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB — CÁMARA EN VIVO
-with tabs_render[1]:
-    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+# MODULO — CÁMARA EN VIVO
+elif modulo_seleccionado == t["tab_camara"]:
+    st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     with col1:
         st.markdown(f'<div class="zone-label">{t["entrada"]}</div>', unsafe_allow_html=True)
@@ -552,9 +503,9 @@ with tabs_render[1]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB — COMPARAR MODELOS
-with tabs_render[2]:
-    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+# MODULO — COMPARAR MODELOS
+elif modulo_seleccionado == t["tab_comparar"]:
+    st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
     archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="upload2")
     if archivo_comp:
         imagen_comp = Image.open(archivo_comp).convert("RGB")
@@ -576,9 +527,9 @@ with tabs_render[2]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB — HISTORIAL DE CONSULTAS
-with tabs_render[3]:
-    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+# MODULO — HISTORIAL DE CONSULTAS
+elif modulo_seleccionado == t["tab_historial"]:
+    st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
     st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
     if st.session_state.historial:
@@ -596,46 +547,41 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB — PANEL DE ADMINISTRACIÓN
-if es_admin:
-    with tabs_render[4]:
-        st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
-        st.markdown('<div class="zone-label">— AUDITORÍA DE SEGURIDAD INTERNA</div>', unsafe_allow_html=True)
-        st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        tabla_contenido = ""
-        for usr, datos in st.session_state.usuarios_db.items():
-            if "ADMIN" in datos["rol"]:
-                badge_style = "background: rgba(255, 75, 75, 0.1); color: #ff4b4b; border: 1px solid rgba(255, 75, 75, 0.2);"
-            else:
-                badge_style = "background: rgba(0, 212, 170, 0.1); color: #00d4aa; border: 1px solid rgba(0, 212, 170, 0.2);"
-            
-            tabla_contenido += f"""
-            <tr>
-                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #e8eaf0; font-family: 'Space Mono', monospace; font-weight: 700;">{usr}</td>
-                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #a2b4d2; font-family: 'Space Mono', monospace;">{datos['clave']}</td>
-                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744;"><span style="font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; {badge_style}">{datos['rol']}</span></td>
-            </tr>
-            """
-        
-        html_completo = f"""
-        <div style="padding: 0 80px; background: #080c14; box-sizing: border-box;">
-            <table style="width: 100%; border-collapse: collapse; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; font-family: 'Sora', sans-serif;">
-                <thead>
-                    <tr style="background: #111a2e; color: #0066ff; font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: left; letter-spacing: 1px;">
-                        <th style="padding: 12px 16px;">ID USUARIO</th>
-                        <th style="padding: 12px 16px;">CONTRASEÑA EN CLARO</th>
-                        <th style="padding: 12px 16px;">ROL ASIGNADO</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tabla_contenido}
-                </tbody>
-            </table>
-        </div>
+# MODULO — PANEL DE ADMINISTRACIÓN
+elif modulo_seleccionado == "👥 Panel Admin (Usuarios)" and es_admin:
+    st.markdown("<div style='padding: 20px 80px 10px 80px;'>", unsafe_allow_html=True)
+    st.markdown('<div class="zone-label">— AUDITORÍA DE SEGURIDAD INTERNA</div>', unsafe_allow_html=True)
+    st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales almacenadas en el servidor.</p>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    tabla_contenido = ""
+    for usr, datos in st.session_state.usuarios_db.items():
+        badge_style = "background: rgba(255, 75, 75, 0.1); color: #ff4b4b; border: 1px solid rgba(255, 75, 75, 0.2);" if "ADMIN" in datos["rol"] else "background: rgba(0, 212, 170, 0.1); color: #00d4aa; border: 1px solid rgba(0, 212, 170, 0.2);"
+        tabla_contenido += f"""
+        <tr>
+            <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #e8eaf0; font-family: 'Space Mono', monospace; font-weight: 700;">{usr}</td>
+            <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #a2b4d2; font-family: 'Space Mono', monospace;">{datos['clave']}</td>
+            <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744;"><span style="font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; {badge_style}">{datos['rol']}</span></td>
+        </tr>
         """
-        st.components.v1.html(html_completo, height=350, scrolling=True)
+    
+    html_completo = f"""
+    <div style="padding: 0 80px; background: #080c14; box-sizing: border-box;">
+        <table style="width: 100%; border-collapse: collapse; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; font-family: 'Sora', sans-serif;">
+            <thead>
+                <tr style="background: #111a2e; color: #0066ff; font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: left; letter-spacing: 1px;">
+                    <th style="padding: 12px 16px;">ID USUARIO</th>
+                    <th style="padding: 12px 16px;">CONTRASEÑA EN CLARO</th>
+                    <th style="padding: 12px 16px;">ROL ASIGNADO</th>
+                </tr>
+            </thead>
+            <tbody>
+                {tabla_contenido}
+            </tbody>
+        </table>
+    </div>
+    """
+    st.components.v1.html(html_completo, height=350, scrolling=True)
 
 # 8. PIE DE PÁGINA (FOOTER CORPORATIVO)
 st.markdown("""
