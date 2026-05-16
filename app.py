@@ -21,7 +21,8 @@ if "usuarios_db" not in st.session_state:
     st.session_state.usuarios_db = {
         "mohamed": {"clave": "admin2026", "rol": "MOHAMED (ADMIN)"},
         "profesora": {"clave": "tribunal10", "rol": "PROFESORA (EVALUADOR)"},
-        "invitado": {"clave": "invitado123", "rol": "INVITADO"}
+        "invitado": {"clave": "invitado123", "rol": "INVITADO"},
+        "mimo": {"clave": "usuario.26", "rol": "MIMO (CLIENTE)"}
     }
 
 if "autenticado" not in st.session_state:
@@ -33,7 +34,7 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# INTERFAZ CSS POTENCIADA Y CORREGIDA
+# INTERFAZ CSS POTENCIADA Y COMPLETA
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -165,7 +166,7 @@ if not st.session_state.autenticado:
                     st.success(f"¡Usuario '{nuevo_usuario}' registrado! Ya puedes iniciar sesión.")
     st.stop()
 
-# --- LÓGICA CORE DE INTELIGENCIA ARTIFICIAL ---
+# --- TEXTOS E IDIOMAS ---
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
@@ -365,8 +366,7 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- 1. BARRA DE NAVEGACIÓN SUPERIOR BLINDADA ---
-# Estilo de badge condicional dependiendo de si es admin o no
+# --- 1. BARRA DE NAVEGACIÓN SUPERIOR (FIJA Y COMPACTA) ---
 badge_rol_color = "rgba(255, 75, 75, 0.1)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.1)"
 badge_text_color = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
 badge_border_color = "rgba(255, 75, 75, 0.3)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.3)"
@@ -386,7 +386,6 @@ btn_logout_html = f"""
     ">🔴 CERRAR: {st.session_state.rol_usuario}</a>
 """
 
-# Renderizado del contenedor superior rígido para evitar que se descoloque
 st.markdown(f"""
 <div style="
     background: #060a12; 
@@ -414,7 +413,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Captura de la acción de desconexión por query params
 if "logout" in st.query_params:
     st.session_state.autenticado = False
     st.session_state.rol_usuario = ""
@@ -566,7 +564,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- TAB 5 — PANEL DE ADMINISTRACIÓN (RENDERIZADO SEGURO) ---
+# --- TAB 5 — PANEL DE ADMINISTRACIÓN (CORREGIDO DE RAÍZ) ---
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
@@ -574,28 +572,31 @@ if es_admin:
         st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # Generación dinámica de celdas mediante strings limpios
+        # 1. Creamos la acumulación de las filas de forma limpia
         tabla_contenido = ""
         for usr, datos in st.session_state.usuarios_db.items():
-            badge_style = "background:rgba(0,102,255,0.1); color:#0066ff; border:1px solid rgba(0,102,255,0.2);" if "ADMIN" in datos["rol"] else "background:rgba(0,212,170,0.1); color:#00d4aa; border:1px solid rgba(0,212,170,0.2);"
+            if "ADMIN" in datos["rol"]:
+                badge_style = "background: rgba(255, 75, 75, 0.1); color: #ff4b4b; border: 1px solid rgba(255, 75, 75, 0.2);"
+            else:
+                badge_style = "background: rgba(0, 212, 170, 0.1); color: #00d4aa; border: 1px solid rgba(0, 212, 170, 0.2);"
             
             tabla_contenido += f"""
             <tr>
-                <td style="padding:14px 16px; border-bottom:1px solid #1a2744; color:#e8eaf0; font-family:'Space Mono', monospace; font-weight:700;">{usr}</td>
-                <td style="padding:14px 16px; border-bottom:1px solid #1a2744; color:#a2b4d2; font-family:'Space Mono', monospace;">{datos['clave']}</td>
-                <td style="padding:14px 16px; border-bottom:1px solid #1a2744;"><span style="font-family:'Space Mono', monospace; font-size:0.75rem; padding:4px 8px; border-radius:4px; {badge_style}">{datos['rol']}</span></td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #e8eaf0; font-family: 'Space Mono', monospace; font-weight: 700;">{usr}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #a2b4d2; font-family: 'Space Mono', monospace;">{datos['clave']}</td>
+                <td style="padding: 14px 16px; border-bottom: 1px solid #1a2744;"><span style="font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; {badge_style}">{datos['rol']}</span></td>
             </tr>
             """
         
-        # Envoltorio estructural de la tabla con estilos oscuros incrustados
+        # 2. Estructuramos la tabla web completa dentro de un único string contenedor
         html_completo = f"""
-        <div style="padding: 0 80px; background:#080c14;">
-            <table style="width:100%; border-collapse:collapse; background:#0d1422; border-radius:8px; overflow:hidden; border:1px solid #1a2744; font-family:'Sora', sans-serif;">
+        <div style="padding: 0 80px; background: #080c14; box-sizing: border-box;">
+            <table style="width: 100%; border-collapse: collapse; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; font-family: 'Sora', sans-serif;">
                 <thead>
-                    <tr style="background:#111a2e; color:#0066ff; font-family:'Space Mono', monospace; font-size:0.8rem; text-align:left; letter-spacing:1px;">
-                        <th style="padding:12px 16px;">ID USUARIO</th>
-                        <th style="padding:12px 16px;">CONTRASEÑA EN CLARO</th>
-                        <th style="padding:12px 16px;">ROL ASIGNADO</th>
+                    <tr style="background: #111a2e; color: #0066ff; font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: left; letter-spacing: 1px;">
+                        <th style="padding: 12px 16px;">ID USUARIO</th>
+                        <th style="padding: 12px 16px;">CONTRASEÑA EN CLARO</th>
+                        <th style="padding: 12px 16px;">ROL ASIGNADO</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -605,7 +606,7 @@ if es_admin:
         </div>
         """
         
-        # Inyección a través del componente estricto de iframe de Streamlit
+        # 3. Forzamos de forma segura el renderizado visual con el componente nativo de Streamlit
         st.components.v1.html(html_completo, height=350, scrolling=True)
 
 # FOOTER DE MARCA PERSONAL
