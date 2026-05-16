@@ -6,125 +6,328 @@ import urllib.request
 import json
 
 st.set_page_config(
-    page_title="ObjectVision",
+    page_title="ObjectVision AI",
     page_icon="🔍",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 st.markdown("""
-    <style>
-    .title { 
-        font-size: 2.5em; 
-        font-weight: bold; 
-        color: #1a1a2e;
-        text-align: center;
-        padding: 20px 0 5px 0;
-    }
-    .subtitle {
-        text-align: center;
-        color: #555;
-        font-size: 1.1em;
-        margin-bottom: 30px;
-    }
-    .result-box {
-        background-color: white;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-    .footer {
-        text-align: center;
-        color: #aaa;
-        font-size: 0.85em;
-        margin-top: 40px;
-    }
-    </style>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, .stApp {
+    background: #080c14 !important;
+    color: #e8eaf0 !important;
+    font-family: 'Sora', sans-serif !important;
+}
+
+[data-testid="stSidebar"] { display: none; }
+[data-testid="collapsedControl"] { display: none; }
+header { display: none !important; }
+.block-container { padding: 0 !important; max-width: 100% !important; }
+footer { display: none !important; }
+
+.hero {
+    background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%);
+    padding: 60px 80px 40px 80px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #1a2744;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 40%, rgba(0, 100, 255, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 200, 150, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 80px;
+}
+
+.logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.logo span {
+    color: #0066ff;
+}
+
+.nav-tags {
+    display: flex;
+    gap: 12px;
+}
+
+.nav-tag {
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #4a6080;
+    border: 1px solid #1a2744;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'Space Mono', monospace;
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    color: #ffffff;
+    max-width: 700px;
+    margin-bottom: 20px;
+}
+
+.hero-title em {
+    font-style: normal;
+    background: linear-gradient(90deg, #0066ff, #00d4aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-sub {
+    font-size: 1rem;
+    color: #4a6080;
+    max-width: 480px;
+    line-height: 1.7;
+    font-weight: 300;
+}
+
+.stats-bar {
+    display: flex;
+    gap: 40px;
+    margin-top: 50px;
+    padding-top: 40px;
+    border-top: 1px solid #1a2744;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.stat-label {
+    font-size: 0.72rem;
+    color: #4a6080;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.main-area {
+    padding: 60px 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    min-height: 60vh;
+}
+
+.upload-zone {
+    background: #0d1422;
+    border: 1px solid #1a2744;
+    border-radius: 16px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.zone-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #0066ff;
+}
+
+.results-zone {
+    background: #0d1422;
+    border: 1px solid #1a2744;
+    border-radius: 16px;
+    padding: 40px;
+}
+
+.result-item {
+    padding: 20px 0;
+    border-bottom: 1px solid #1a2744;
+}
+
+.result-item:last-child { border-bottom: none; }
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.result-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e8eaf0;
+}
+
+.result-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.bar-track {
+    height: 4px;
+    background: #1a2744;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+}
+
+.rank-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+    color: #2a3a54;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.empty-text {
+    font-size: 0.85rem;
+    color: #2a3a54;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+}
+
+.bottom-bar {
+    padding: 24px 80px;
+    border-top: 1px solid #1a2744;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bottom-left {
+    font-size: 0.75rem;
+    color: #2a3a54;
+    font-family: 'Space Mono', monospace;
+}
+
+.bottom-right {
+    display: flex;
+    gap: 24px;
+}
+
+.bottom-tag {
+    font-size: 0.7rem;
+    color: #2a3a54;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+}
+
+/* Streamlit overrides */
+.stFileUploader {
+    background: transparent !important;
+}
+.stFileUploader > div {
+    background: #080c14 !important;
+    border: 1px dashed #1a2744 !important;
+    border-radius: 12px !important;
+    color: #4a6080 !important;
+}
+.stFileUploader label { color: #4a6080 !important; }
+.stImage img { border-radius: 12px !important; }
+.stSpinner { color: #0066ff !important; }
+div[data-testid="stImage"] img { border-radius: 12px; }
+</style>
 """, unsafe_allow_html=True)
 
-# Traducciones español
-TRADUCCIONES = {
-    "car": "Coche", "sports car": "Coche deportivo", "convertible": "Descapotable",
-    "dog": "Perro", "cat": "Gato", "bird": "Pájaro", "fish": "Pez",
-    "labrador retriever": "Labrador Retriever", "golden retriever": "Golden Retriever",
-    "pizza": "Pizza", "hamburger": "Hamburguesa", "hot dog": "Perrito caliente",
-    "banana": "Plátano", "apple": "Manzana", "orange": "Naranja",
-    "chair": "Silla", "table": "Mesa", "laptop": "Portátil", "phone": "Teléfono",
-    "bicycle": "Bicicleta", "motorcycle": "Moto", "bus": "Autobús", "truck": "Camión",
-    "airplane": "Avión", "boat": "Barco", "train": "Tren",
-    "lion": "León", "tiger": "Tigre", "elephant": "Elefante", "bear": "Oso",
-    "zebra": "Cebra", "giraffe": "Jirafa", "horse": "Caballo", "cow": "Vaca",
-    "sheep": "Oveja", "rabbit": "Conejo", "mouse": "Ratón",
-    "cup": "Taza", "bottle": "Botella", "book": "Libro", "clock": "Reloj",
-    "keyboard": "Teclado", "computer mouse": "Ratón de ordenador",
-    "shield": "Escudo", "soccer ball": "Balón de fútbol",
-    "kuvasz": "Kuvasz (raza de perro)", "chesapeake bay retriever": "Chesapeake Bay Retriever"
-}
+# HERO
+st.markdown("""
+<div class="hero">
+    <div class="nav">
+        <div class="logo">Object<span>Vision</span></div>
+        <div class="nav-tags">
+            <div class="nav-tag">MobileNetV2</div>
+            <div class="nav-tag">PyTorch</div>
+            <div class="nav-tag">ImageNet</div>
+        </div>
+    </div>
+    <div class="hero-title">Visión artificial<br>que <em>entiende</em><br>tu mundo.</div>
+    <div class="hero-sub">Sube cualquier imagen y nuestra IA identifica los objetos al instante con datos de confianza en tiempo real.</div>
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-number">1000+</div>
+            <div class="stat-label">Clases reconocibles</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">Top-3</div>
+            <div class="stat-label">Predicciones</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">Cloud</div>
+            <div class="stat-label">Servidor remoto</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Disponibilidad</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-MENSAJES = {
-    "perro": "🐶 ¡Es un perro! Los perros son los animales más leales del mundo.",
-    "gato": "🐱 ¡Es un gato! Los gatos duermen hasta 16 horas al día.",
-    "coche": "🚗 ¡Es un coche! Los primeros coches apenas llegaban a 15 km/h.",
-    "pizza": "🍕 ¡Es una pizza! La pizza más cara del mundo cuesta más de 12.000€.",
-    "avión": "✈️ ¡Es un avión! Volar es el medio de transporte más seguro del mundo.",
-    "león": "🦁 ¡Es un león! El rugido de un león se escucha a 8 km de distancia.",
-}
-
-def traducir(nombre_ingles):
-    nombre_lower = nombre_ingles.lower().replace("_", " ")
-    return TRADUCCIONES.get(nombre_lower, nombre_ingles.replace("_", " ").title())
-
-def color_barra(prob):
-    if prob >= 0.6:
-        return "verde"
-    elif prob >= 0.3:
-        return "amarillo"
-    else:
-        return "rojo"
-
-def mensaje_curioso(nombre_es):
-    for clave, msg in MENSAJES.items():
-        if clave in nombre_es.lower():
-            return msg
-    return None
-
-# Inicializar contador
-if "contador" not in st.session_state:
-    st.session_state.contador = 0
-
-# Sidebar
-with st.sidebar:
-    st.markdown("## 🔍 ObjectVision")
-    st.markdown("---")
-    st.markdown("**Modelo:** MobileNetV2")
-    st.markdown("**Framework:** PyTorch")
-    st.markdown("**Dataset:** ImageNet (1000 clases)")
-    st.markdown("---")
-    st.markdown("### ¿Cómo funciona?")
-    st.markdown("1. Sube una imagen 📤")
-    st.markdown("2. La IA la analiza 🧠")
-    st.markdown("3. Ver los resultados 📊")
-    st.markdown("---")
-    st.markdown("### Formatos aceptados")
-    st.markdown("JPG · JPEG · PNG")
-    st.markdown("---")
-    st.metric("📸 Imágenes analizadas", st.session_state.contador)
-    st.markdown("---")
-    st.markdown("**ODS 4** — Educación de calidad")
-    st.markdown("**ODS 9** — Innovación e infraestructura")
-    st.markdown("---")
-    st.caption("Proyecto Intermodular 2025/2026")
-    st.caption("Mohamed Mohamed Embarec")
-
-# Título
-st.markdown('<div class="title">🔍 ObjectVision</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Reconocimiento de objetos con Inteligencia Artificial</div>', unsafe_allow_html=True)
-st.markdown("---")
-
+# Modelo
 @st.cache_resource
 def cargar_modelo():
-    modelo = models.mobilenet_v2(weights="IMAGENET1K_V1")
-    modelo.eval()
-    return modelo
+    m = models.mobilenet_v2(weights="IMAGENET1K_V1")
+    m.eval()
+    return m
 
 @st.cache_data
 def cargar_etiquetas():
@@ -141,73 +344,92 @@ transformacion = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-archivo = st.file_uploader("📁 Sube una imagen para analizar", type=["jpg", "jpeg", "png"])
+TRADUCCIONES = {
+    "car": "Coche", "sports car": "Coche deportivo", "convertible": "Descapotable",
+    "dog": "Perro", "cat": "Gato", "bird": "Pájaro", "labrador retriever": "Labrador Retriever",
+    "golden retriever": "Golden Retriever", "pizza": "Pizza", "hamburger": "Hamburguesa",
+    "banana": "Plátano", "apple": "Manzana", "chair": "Silla", "laptop": "Portátil",
+    "bicycle": "Bicicleta", "motorcycle": "Moto", "bus": "Autobús", "truck": "Camión",
+    "airplane": "Avión", "lion": "León", "tiger": "Tigre", "elephant": "Elefante",
+    "soccer ball": "Balón de fútbol", "keyboard": "Teclado", "bottle": "Botella",
+    "cup": "Taza", "book": "Libro", "clock": "Reloj", "horse": "Caballo",
+    "kuvasz": "Kuvasz", "chesapeake bay retriever": "Chesapeake Bay Retriever",
+    "shield": "Escudo", "computer mouse": "Ratón de ordenador"
+}
 
-if archivo is not None:
-    imagen = Image.open(archivo).convert("RGB")
-    col1, col2 = st.columns([1, 1], gap="large")
+def traducir(n):
+    return TRADUCCIONES.get(n.lower().replace("_", " "), n.replace("_", " ").title())
 
-    with col1:
-        st.image(imagen, caption="Imagen subida", use_container_width=True)
+# MAIN
+col_upload, col_results = st.columns(2, gap="large")
 
-    tensor = transformacion(imagen).unsqueeze(0)
+with col_upload:
+    st.markdown('<div style="padding: 60px 0 0 80px;">', unsafe_allow_html=True)
+    st.markdown('<div class="zone-label">— Entrada</div>', unsafe_allow_html=True)
+    st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
+    archivo = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+    if archivo:
+        imagen = Image.open(archivo).convert("RGB")
+        st.image(imagen, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with st.spinner("🧠 Analizando con IA..."):
-        with torch.no_grad():
-            salida = modelo(tensor)
-        probabilidades = torch.nn.functional.softmax(salida[0], dim=0)
-        top3 = torch.topk(probabilidades, 3)
+with col_results:
+    st.markdown('<div style="padding: 60px 80px 0 0;">', unsafe_allow_html=True)
+    st.markdown('<div class="zone-label">— Análisis</div>', unsafe_allow_html=True)
+    st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
 
-    st.session_state.contador += 1
+    if archivo:
+        tensor = transformacion(imagen).unsqueeze(0)
+        with st.spinner("Procesando..."):
+            with torch.no_grad():
+                salida = modelo(tensor)
+            probs = torch.nn.functional.softmax(salida[0], dim=0)
+            top3 = torch.topk(probs, 3)
 
-    with col2:
-        st.markdown('<div class="result-box">', unsafe_allow_html=True)
-        st.subheader("📊 Resultados del análisis")
-        st.markdown("---")
-
-        colores_emoji = ["🥇", "🥈", "🥉"]
-        primer_nombre = None
+        ranks = ["01", "02", "03"]
+        badge_colors = ["#0066ff", "#00d4aa", "#6644ff"]
+        bar_colors = ["#0066ff", "#00d4aa", "#6644ff"]
+        pct_colors = ["#0066ff", "#00d4aa", "#6644ff"]
 
         for i in range(3):
-            nombre_en = etiquetas[top3.indices[i].item()]
-            nombre_es = traducir(nombre_en)
+            nombre = traducir(etiquetas[top3.indices[i].item()])
             prob = top3.values[i].item()
-            nivel = color_barra(prob)
+            pct = prob * 100
+            nivel = "Alta" if prob >= 0.6 else "Media" if prob >= 0.3 else "Baja"
 
-            if i == 0:
-                primer_nombre = nombre_es
+            st.markdown(f"""
+            <div class="result-item">
+                <div class="result-header">
+                    <div style="display:flex;align-items:center">
+                        <span class="rank-badge" style="background:{badge_colors[i]}22;color:{badge_colors[i]};border:1px solid {badge_colors[i]}44">#{ranks[i]}</span>
+                        <span class="result-name">{nombre}</span>
+                    </div>
+                    <span class="result-pct" style="color:{pct_colors[i]}">{pct:.1f}%</span>
+                </div>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width:{pct}%;background:{bar_colors[i]}"></div>
+                </div>
+                <div style="margin-top:6px;font-size:0.7rem;color:#2a3a54;font-family:'Space Mono',monospace;letter-spacing:1px">CONFIANZA {nivel.upper()}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="empty-state" style="min-height:300px">
+            <div class="empty-icon">⬡</div>
+            <div class="empty-text">Esperando imagen...</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-            if nivel == "verde":
-                color_hex = "#28a745"
-                etiqueta_nivel = "✅ Alta confianza"
-            elif nivel == "amarillo":
-                color_hex = "#ffc107"
-                etiqueta_nivel = "⚠️ Confianza media"
-            else:
-                color_hex = "#dc3545"
-                etiqueta_nivel = "❌ Confianza baja"
+    st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown(f"#### {colores_emoji[i]} {nombre_es}")
-            st.markdown(
-                f'<div style="background:{color_hex};height:18px;width:{int(prob*100)}%;border-radius:8px;margin-bottom:4px"></div>',
-                unsafe_allow_html=True
-            )
-            st.caption(f"Confianza: {prob*100:.2f}% · {etiqueta_nivel}")
-
-            if i < 2:
-                st.markdown("---")
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # Dato curioso
-        if primer_nombre:
-            msg = mensaje_curioso(primer_nombre)
-            if msg:
-                st.info(msg)
-
-else:
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.info("⬆️ Sube una imagen en el recuadro de arriba para que la IA la analice.")
-
-st.markdown('<div class="footer">ObjectVision © 2026 · Proyecto Educativo de IA · Desarrollado con Streamlit y PyTorch</div>', unsafe_allow_html=True)
+# FOOTER
+st.markdown("""
+<div class="bottom-bar">
+    <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
+    <div class="bottom-right">
+        <span class="bottom-tag">ODS 4</span>
+        <span class="bottom-tag">ODS 9</span>
+        <span class="bottom-tag">PyTorch + Streamlit</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
