@@ -33,7 +33,7 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# INTERFAZ CSS POTENCIADA Y CORREGIDA (Sin conflictos de maquetación)
+# INTERFAZ CSS POTENCIADA Y CORREGIDA
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -91,7 +91,7 @@ div.stButton > button[key^="logout_btn"]:hover {
 .stat-number { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; }
 .stat-label { font-size: 0.7rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
 
-/* Secciones de análisis */
+/* Secciones de análisis y tablas admin */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 20px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -101,6 +101,14 @@ div.stButton > button[key^="logout_btn"]:hover {
 .bar-track { height: 6px; background: #1a2744; border-radius: 3px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 3px; }
 .rank-badge { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-right: 12px; font-weight: 700; }
+
+/* Tabla estilizada de administración */
+.admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; }
+.admin-table th { background: #111a2e; color: #0066ff; font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: left; padding: 12px 16px; letter-spacing: 1px; }
+.admin-table td { padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #e8eaf0; font-size: 0.9rem; }
+.admin-table tr:last-child td { border-bottom: none; }
+.badge-rol { font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: rgba(0, 212, 170, 0.1); color: #00d4aa; border: 1px solid rgba(0, 212, 170, 0.2); }
+.badge-rol-admin { font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: rgba(0, 102, 255, 0.1); color: #0066ff; border: 1px solid rgba(0, 102, 255, 0.2); }
 
 /* Historial */
 .history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
@@ -393,7 +401,7 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- 1. BARRA DE NAVEGACIÓN SUPERIOR CORREGIDA (Estructura Limpia) ---
+# --- 1. BARRA DE NAVEGACIÓN SUPERIOR ---
 col_nav = st.columns([4, 2, 2, 2, 3])
 
 with col_nav[0]:
@@ -416,7 +424,7 @@ with col_nav[4]:
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 2. HERO PRINCIPAL LIMPIO ---
+# --- 2. HERO PRINCIPAL ---
 idioma = st.session_state.idioma
 t = TEXTOS[idioma]
 
@@ -433,7 +441,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# CONTROLES INTERACTIVOS SUPERIORES (Filtros e idioma alineados abajo)
+# CONTROLES INTERACTIVOS SUPERIORES
 st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
 col_controles = st.columns([3, 1, 1])
 with col_controles[0]:
@@ -446,12 +454,18 @@ with col_controles[2]:
     t = TEXTOS[idioma]
 st.markdown("</div>", unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4 = st.tabs([
-    t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]
-])
+# --- CONFIGURACIÓN DE PESTAÑAS DINÁMICAS (OCULTA SI NO ES ADMIN) ---
+lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
+
+# Si el usuario logueado eres tú (MOHAMED (ADMIN)), añadimos la pestaña de control
+es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
+if es_admin:
+    lista_tabs.append("👥 Panel Admin (Usuarios)")
+
+tabs_render = st.tabs(lista_tabs)
 
 # TAB 1 — ANALIZAR
-with tab1:
+with tabs_render[0]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     with col1:
@@ -490,7 +504,7 @@ with tab1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # TAB 2 — CÁMARA
-with tab2:
+with tabs_render[1]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
     with col1:
@@ -512,7 +526,7 @@ with tab2:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # TAB 3 — COMPARAR
-with tab3:
+with tabs_render[2]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="upload2")
     if archivo_comp:
@@ -530,13 +544,14 @@ with tab3:
             resnet = cargar_resnet()
             with st.spinner(t["procesando"]):
                 top3_resnet = predecir(imagen_comp, resnet)
-            mostrar_resultados(top3_resnet, t, idioma, umbral_sel)
+            resnet_top = top3_resnet
+            mostrar_resultados(resnet_top, t, idioma, umbral_sel)
     else:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # TAB 4 — HISTORIAL
-with tab4:
+with tabs_render[3]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
@@ -554,6 +569,40 @@ with tab4:
     else:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
+
+# --- TAB 5 — PANEL DE ADMINISTRACIÓN (MOHAMED EXCLUSIVE) ---
+if es_admin:
+    with tabs_render[4]:
+        st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+        st.markdown('<div class="zone-label">— AUDITORÍA DE SEGURIDAD INTERNA</div>', unsafe_allow_html=True)
+        st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
+        
+        # Construcción dinámica de la tabla HTML con los datos de usuarios_db
+        tabla_html = """
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID USUARIO</th>
+                    <th>CONTRASEÑA EN CLARO</th>
+                    <th>ROL ASIGNADO</th>
+                </tr>
+            </thead>
+            <tbody>
+        """
+        
+        for usr, datos in st.session_state.usuarios_db.items():
+            badge_class = "badge-rol-admin" if "ADMIN" in datos["rol"] else "badge-rol"
+            tabla_html += f"""
+                <tr>
+                    <td style="font-family:'Space Mono', monospace; font-weight:700;">{usr}</td>
+                    <td style="font-family:'Space Mono', monospace; color:#a2b4d2;">{datos['clave']}</td>
+                    <td><span class="{badge_class}">{datos['rol']}</span></td>
+                </tr>
+            """
+            
+        tabla_html += "</tbody></table>"
+        st.markdown(tabla_html, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # FOOTER DE MARCA PERSONAL
 st.markdown("""
