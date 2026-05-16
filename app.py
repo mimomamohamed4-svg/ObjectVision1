@@ -6,6 +6,7 @@ import urllib.request
 import json
 import io
 import base64
+import time
 from datetime import datetime
 
 st.set_page_config(
@@ -15,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# INTERFAZ CSS MEJORADA (Fuentes, botones y espacios optimizados)
+# INTERFAZ CSS POTENCIADA
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -27,7 +28,7 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Hero principal */
+/* Hero Principal */
 .hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%); padding: 50px 80px 40px 80px; border-bottom: 1px solid #1a2744; position: relative; overflow: hidden; }
 .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 40%, rgba(0,100,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,200,150,0.05) 0%, transparent 50%); pointer-events: none; }
 .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
@@ -54,7 +55,7 @@ footer { display: none !important; }
 .result-name { font-size: 1.15rem; font-weight: 500; color: #e8eaf0; letter-spacing: -0.3px; }
 .result-pct { font-family: 'Space Mono', monospace; font-size: 0.95rem; font-weight: 700; }
 .bar-track { height: 6px; background: #1a2744; border-radius: 3px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease-in-out; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1); box-shadow: 0 0 10px rgba(0, 102, 255, 0.4); }
 .rank-badge { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-right: 12px; font-weight: 700; }
 
 /* Historial */
@@ -65,7 +66,7 @@ footer { display: none !important; }
 .history-name { font-weight: 600; color: #e8eaf0; font-size: 0.95rem; }
 .history-meta { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; margin-top: 6px; }
 
-/* Estados vacíos */
+/* Estados vacíos y alertas */
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; gap: 20px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
 .empty-icon { font-size: 3.5rem; opacity: 0.15; color: #0066ff; }
 .empty-text { font-size: 0.9rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; }
@@ -75,20 +76,23 @@ footer { display: none !important; }
 .bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
-/* Elementos nativos de Streamlit modificados por CSS */
+/* Componentes de Streamlit */
 .stFileUploader { padding: 10px 0; }
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; padding: 20px !important; }
 .stImage img { border-radius: 16px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; border-radius: 8px !important; }
 
-/* Botón de Voz estilizado con estilo Cyberpunk */
+/* Botón de Voz Estilizado */
 .stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; width: auto !important; margin-top: 16px !important; font-weight: 700 !important; transition: all 0.3s; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
-/* Ajuste fino de pestañas (Tabs) */
+/* Pestañas (Tabs) */
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
+
+/* Slider de Confianza personalizado */
+div[data-testid="stSlider"] { padding: 10px 20px; background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; margin-bottom: 20px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -205,9 +209,12 @@ def cargar_resnet():
 
 @st.cache_data
 def cargar_etiquetas():
-    url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
-    with urllib.request.urlopen(url) as f:
-        return json.load(f)
+    try:
+        url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
+        with urllib.request.urlopen(url, timeout=5) as f:
+            return json.load(f)
+    except Exception:
+        return ["background", "laptop", "golden retriever", "sports car", "backpack", "pizza"]
 
 mobilenet = cargar_mobilenet()
 etiquetas = cargar_etiquetas()
@@ -225,29 +232,42 @@ def predecir(imagen, modelo):
     probs = torch.nn.functional.softmax(salida[0], dim=0)
     return torch.topk(probs, 3)
 
-def mostrar_resultados(top3, t, idioma):
+def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
     badge_colors = ["#0066ff", "#00d4aa", "#6644ff"]
+    elementos_visibles = 0
+    reporte_txt = f"--- AUDITORIA OBJECTVISION AI ---\nFecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n\nResultados:\n"
+    
     for i in range(3):
         nombre = traducir(etiquetas[top3.indices[i].item()], idioma)
         prob = top3.values[i].item()
         pct = prob * 100
-        color_bar, nivel = nivel_confianza(prob, t)
-        st.markdown(f"""
-        <div class="result-item">
-            <div class="result-header">
-                <div style="display:flex;align-items:center">
-                    <span class="rank-badge" style="background:{badge_colors[i]}22;color:{badge_colors[i]};border:1px solid {badge_colors[i]}44">#{str(i+1).zfill(2)}</span>
-                    <span class="result-name">{nombre}</span>
+        
+        # FILTRO MEJORADO: Validación de umbral
+        if pct >= umbral_minimo:
+            elementos_visibles += 1
+            color_bar, nivel = nivel_confianza(prob, t)
+            reporte_txt += f"- {nombre}: {pct:.1f}%\n"
+            st.markdown(f"""
+            <div class="result-item">
+                <div class="result-header">
+                    <div style="display:flex;align-items:center">
+                        <span class="rank-badge" style="background:{badge_colors[i]}22;color:{badge_colors[i]};border:1px solid {badge_colors[i]}44">#{str(i+1).zfill(2)}</span>
+                        <span class="result-name">{nombre}</span>
+                    </div>
+                    <span class="result-pct" style="color:{badge_colors[i]}">{pct:.1f}%</span>
                 </div>
-                <span class="result-pct" style="color:{badge_colors[i]}">{pct:.1f}%</span>
+                <div class="bar-track">
+                    <div class="bar-fill" style="width:{pct}%;background:{color_bar}"></div>
+                </div>
+                <div style="margin-top:6px;font-size:0.75rem;color:#4a6080;font-family:'Space Mono',monospace;letter-spacing:1px">{nivel}</div>
             </div>
-            <div class="bar-track">
-                <div class="bar-fill" style="width:{pct}%;background:{color_bar}"></div>
-            </div>
-            <div style="margin-top:6px;font-size:0.75rem;color:#4a6080;font-family:'Space Mono',monospace;letter-spacing:1px">{nivel}</div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
+    if elementos_visibles == 0:
+        st.markdown(f'<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Ningún objeto supera el {umbral_minimo}% de confianza establecido.</div></div>', unsafe_allow_html=True)
+        return
+
+    # Módulo de Voz Integrado
     nombre_top = traducir(etiquetas[top3.indices[0].item()], idioma)
     prob_top = top3.values[0].item() * 100
 
@@ -261,17 +281,27 @@ def mostrar_resultados(top3, t, idioma):
         mensaje_voz = f"Objet détecté: {nombre_top}, avec {prob_top:.0f} pourcent de confiance."
         lang_voz = "fr-FR"
 
-    if st.button(t["boton_voz"], key=f"voz_{nombre_top}"):
-        st.components.v1.html(f"""
-        <script>
-            var msg = new SpeechSynthesisUtterance("{mensaje_voz}");
-            msg.lang = "{lang_voz}";
-            msg.rate = 0.95;
-            msg.pitch = 1.0;
-            msg.volume = 1.0;
-            window.speechSynthesis.speak(msg);
-        </script>
-        """, height=0)
+    col_btn1, col_btn2 = st.columns([1, 1])
+    with col_btn1:
+        if st.button(t["boton_voz"], key=f"voz_{nombre_top}"):
+            st.components.v1.html(f"""
+            <script>
+                var msg = new SpeechSynthesisUtterance("{mensaje_voz}");
+                msg.lang = "{lang_voz}";
+                msg.rate = 0.95;
+                window.speechSynthesis.speak(msg);
+            </script>
+            """, height=0)
+            
+    # MEJORA: Botón de descarga de informe integrado
+    with col_btn2:
+        st.download_button(
+            label="📥 Descargar Reporte",
+            data=reporte_txt,
+            file_name="reporte_objectvision.txt",
+            mime="text/plain",
+            key=f"dl_{nombre_top}"
+        )
 
 # HERO
 idioma = st.session_state.idioma
@@ -298,8 +328,13 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-col_lang = st.columns([4, 1])
-with col_lang[1]:
+# CONTROLES INTERACTIVOS SUPERIORES
+col_controles = st.columns([2, 2, 1])
+with col_controles[0]:
+    # MEJORA: Slider de umbral de confianza integrado elegantemente
+    umbral_sel = st.slider("Filtro de Certreza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
+with col_controles[2]:
+    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
     lang_map = {"Español": "es", "English": "en", "Français": "fr"}
     lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed")
     st.session_state.idioma = lang_map[lang_sel]
@@ -324,8 +359,15 @@ with tab1:
         st.markdown(f'<div class="zone-label">{t["analisis"]}</div>', unsafe_allow_html=True)
         if archivo:
             with st.spinner(t["procesando"]):
+                # MEJORA: Métricas de tiempo de inferencia en vivo
+                t_inicio = time.time()
                 top3 = predecir(imagen, mobilenet)
-            mostrar_resultados(top3, t, idioma)
+                t_final = time.time()
+                ms = (t_final - t_inicio) * 1000
+            
+            st.markdown(f"<span style='font-family:Space Mono; font-size:0.75rem; color:#00d4aa; letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
+            mostrar_resultados(top3, t, idioma, umbral_sel)
+            
             buf = io.BytesIO()
             imagen.save(buf, format="JPEG")
             img_b64 = base64.b64encode(buf.getvalue()).decode()
@@ -355,8 +397,12 @@ with tab2:
         if foto:
             imagen_cam = Image.open(foto).convert("RGB")
             with st.spinner(t["procesando"]):
+                t_inicio = time.time()
                 top3_cam = predecir(imagen_cam, mobilenet)
-            mostrar_resultados(top3_cam, t, idioma)
+                t_final = time.time()
+                ms = (t_final - t_inicio) * 1000
+            st.markdown(f"<span style='font-family:Space Mono; font-size:0.75rem; color:#00d4aa; letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
+            mostrar_resultados(top3_cam, t, idioma, umbral_sel)
         else:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -374,13 +420,13 @@ with tab3:
             st.markdown(f'<div class="zone-label">{t["modelo_a"]}</div>', unsafe_allow_html=True)
             with st.spinner(t["procesando"]):
                 top3_mobile = predecir(imagen_comp, mobilenet)
-            mostrar_resultados(top3_mobile, t, idioma)
+            mostrar_resultados(top3_mobile, t, idioma, umbral_sel)
         with col_b:
             st.markdown(f'<div class="zone-label">{t["modelo_b"]}</div>', unsafe_allow_html=True)
             resnet = cargar_resnet()
             with st.spinner(t["procesando"]):
                 top3_resnet = predecir(imagen_comp, resnet)
-            mostrar_resultados(top3_resnet, t, idioma)
+            mostrar_resultados(top3_resnet, t, idioma, umbral_sel)
     else:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
