@@ -33,7 +33,7 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# INTERFAZ CSS POTENCIADA (Actualizada con estilos de botón integrados)
+# INTERFAZ CSS POTENCIADA Y CORREGIDA (Sin conflictos de maquetación)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -51,54 +51,68 @@ footer { display: none !important; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
 
-/* Hero Principal */
-.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 50%, #080c14 100%); padding: 50px 80px 40px 80px; border-bottom: 1px solid #1a2744; position: relative; overflow: hidden; }
-.hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 40%, rgba(0,100,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(0,200,150,0.05) 0%, transparent 50%); pointer-events: none; }
-.nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+/* Navbar Superior Real */
+.navbar-wrapper { background: #060a12; padding: 15px 80px; border-bottom: 1px solid #1a2744; display: flex; align-items: center; justify-content: space-between; }
 .logo { font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
 .logo span { color: #0066ff; }
-.nav-tags { display: flex; gap: 12px; align-items: center; }
-.nav-tag { font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: #5efaf2; background: rgba(0,102,255,0.1); border: 1px solid #1a2744; padding: 6px 16px; border-radius: 20px; font-family: 'Space Mono', monospace; font-weight: 700; }
 
-/* Botón de Logout simulado arriba a la derecha */
-div[data-testid="stHeaderActionElements"] { display:none; }
-.logout-btn-container { margin-bottom: -16px; }
-.logout-btn-container button { background: rgba(255, 75, 75, 0.1) !important; color: #ff4b4b !important; border: 1px solid rgba(255, 75, 75, 0.3) !important; padding: 6px 16px !important; border-radius: 20px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; letter-spacing: 1.5px !important; font-weight: 700 !important; text-transform: uppercase !important; transition: all 0.3s !important; }
-.logout-btn-container button:hover { background: #ff4b4b !important; color: white !important; box-shadow: 0 0 15px rgba(255, 75, 75, 0.4) !important; transform: translateY(-1px); }
+/* Tags de tecnología */
+.nav-tag-elemento { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 12px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; display: inline-block; text-align: center; width: 100%; }
 
-.hero-title { font-size: clamp(2.2rem, 4.5vw, 3.8rem); font-weight: 700; line-height: 1.15; letter-spacing: -1.5px; color: #fff; max-width: 800px; margin-bottom: 20px; }
+/* Botón de Salir Estilizado en el navbar */
+div.stButton > button[key^="logout_btn"] {
+    background: rgba(255, 75, 75, 0.1) !important;
+    color: #ff4b4b !important;
+    border: 1px solid rgba(255, 75, 75, 0.3) !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    transition: all 0.2s;
+}
+div.stButton > button[key^="logout_btn"]:hover {
+    background: #ff4b4b !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(255, 75, 75, 0.3);
+}
+
+/* Hero Principal Limpio */
+.hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 60px 80px 40px 80px; border-bottom: 1px solid #1a2744; }
+.hero-title { font-size: clamp(2.2rem, 4.5vw, 3.5rem); font-weight: 700; line-height: 1.2; letter-spacing: -1.5px; color: #fff; max-width: 800px; margin-bottom: 16px; }
 .hero-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.hero-sub { font-size: 1.05rem; color: #6b7c96; max-width: 520px; line-height: 1.7; font-weight: 400; }
+.hero-sub { font-size: 1.05rem; color: #6b7c96; max-width: 520px; line-height: 1.6; font-weight: 400; margin-bottom: 30px; }
 
 /* Contadores barra */
-.stats-bar { display: flex; gap: 50px; margin-top: 35px; padding-top: 35px; border-top: 1px solid #1a2744; }
-.stat { display: flex; flex-direction: column; gap: 6px; }
-.stat-number { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
-.stat-label { font-size: 0.75rem; color: #4a6080; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
+.stats-bar { display: flex; gap: 50px; padding-top: 30px; border-top: 1px solid #1a2744; }
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.stat-number { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; }
+.stat-label { font-size: 0.7rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
 
 /* Secciones de análisis */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
-.result-item { padding: 22px 0; border-bottom: 1px solid #1a2744; }
+.result-item { padding: 20px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
-.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.result-name { font-size: 1.15rem; font-weight: 500; color: #e8eaf0; letter-spacing: -0.3px; }
+.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.result-name { font-size: 1.1rem; font-weight: 500; color: #e8eaf0; }
 .result-pct { font-family: 'Space Mono', monospace; font-size: 0.95rem; font-weight: 700; }
 .bar-track { height: 6px; background: #1a2744; border-radius: 3px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1); box-shadow: 0 0 10px rgba(0, 102, 255, 0.4); }
+.bar-fill { height: 100%; border-radius: 3px; }
 .rank-badge { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-right: 12px; font-weight: 700; }
 
 /* Historial */
-.history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 18px; margin-bottom: 14px; transition: transform 0.2s; }
-.history-card:hover { transform: translateY(-2px); border-color: #0066ff; }
+.history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
 .history-thumb { width: 65px; height: 65px; object-fit: cover; border-radius: 8px; border: 1px solid #1a2744; }
 .history-info { flex: 1; }
 .history-name { font-weight: 600; color: #e8eaf0; font-size: 0.95rem; }
 .history-meta { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; margin-top: 6px; }
 
 /* Estados vacíos y alertas */
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; gap: 20px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
-.empty-icon { font-size: 3.5rem; opacity: 0.15; color: #0066ff; }
-.empty-text { font-size: 0.9rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 15px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
+.empty-icon { font-size: 2.5rem; opacity: 0.2; color: #0066ff; }
+.empty-text { font-size: 0.85rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 
 /* Footer barra inferior */
 .bottom-bar { padding: 30px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; background: #05080f; }
@@ -106,23 +120,22 @@ div[data-testid="stHeaderActionElements"] { display:none; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
 /* Componentes de Streamlit */
-.stFileUploader { padding: 10px 0; }
-.stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; padding: 20px !important; }
-.stImage img { border-radius: 16px !important; border: 1px solid #1a2744; }
-.stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; border-radius: 8px !important; }
-div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
+.stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
+.stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
+.stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
+div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
 
-/* Botones Estilizados de Inferencia y Voz */
-.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; width: auto !important; margin-top: 16px !important; font-weight: 700 !important; transition: all 0.3s; }
-.stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
+/* Botones */
+.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; }
+.stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
 /* Pestañas (Tabs) */
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
-.stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+.stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
 
-/* Slider de Confianza personalizado */
-div[data-testid="stSlider"] { padding: 10px 20px; background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; margin-bottom: 20px; }
+/* Slider */
+div[data-testid="stSlider"] { padding: 10px 20px; background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -262,8 +275,8 @@ TRADUCCIONES = {
     "backpack": "Mochila", "table lamp": "Lámpara"
 }
 
-def traducir(n, idioma="es"):
-    if idioma != "es":
+def traducir(n, idm="es"):
+    if idm != "es":
         return n.replace("_", " ").title()
     return TRADUCCIONES.get(n.lower().replace("_", " "), n.replace("_", " ").title())
 
@@ -312,13 +325,13 @@ def predecir(imagen, modelo):
     probs = torch.nn.functional.softmax(salida[0], dim=0)
     return torch.topk(probs, 3)
 
-def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
+def mostrar_resultados(top3, t, idm, umbral_minimo=10):
     badge_colors = ["#0066ff", "#00d4aa", "#6644ff"]
     elementos_visibles = 0
     reporte_txt = f"--- AUDITORIA OBJECTVISION AI ---\nFecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n\nResultados:\n"
     
     for i in range(3):
-        nombre = traducir(etiquetas[top3.indices[i].item()], idioma)
+        nombre = traducir(etiquetas[top3.indices[i].item()], idm)
         prob = top3.values[i].item()
         pct = prob * 100
         
@@ -346,13 +359,13 @@ def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Ningún objeto supera el {umbral_minimo}% de confianza establecido.</div></div>', unsafe_allow_html=True)
         return
 
-    nombre_top = traducir(etiquetas[top3.indices[0].item()], idioma)
+    nombre_top = traducir(etiquetas[top3.indices[0].item()], idm)
     prob_top = top3.values[0].item() * 100
 
-    if idioma == "es":
+    if idm == "es":
         mensaje_voz = f"Objeto detectado: {nombre_top}, con un {prob_top:.0f} por ciento de certeza."
         lang_voz = "es-ES"
-    elif idioma == "en":
+    elif idm == "en":
         mensaje_voz = f"Object detected: {nombre_top}, with {prob_top:.0f} percent confidence."
         lang_voz = "en-US"
     else:
@@ -380,38 +393,35 @@ def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- CONFIGURACIÓN DE ELEMENTOS DINÁMICOS DEL HEADER ---
-idioma = st.session_state.idioma
-t = TEXTOS[idioma]
+# --- 1. BARRA DE NAVEGACIÓN SUPERIOR CORREGIDA (Estructura Limpia) ---
+col_nav = st.columns([4, 2, 2, 2, 3])
 
-# Estructura del Hero superior con inyección HTML para layout
-st.markdown("""
-<div class="hero">
-    <div class="nav">
-        <div class="logo">Object<span>Vision</span></div>
-        <div class="nav-tags" id="header-tags">
-""", unsafe_allow_html=True)
+with col_nav[0]:
+    st.markdown('<div style="padding: 10px 0 0 40px;"><div class="logo">Object<span>Vision</span></div></div>', unsafe_allow_html=True)
 
-# Renderizamos los componentes interactivos dentro del contenedor flex del menú de tags
-col_header_tags = st.columns([6, 2, 1, 1, 1])
-with col_header_tags[1]:
-    st.markdown('<div class="logout-btn-container">', unsafe_allow_html=True)
-    if st.button(f"🔒 {st.session_state.rol_usuario}"):
+with col_nav[1]:
+    st.markdown('<div style="padding-top: 12px;"><div class="nav-tag-elemento">MobileNetV2</div></div>', unsafe_allow_html=True)
+
+with col_nav[2]:
+    st.markdown('<div style="padding-top: 12px;"><div class="nav-tag-elemento">PyTorch</div></div>', unsafe_allow_html=True)
+
+with col_nav[3]:
+    st.markdown('<div style="padding-top: 12px;"><div class="nav-tag-elemento">ImageNet</div></div>', unsafe_allow_html=True)
+
+with col_nav[4]:
+    st.markdown('<div style="padding: 12px 40px 0 0;">', unsafe_allow_html=True)
+    if st.button(f"🔴 CERRAR: {st.session_state.rol_usuario}", key="logout_btn_header"):
         st.session_state.autenticado = False
         st.session_state.rol_usuario = ""
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
-with col_header_tags[2]:
-    st.markdown('<div class="nav-tag">MobileNetV2</div>', unsafe_allow_html=True)
-with col_header_tags[3]:
-    st.markdown('<div class="nav-tag">PyTorch</div>', unsafe_allow_html=True)
-with col_header_tags[4]:
-    st.markdown('<div class="nav-tag">ImageNet</div>', unsafe_allow_html=True)
 
-# Cerramos las etiquetas HTML abiertas del Hero
+# --- 2. HERO PRINCIPAL LIMPIO ---
+idioma = st.session_state.idioma
+t = TEXTOS[idioma]
+
 st.markdown(f"""
-        </div>
-    </div>
+<div class="hero-limpio">
     <div class="hero-title">{t["titulo"]}</div>
     <div class="hero-sub">{t["subtitulo"]}</div>
     <div class="stats-bar">
@@ -423,17 +433,18 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# CONTROLES INTERACTIVOS SUPERIORES REORGANIZADOS (Solo filtros e idioma)
-col_controles = st.columns([2, 2, 1])
+# CONTROLES INTERACTIVOS SUPERIORES (Filtros e idioma alineados abajo)
+st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
+col_controles = st.columns([3, 1, 1])
 with col_controles[0]:
     umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 with col_controles[2]:
-    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
     lang_map = {"Español": "es", "English": "en", "Français": "fr"}
     lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed")
     st.session_state.idioma = lang_map[lang_sel]
     idioma = st.session_state.idioma
     t = TEXTOS[idioma]
+st.markdown("</div>", unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4 = st.tabs([
     t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]
