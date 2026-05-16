@@ -35,26 +35,46 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# 3. INTERFAZ CSS GLOBAL (Estilos de la aplicación)
+# 3. INTERFAZ CSS GLOBAL (Estilos de la aplicación corregidos para evitar solapamientos)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
+
+/* Ocultar elementos molestos de Streamlit pero manteniendo el flujo limpio */
 [data-testid="stSidebar"] { display: none; }
 [data-testid="collapsedControl"] { display: none; }
 header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
+/* Nueva Barra de navegación superior integrada mediante CSS Puro */
+.custom-navbar {
+    background: #060a12; 
+    padding: 15px 80px; 
+    border-bottom: 1px solid #1a2744; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 0px;
+}
+.nav-logo { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
+.nav-logo span { color: #0066ff; }
+.nav-badges { display: flex; gap: 12px; align-items: center; }
+.nav-badge-item { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; }
+.nav-badge-active { color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); }
+.nav-user { font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; }
+
 /* Contenedor del Login y Registro */
-.login-container { max-width: 450px; margin: 60px auto 20px auto; padding: 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 166px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+.login-container { max-width: 450px; margin: 60px auto 20px auto; padding: 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
 .login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
 
-/* Hero Principal */
-.hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 60px 80px 40px 80px; border-bottom: 1px solid #1a2744; }
+/* Hero Principal con padding corregido */
+.hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 40px 80px; border-bottom: 1px solid #1a2744; }
 .hero-title { font-size: clamp(2.2rem, 4.5vw, 3.5rem); font-weight: 700; line-height: 1.2; letter-spacing: -1.5px; color: #fff; max-width: 800px; margin-bottom: 16px; }
 .hero-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .hero-sub { font-size: 1.05rem; color: #6b7c96; max-width: 520px; line-height: 1.6; font-weight: 400; margin-bottom: 30px; }
@@ -83,7 +103,7 @@ footer { display: none !important; }
 .history-name { font-weight: 600; color: #e8eaf0; font-size: 0.95rem; }
 .history-meta { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; margin-top: 6px; }
 
-/* Estados vacíos y alertas */
+/* Estados vacíos */
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 15px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
 .empty-icon { font-size: 2.5rem; opacity: 0.2; color: #0066ff; }
 .empty-text { font-size: 0.85rem; color: #4a6080; font-family: 'Space Mono', monospace; }
@@ -93,7 +113,7 @@ footer { display: none !important; }
 .bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
-/* Reescritura de componentes nativos de Streamlit */
+/* Reescritura de componentes nativos */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
@@ -107,9 +127,6 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
-
-/* Slider de certeza */
-div[data-testid="stSlider"] { padding: 10px 20px; background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -210,27 +227,6 @@ TEXTOS = {
         "modelo_a": "— MobileNetV2 (Fast)",
         "modelo_b": "— ResNet50 (Accurate)",
         "boton_voz": "🔊 Listen to result",
-    },
-    "fr": {
-        "titulo": "Vision artificielle qui <em>comprend</em> votre monde.",
-        "subtitulo": "Téléchargez une image y notre IA identifie les objets instantanément.",
-        "tab_analizar": "Analyser image",
-        "tab_camara": "Caméra live",
-        "tab_comparar": "Comparer modèles",
-        "tab_historial": "Historique",
-        "entrada": "— Entrée",
-        "analisis": "— Analyse",
-        "alta": "HAUTE CONFIANCE",
-        "media": "CONFIANZA MOYENNE",
-        "baja": "FAIBLE CONFIANCE",
-        "esperando": "En attente...",
-        "procesando": "Traitement...",
-        "historial_vacio": "Pas encore d'analyse",
-        "camara_info": "Activez la caméra et prenez une photo",
-        "comparar_info": "Téléchargez une image pour comparar",
-        "modelo_a": "— MobileNetV2 (Rapide)",
-        "modelo_b": "— ResNet50 (Précis)",
-        "boton_voz": "🔊 Écouter le résultat",
     }
 }
 
@@ -240,13 +236,7 @@ TRADUCCIONES = {
     "golden retriever": "Golden Retriever", "pizza": "Pizza", "hamburger": "Hamburguesa",
     "banana": "Plátano", "apple": "Manzana", "chair": "Silla", "laptop": "Portátil",
     "bicycle": "Bicicleta", "motorcycle": "Moto", "bus": "Autobús", "truck": "Camión",
-    "airplane": "Avión", "lion": "León", "tiger": "Tigre", "elephant": "Elefante",
-    "soccer ball": "Balón de fútbol", "keyboard": "Teclado", "bottle": "Botella",
-    "cup": "Taza", "book": "Libro", "clock": "Reloj", "horse": "Caballo",
-    "kuvasz": "Kuvasz", "shield": "Escudo", "minivan": "Minivan",
-    "chesapeake bay retriever": "Chesapeake Bay Retriever",
-    "computer mouse": "Ratón de ordenador", "sunglasses": "Gafas de sol",
-    "backpack": "Mochila", "table lamp": "Lámpara"
+    "airplane": "Avión", "soccer ball": "Balón de fútbol", "keyboard": "Teclado", "bottle": "Botella"
 }
 
 def traducir(n, idm="es"):
@@ -262,7 +252,6 @@ def nivel_confianza(prob, t):
     else:
         return "#dc3545", t["baja"]
 
-# 6. INICIALIZACIÓN DE MODELOS DE INTELIGENCIA ARTIFICIAL
 @st.cache_resource
 def cargar_mobilenet():
     m = models.mobilenet_v2(weights="IMAGENET1K_V1")
@@ -340,12 +329,9 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
     if idm == "es":
         mensaje_voz = f"Objeto detectado: {nombre_top}, con un {prob_top:.0f} por ciento de certeza."
         lang_voz = "es-ES"
-    elif idm == "en":
+    else:
         mensaje_voz = f"Object detected: {nombre_top}, with {prob_top:.0f} percent confidence."
         lang_voz = "en-US"
-    else:
-        mensaje_voz = f"Objet détecté: {nombre_top}, avec {prob_top:.0f} pourcent de confianza."
-        lang_voz = "fr-FR"
 
     col_btn1, col_btn2 = st.columns([1, 1])
     with col_btn1:
@@ -368,61 +354,41 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- 7. BARRA DE NAVEGACIÓN SUPERIOR BLINDADA (Solución Definitiva) ---
-badge_rol_color = "rgba(255, 75, 75, 0.15)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.15)"
-badge_text_color = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
-badge_border_color = "rgba(255, 75, 75, 0.4)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.4)"
+# --- 5. NUEVA BARRA DE NAVEGACIÓN SUPERIOR CON FLUJO NATIVO (Adiós solapamientos) ---
+badge_bg = "rgba(255, 75, 75, 0.15)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.15)"
+badge_txt = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
+badge_border = "rgba(255, 75, 75, 0.4)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.4)"
 
-navbar_html = f"""
-<div style="
-    background: #060a12; 
-    padding: 15px 40px; 
-    border-bottom: 1px solid #1a2744; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between;
-    width: 100%;
-    font-family: 'Sora', sans-serif;
-    box-sizing: border-box;
-">
-    <div style="font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase;">
-        Object<span style="color: #0066ff;">Vision</span>
+st.markdown(f"""
+<div class="custom-navbar">
+    <div class="nav-logo">Object<span>Vision</span></div>
+    <div class="nav-badges">
+        <div class="nav-badge-item nav-badge-active">MobileNetV2</div>
+        <div class="nav-badge-item">PyTorch</div>
+        <div class="nav-badge-item">ImageNet</div>
     </div>
-    
-    <div style="display: flex; gap: 12px; align-items: center;">
-        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">MobileNetV2</span>
-        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">PyTorch</span>
-        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">ImageNet</span>
-    </div>
-    
-    <div style="display: flex; align-items: center;">
-        <span style="
-            background: {badge_rol_color};
-            color: {badge_text_color};
-            border: 1px solid {badge_border_color};
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75rem;
-            font-weight: 700;
-        ">👤 {st.session_state.rol_usuario}</span>
+    <div class="nav-user" style="background:{badge_bg}; color:{badge_txt}; border:1px solid {badge_border};">
+        👤 {st.session_state.rol_usuario}
     </div>
 </div>
-"""
-st.components.v1.html(navbar_html, height=70)
+""", unsafe_allow_html=True)
 
-# Botón nativo de salida (Logout)
-col_logout_1, col_logout_2 = st.columns([7, 1])
-with col_logout_2:
+# Botón nativo de Cerrar Sesión y Cambiar Idioma en línea justo debajo de la Navbar
+col_nav_actions = st.columns([6, 1, 1])
+with col_nav_actions[1]:
+    lang_map = {"Español": "es", "English": "en"}
+    lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed", key="lang_selector_top")
+    st.session_state.idioma = lang_map[lang_sel]
+    idioma = st.session_state.idioma
+    t = TEXTOS[idioma]
+with col_nav_actions[2]:
     if st.button("🔴 SALIR", key="logout_system_btn"):
         st.session_state.autenticado = False
         st.session_state.rol_usuario = ""
+        st.clear_cache()
         st.rerun()
 
-# 8. HERO SECCIÓN PRINCIPAL
-idioma = st.session_state.idioma
-t = TEXTOS[idioma]
-
+# 6. HERO SECCIÓN PRINCIPAL
 st.markdown(f"""
 <div class="hero-limpio">
     <div class="hero-title">{t["titulo"]}</div>
@@ -436,20 +402,12 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Controles de Configuración superiores (Slider e Idioma)
+# Filtro de certeza mínimo justo arriba de las pestañas
 st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
-col_controles = st.columns([3, 1, 1])
-with col_controles[0]:
-    umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
-with col_controles[2]:
-    lang_map = {"Español": "es", "English": "en", "Français": "fr"}
-    lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed")
-    st.session_state.idioma = lang_map[lang_sel]
-    idioma = st.session_state.idioma
-    t = TEXTOS[idioma]
+umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 st.markdown("</div>", unsafe_allow_html=True)
 
-# 9. GESTIÓN Y RENDERIZADO DE PESTAÑAS (TABS)
+# 7. GESTIÓN DE PESTAÑAS (TABS)
 lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 
@@ -480,7 +438,7 @@ with tabs_render[0]:
             st.markdown(f"<span style='font-family:Space Mono; font-size:0.75rem; color:#00d4aa; letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
             mostrar_resultados(top3, t, idioma, umbral_sel)
             
-            # Guardar en el Historial del Estado de Sesión
+            # Guardar en Historial
             buf = io.BytesIO()
             imagen.save(buf, format="JPEG")
             img_b64 = base64.b64encode(buf.getvalue()).decode()
@@ -564,7 +522,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB — PANEL DE ADMINISTRACIÓN (CORREGIDO Y BLINDADO)
+# TAB — PANEL DE ADMINISTRACIÓN (Renderizado estricto)
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
@@ -572,7 +530,6 @@ if es_admin:
         st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # 1. Generamos el contenido de las filas de forma aislada
         tabla_contenido = ""
         for usr, datos in st.session_state.usuarios_db.items():
             if "ADMIN" in datos["rol"]:
@@ -588,7 +545,6 @@ if es_admin:
             </tr>
             """
         
-        # 2. Estructuramos la tabla web completa dentro de un único string contenedor
         html_completo = f"""
         <div style="padding: 0 80px; background: #080c14; box-sizing: border-box;">
             <table style="width: 100%; border-collapse: collapse; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; font-family: 'Sora', sans-serif;">
@@ -605,11 +561,9 @@ if es_admin:
             </table>
         </div>
         """
-        
-        # 3. CRÍTICO: Forzamos a Streamlit a interpretar el código como una web real (Evita el texto plano)
         st.components.v1.html(html_completo, height=350, scrolling=True)
 
-# 10. PIE DE PÁGINA (FOOTER CORPORATIVO)
+# 8. PIE DE PÁGINA (FOOTER CORPORATIVO)
 st.markdown("""
 <div class="bottom-bar">
     <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
