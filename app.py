@@ -33,7 +33,7 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# INTERFAZ CSS POTENCIADA (Incluye Login, Registro y Ajustes de Inputs)
+# INTERFAZ CSS POTENCIADA (Actualizada con estilos de botón integrados)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -59,6 +59,12 @@ footer { display: none !important; }
 .logo span { color: #0066ff; }
 .nav-tags { display: flex; gap: 12px; align-items: center; }
 .nav-tag { font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; color: #5efaf2; background: rgba(0,102,255,0.1); border: 1px solid #1a2744; padding: 6px 16px; border-radius: 20px; font-family: 'Space Mono', monospace; font-weight: 700; }
+
+/* Botón de Logout simulado arriba a la derecha */
+div[data-testid="stHeaderActionElements"] { display:none; }
+.logout-btn-container { margin-bottom: -16px; }
+.logout-btn-container button { background: rgba(255, 75, 75, 0.1) !important; color: #ff4b4b !important; border: 1px solid rgba(255, 75, 75, 0.3) !important; padding: 6px 16px !important; border-radius: 20px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; letter-spacing: 1.5px !important; font-weight: 700 !important; text-transform: uppercase !important; transition: all 0.3s !important; }
+.logout-btn-container button:hover { background: #ff4b4b !important; color: white !important; box-shadow: 0 0 15px rgba(255, 75, 75, 0.4) !important; transform: translateY(-1px); }
 
 .hero-title { font-size: clamp(2.2rem, 4.5vw, 3.8rem); font-weight: 700; line-height: 1.15; letter-spacing: -1.5px; color: #fff; max-width: 800px; margin-bottom: 20px; }
 .hero-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -106,7 +112,7 @@ footer { display: none !important; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; border-radius: 8px !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
 
-/* Botones Estilizados */
+/* Botones Estilizados de Inferencia y Voz */
 .stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; letter-spacing: 1px !important; text-transform: uppercase !important; width: auto !important; margin-top: 16px !important; font-weight: 700 !important; transition: all 0.3s; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
@@ -234,7 +240,7 @@ TEXTOS = {
         "procesando": "Traitement...",
         "historial_vacio": "Pas encore d'analyse",
         "camara_info": "Activez la caméra et prenez une photo",
-        "comparar_info": "Téléchargez une image pour comparer",
+        "comparar_info": "Téléchargez une image pour comparar",
         "modelo_a": "— MobileNetV2 (Rapide)",
         "modelo_b": "— ResNet50 (Précis)",
         "boton_voz": "🔊 Écouter le résultat",
@@ -281,7 +287,7 @@ def cargar_resnet():
     m.eval()
     return m
 
-@st.cache_data
+@st.cache_resource
 def cargar_etiquetas():
     try:
         url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
@@ -374,19 +380,36 @@ def mostrar_resultados(top3, t, idioma, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# RENDERIZADO DEL HERO E INFORMACIÓN DE ROL DINÁMICO
+# --- CONFIGURACIÓN DE ELEMENTOS DINÁMICOS DEL HEADER ---
 idioma = st.session_state.idioma
 t = TEXTOS[idioma]
 
-st.markdown(f"""
+# Estructura del Hero superior con inyección HTML para layout
+st.markdown("""
 <div class="hero">
     <div class="nav">
         <div class="logo">Object<span>Vision</span></div>
-        <div class="nav-tags">
-            <div class="nav-tag" style="color: #ff4b4b; background: rgba(255,75,75,0.1); border-color: rgba(255,75,75,0.3)">AUTH: {st.session_state.rol_usuario}</div>
-            <div class="nav-tag">MobileNetV2</div>
-            <div class="nav-tag">PyTorch</div>
-            <div class="nav-tag">ImageNet</div>
+        <div class="nav-tags" id="header-tags">
+""", unsafe_allow_html=True)
+
+# Renderizamos los componentes interactivos dentro del contenedor flex del menú de tags
+col_header_tags = st.columns([6, 2, 1, 1, 1])
+with col_header_tags[1]:
+    st.markdown('<div class="logout-btn-container">', unsafe_allow_html=True)
+    if st.button(f"🔒 {st.session_state.rol_usuario}"):
+        st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+with col_header_tags[2]:
+    st.markdown('<div class="nav-tag">MobileNetV2</div>', unsafe_allow_html=True)
+with col_header_tags[3]:
+    st.markdown('<div class="nav-tag">PyTorch</div>', unsafe_allow_html=True)
+with col_header_tags[4]:
+    st.markdown('<div class="nav-tag">ImageNet</div>', unsafe_allow_html=True)
+
+# Cerramos las etiquetas HTML abiertas del Hero
+st.markdown(f"""
         </div>
     </div>
     <div class="hero-title">{t["titulo"]}</div>
@@ -400,8 +423,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# CONTROLES INTERACTIVOS SUPERIORES (Filtros, Idioma y Cierre de Sesión)
-col_controles = st.columns([2, 1, 1, 1])
+# CONTROLES INTERACTIVOS SUPERIORES REORGANIZADOS (Solo filtros e idioma)
+col_controles = st.columns([2, 2, 1])
 with col_controles[0]:
     umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 with col_controles[2]:
@@ -411,12 +434,6 @@ with col_controles[2]:
     st.session_state.idioma = lang_map[lang_sel]
     idioma = st.session_state.idioma
     t = TEXTOS[idioma]
-with col_controles[3]:
-    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
-    if st.button("🔒 Salir"):
-        st.session_state.autenticado = False
-        st.session_state.rol_usuario = ""
-        st.rerun()
 
 tab1, tab2, tab3, tab4 = st.tabs([
     t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]
