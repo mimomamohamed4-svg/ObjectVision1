@@ -51,34 +51,6 @@ footer { display: none !important; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
 
-/* Navbar Superior Real */
-.navbar-wrapper { background: #060a12; padding: 15px 80px; border-bottom: 1px solid #1a2744; display: flex; align-items: center; justify-content: space-between; }
-.logo { font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
-.logo span { color: #0066ff; }
-
-/* Tags de tecnología */
-.nav-tag-elemento { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 12px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; display: inline-block; text-align: center; width: 100%; }
-
-/* Botón de Salir Estilizado en el navbar */
-div.stButton > button[key^="logout_btn"] {
-    background: rgba(255, 75, 75, 0.1) !important;
-    color: #ff4b4b !important;
-    border: 1px solid rgba(255, 75, 75, 0.3) !important;
-    padding: 6px 14px !important;
-    border-radius: 6px !important;
-    font-family: 'Space Mono', monospace !important;
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    width: 100% !important;
-    margin: 0 !important;
-    transition: all 0.2s;
-}
-div.stButton > button[key^="logout_btn"]:hover {
-    background: #ff4b4b !important;
-    color: #fff !important;
-    box-shadow: 0 0 12px rgba(255, 75, 75, 0.3);
-}
-
 /* Hero Principal Limpio */
 .hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 60px 80px 40px 80px; border-bottom: 1px solid #1a2744; }
 .hero-title { font-size: clamp(2.2rem, 4.5vw, 3.5rem); font-weight: 700; line-height: 1.2; letter-spacing: -1.5px; color: #fff; max-width: 800px; margin-bottom: 16px; }
@@ -125,7 +97,7 @@ div.stButton > button[key^="logout_btn"]:hover {
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
 
-/* Botones */
+/* Botones genéricos de Streamlit */
 .stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
@@ -393,28 +365,61 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- 1. BARRA DE NAVEGACIÓN SUPERIOR ---
-col_nav = st.columns([4, 2, 2, 2, 3])
+# --- 1. BARRA DE NAVEGACIÓN SUPERIOR BLINDADA ---
+# Estilo de badge condicional dependiendo de si es admin o no
+badge_rol_color = "rgba(255, 75, 75, 0.1)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.1)"
+badge_text_color = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
+badge_border_color = "rgba(255, 75, 75, 0.3)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.3)"
 
-with col_nav[0]:
-    st.markdown('<div style="padding: 10px 0 0 40px;"><div class="logo">Object<span>Vision</span></div></div>', unsafe_allow_html=True)
+btn_logout_html = f"""
+    <a href="?logout=true" target="_self" style="
+        background: {badge_rol_color};
+        color: {badge_text_color};
+        border: 1px solid {badge_border_color};
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-family: 'Space Mono', monospace;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+    ">🔴 CERRAR: {st.session_state.rol_usuario}</a>
+"""
 
-with col_nav[1]:
-    st.markdown('<div style="padding-top: 12px;"><div class="nav-tag-elemento">MobileNetV2</div></div>', unsafe_allow_html=True)
+# Renderizado del contenedor superior rígido para evitar que se descoloque
+st.markdown(f"""
+<div style="
+    background: #060a12; 
+    padding: 15px 40px; 
+    border-bottom: 1px solid #1a2744; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+">
+    <div style="font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase;">
+        Object<span style="color: #0066ff;">Vision</span>
+    </div>
+    
+    <div style="display: flex; gap: 12px; align-items: center;">
+        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">MobileNetV2</span>
+        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">PyTorch</span>
+        <span style="font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26, 39, 68, 0.3); border: 1px solid #1a2744; padding: 5px 14px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; white-space: nowrap;">ImageNet</span>
+    </div>
+    
+    <div style="display: flex; align-items: center;">
+        {btn_logout_html}
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-with col_nav[2]:
-    st.markdown('<div style="padding-top: 12px;"><div class="nav-tag-elemento">PyTorch</div></div>', unsafe_allow_html=True)
-
-with col_nav[3]:
-    st.markdown('<div style="padding-top: 12px;"><div class="nav-tag-elemento">ImageNet</div></div>', unsafe_allow_html=True)
-
-with col_nav[4]:
-    st.markdown('<div style="padding: 12px 40px 0 0;">', unsafe_allow_html=True)
-    if st.button(f"🔴 CERRAR: {st.session_state.rol_usuario}", key="logout_btn_header"):
-        st.session_state.autenticado = False
-        st.session_state.rol_usuario = ""
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+# Captura de la acción de desconexión por query params
+if "logout" in st.query_params:
+    st.session_state.autenticado = False
+    st.session_state.rol_usuario = ""
+    st.query_params.clear()
+    st.rerun()
 
 # --- 2. HERO PRINCIPAL ---
 idioma = st.session_state.idioma
@@ -446,10 +451,9 @@ with col_controles[2]:
     t = TEXTOS[idioma]
 st.markdown("</div>", unsafe_allow_html=True)
 
-# --- CONFIGURACIÓN DE PESTAÑAS DINÁMICAS (OCULTA SI NO ES ADMIN) ---
+# --- CONFIGURACIÓN DE PESTAÑAS DINÁMICAS ---
 lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 
-# Si el usuario logueado eres tú (MOHAMED (ADMIN)), añadimos la pestaña de control
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 if es_admin:
     lista_tabs.append("👥 Panel Admin (Usuarios)")
@@ -562,7 +566,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- TAB 5 — PANEL DE ADMINISTRACIÓN (MOHAMED EXCLUSIVE) ---
+# --- TAB 5 — PANEL DE ADMINISTRACIÓN (RENDERIZADO SEGURO) ---
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
@@ -570,7 +574,7 @@ if es_admin:
         st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # 1. Creamos las filas dinámicamente aplicando estilos Inline robustos
+        # Generación dinámica de celdas mediante strings limpios
         tabla_contenido = ""
         for usr, datos in st.session_state.usuarios_db.items():
             badge_style = "background:rgba(0,102,255,0.1); color:#0066ff; border:1px solid rgba(0,102,255,0.2);" if "ADMIN" in datos["rol"] else "background:rgba(0,212,170,0.1); color:#00d4aa; border:1px solid rgba(0,212,170,0.2);"
@@ -583,7 +587,7 @@ if es_admin:
             </tr>
             """
         
-        # 2. Construimos la estructura HTML contenedora
+        # Envoltorio estructural de la tabla con estilos oscuros incrustados
         html_completo = f"""
         <div style="padding: 0 80px; background:#080c14;">
             <table style="width:100%; border-collapse:collapse; background:#0d1422; border-radius:8px; overflow:hidden; border:1px solid #1a2744; font-family:'Sora', sans-serif;">
@@ -601,7 +605,7 @@ if es_admin:
         </div>
         """
         
-        # 3. Forzamos el renderizado web estricto mediante un iFrame nativo de Streamlit
+        # Inyección a través del componente estricto de iframe de Streamlit
         st.components.v1.html(html_completo, height=350, scrolling=True)
 
 # FOOTER DE MARCA PERSONAL
