@@ -9,7 +9,7 @@ import base64
 import time
 from datetime import datetime
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
+# 1. CONFIGURACIÓN DE LA PÁGINA (Debe ser lo primero)
 st.set_page_config(
     page_title="ObjectVision AI",
     page_icon="🔍",
@@ -34,10 +34,8 @@ if "historial" not in st.session_state:
     st.session_state.historial = []
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
-if "login_mode" not in st.session_state:
-    st.session_state.login_mode = "login"  # Puede ser 'login' o 'registro'
 
-# 3. INTERFAZ CSS GLOBAL (Reducido y enfocado a no romper componentes)
+# 3. INTERFAZ CSS GLOBAL (Sólida, limpia y sin parches experimentales)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght=300;400;500;600;700&family=Space+Mono:wght=400;700&display=swap');
@@ -68,18 +66,18 @@ footer { display: none !important; }
 .nav-badge-active { color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); }
 .nav-user { font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; }
 
-/* Tarjeta del Login Estilizada */
-.login-box-container { 
-    background: #0d1422 !important; 
-    border: 1px solid #1a2744 !important; 
-    border-radius: 16px !important; 
-    padding: 35px !important; 
+/* Tarjeta del Login Estilizada (HTML Estático Blindado) */
+.login-box-html {
+    background: #0d1422;
+    border: 1px solid #1a2744;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
     margin-top: 60px;
 }
-.login-header-text { text-align: center; margin-bottom: 25px; }
-.login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -1px; }
+.login-title { font-size: 1.9rem; font-weight: 700; color: #fff; margin-bottom: 6px; letter-spacing: -1px; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
-.login-subtitle { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; text-transform: uppercase; }
+.login-subtitle { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 25px; }
 
 /* Hero Principal */
 .hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 40px 80px; border-bottom: 1px solid #1a2744; }
@@ -121,92 +119,53 @@ footer { display: none !important; }
 .bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
-/* Reescritura inputs estables */
+/* Inputs nativos controlados */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
 
-/* Botones universales */
-.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; margin-top: 10px; }
+/* Botón de envío */
+.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 12px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; margin-top: 15px; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 </style>
 """, unsafe_allow_html=True)
 
-# 4. FLUJO DE CONTROL: LOGIN / REGISTRO (CON LÓGICA PURA PYTHON)
+# 4. FLUJO DE CONTROL: PORTAL DE ACCESO (DISEÑO BLINDADO)
 if not st.session_state.autenticado:
-    col_l1, col_l2, col_l3 = st.columns([1, 1.3, 1])
+    col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
-        with st.container():
-            st.markdown("""
-            <div class="login-box-container">
-                <div class="login-header-text">
-                    <div class="login-title">Object<span>Vision</span> AI</div>
-                    <div class="login-subtitle">Sistema de Control de Acceso</div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        # Renderizado estático HTML de la tarjeta (Imposible de romper por Streamlit)
+        st.markdown("""
+        <div class="login-box-html">
+            <div class="login-title">Object<span>Vision</span> AI</div>
+            <div class="login-subtitle">Control de Acceso de Investigadores</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Formulario limpio de recolección de credenciales justo debajo
+        with st.form("security_access_form"):
+            usuario_input = st.text_input("Identificador de Usuario (ID)", placeholder="Ej: mohamed").strip().lower()
+            contrasena_input = st.text_input("Clave de Seguridad", type="password", placeholder="••••••••")
+            btn_login = st.form_submit_button("Verificar Identidad y Acceder")
             
-            # Selectores de modo usando botones nativos limpios
-            col_mode1, col_mode2 = st.columns(2)
-            with col_mode1:
-                if st.button("🔑 Iniciar Sesión", key="go_to_login"):
-                    st.session_state.login_mode = "login"
-            with col_mode2:
-                if st.button("📝 Crear Cuenta", key="go_to_reg"):
-                    st.session_state.login_mode = "registro"
-            
-            st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
-            
-            # MODO 1: INICIAR SESIÓN
-            if st.session_state.login_mode == "login":
-                usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="login_user").strip().lower()
-                contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="login_pass")
-                btn_login = st.button("Acceder al Sistema", key="btn_execute_login")
-                
-                if btn_login:
-                    if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
-                        st.session_state.autenticado = True
-                        st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
-                        st.success("Acceso autorizado. Cargando interfaz...")
-                        time.sleep(0.4)
-                        st.rerun()
-                    else:
-                        st.error("Credenciales incorrectas o usuario no registrado.")
-            
-            # MODO 2: REGISTRO
-            else:
-                nuevo_usuario = st.text_input("Elige un Nombre de Usuario", placeholder="Ej: pedro99", key="reg_user").strip().lower()
-                nueva_contrasena = st.text_input("Crea una Contraseña Segura", type="password", placeholder="Mínimo 4 caracteres", key="reg_pass")
-                confirmar_pass = st.text_input("Repite la Contraseña", type="password", placeholder="••••••••", key="reg_pass_conf")
-                btn_registrar = st.button("Finalizar Registro", key="btn_execute_register")
-                
-                if btn_registrar:
-                    if not nuevo_usuario or not nueva_contrasena:
-                        st.warning("Por favor, rellena todos los campos.")
-                    elif len(nueva_contrasena) < 4:
-                        st.error("La contraseña debe tener al menos 4 caracteres.")
-                    elif nueva_contrasena != confirmar_pass:
-                        st.error("Las contraseñas no coinciden.")
-                    elif nuevo_usuario in st.session_state.usuarios_db:
-                        st.error("Ese nombre de usuario ya está ocupado.")
-                    else:
-                        st.session_state.usuarios_db[nuevo_usuario] = {
-                            "clave": nueva_contrasena,
-                            "rol": f"{nuevo_usuario.upper()} (CLIENTE)"
-                        }
-                        st.success(f"¡Usuario '{nuevo_usuario}' registrado! Haz clic en Iniciar Sesión.")
-                        st.session_state.login_mode = "login"
-                        time.sleep(0.5)
-                        st.rerun()
-                        
+            if btn_login:
+                if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
+                    st.session_state.autenticado = True
+                    st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
+                    st.success("Acceso concedido. Conectando con los módulos de visión...")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("Acceso denegado. Las credenciales proporcionadas no constan en el sistema.")
+                    
     st.stop()
 
 # --- TEXTOS E IDIOMAS ---
 TEXTOS = {
     "es": {
-        "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
+        "titulo": "Visión artificial que <em>entiende</em> tu world.",
         "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante.",
         "tab_analizar": "🔍 Analizar imagen",
         "tab_camara": "📷 Cámara en vivo",
@@ -392,7 +351,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Botones nativos de acciones superiores
+# Controles de navegación nativos superiores
 col_nav_actions = st.columns([6, 1, 1])
 with col_nav_actions[1]:
     lang_map = {"Español": "es", "English": "en"}
@@ -421,7 +380,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- 7. PANEL DE CONTROL DE NAVEGACIÓN (Python Puro, Cero problemas de CSS) ---
+# 7. PANEL DE CONTROL DE NAVEGACIÓN PRINCIPAL
 lista_modulos = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 
@@ -438,10 +397,7 @@ with col_panel2:
     umbral_sel = st.slider("🎯 Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 st.markdown("</div>", unsafe_allow_html=True)
 
-
-# LÓGICA DE RENDERIZADO BASADA EN EL SELECTBOX (Inmune a bugs visuales)
-
-# MODULO — ANALIZAR IMAGEN
+# LÓGICA DE RENDERIZADO DEL SELECTBOX
 if modulo_seleccionado == t["tab_analizar"]:
     st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -481,7 +437,6 @@ if modulo_seleccionado == t["tab_analizar"]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["esperando"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# MODULO — CÁMARA EN VIVO
 elif modulo_seleccionado == t["tab_camara"]:
     st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -503,7 +458,6 @@ elif modulo_seleccionado == t["tab_camara"]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# MODULO — COMPARAR MODELOS
 elif modulo_seleccionado == t["tab_comparar"]:
     st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
     archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="upload2")
@@ -527,7 +481,6 @@ elif modulo_seleccionado == t["tab_comparar"]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# MODULO — HISTORIAL DE CONSULTAS
 elif modulo_seleccionado == t["tab_historial"]:
     st.markdown("<div style='padding: 20px 80px;'>", unsafe_allow_html=True)
     st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
@@ -547,11 +500,9 @@ elif modulo_seleccionado == t["tab_historial"]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# MODULO — PANEL DE ADMINISTRACIÓN
 elif modulo_seleccionado == "👥 Panel Admin (Usuarios)" and es_admin:
     st.markdown("<div style='padding: 20px 80px 10px 80px;'>", unsafe_allow_html=True)
     st.markdown('<div class="zone-label">— AUDITORÍA DE SEGURIDAD INTERNA</div>', unsafe_allow_html=True)
-    st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales almacenadas en el servidor.</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
     
     tabla_contenido = ""
