@@ -33,38 +33,29 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# 3. INTERFAZ CSS GLOBAL TRABAJADA
+# 3. INTERFAZ CSS GLOBAL TOTALMENTE CORREGIDA
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght=300;400;500;600;700&family=Space+Mono:wght=400;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
 
-/* Ocultar elementos nativos */
+/* Ocultar elementos nativos molestos de Streamlit */
 [data-testid="stSidebar"] { display: none; }
 [data-testid="collapsedControl"] { display: none; }
 header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Contenedor unificado para la Navbar superior */
-.navbar-container {
-    background: #060a12;
-    border-bottom: 1px solid #1a2744;
-    padding: 10px 60px;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-/* Tarjeta contenedora para el Login */
+/* Tarjeta contenedora para el Login (Centrada y estrecha) */
 .login-box {
     background: #0d1422;
     border: 1px solid #1a2744;
     border-radius: 16px;
-    padding: 40px;
-    margin-top: 50px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    padding: 35px 40px;
+    margin: 60px auto 20px auto;
+    max-width: 480px; /* Evita que los inputs se estiren por toda la pantalla */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
 }
 
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
@@ -104,16 +95,19 @@ footer { display: none !important; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
 
-/* Pestañas */
+/* Ajustar las pestañas globales */
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
 
-/* Estilo para los botones nativos */
+/* Ajustar las pestañas internas de la caja de login para que queden perfectas */
+.login-box .stTabs [data-baseweb="tab-list"] { padding-left: 0px !important; background: transparent !important; }
+
+/* Botones genéricos */
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
-/* Botón de cerrar sesión específico (Rojo estilizado) */
+/* Botón de cerrar sesión específico (Rojo cyberpunk) */
 div.stButton > button[key^="logout_btn"] {
     background: rgba(255, 75, 75, 0.08) !important;
     color: #ff4b4b !important;
@@ -126,70 +120,68 @@ div.stButton > button[key^="logout_btn"]:hover {
 </style>
 """, unsafe_allow_html=True)
 
-# ── LOGIN ──────────────────────────────────────────────────────────────────────
+# ── LOGIN COMPACTADO Y ARREGLADO ───────────────────────────────────────────────
 if not st.session_state.autenticado:
-    col1, col2, col3 = st.columns([1, 1.3, 1])
-    with col2:
-        st.markdown('<div class="login-box">', unsafe_allow_html=True)
-        st.markdown("""
-        <div style="text-align:center; margin-bottom:20px;">
-            <div style="font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:#fff;">
-                Object<span style="color:#0066ff">Vision</span> <span style="color:#4a6080; font-size:1rem;">AI</span>
-            </div>
-            <div style="font-size:0.72rem; color:#4a6080; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
-                Portal de acceso · 2026
-            </div>
-            <div style="height:1px; background:#1a2744; margin:24px 0;"></div>
+    # Usamos un contenedor HTML específico controlado por el CSS superior (.login-box)
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="text-align:center; margin-bottom:10px;">
+        <div style="font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:#fff;">
+            Object<span style="color:#0066ff">Vision</span> <span style="color:#4a6080; font-size:1rem;">AI</span>
         </div>
-        """, unsafe_allow_html=True)
+        <div style="font-size:0.72rem; color:#4a6080; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
+            Portal de acceso · 2026
+        </div>
+        <div style="height:1px; background:#1a2744; margin:20px 0;"></div>
+    </div>
+    """, unsafe_allow_html=True)
 
-        tab_login, tab_reg = st.tabs(["🔑  Iniciar Sesión", "📝  Crear Cuenta"])
+    tab_login, tab_reg = st.tabs(["🔑  Iniciar Sesión", "📝  Crear Cuenta"])
 
-        with tab_login:
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="li_u").strip().lower()
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="li_p")
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            if st.button("Acceder al Sistema", key="btn_login", use_container_width=True):
-                db = st.session_state.usuarios_db
-                if usuario_input in db and db[usuario_input]["clave"] == contrasena_input:
-                    st.session_state.autenticado = True
-                    st.session_state.rol_usuario = db[usuario_input]["rol"]
-                    st.success("✅ Acceso autorizado.")
-                    time.sleep(0.4)
-                    st.rerun()
-                else:
-                    st.error("❌ Credenciales incorrectas.")
+    with tab_login:
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="li_u").strip().lower()
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="li_p")
+        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+        if st.button("Acceder al Sistema", key="btn_login", use_container_width=True):
+            db = st.session_state.usuarios_db
+            if usuario_input in db and db[usuario_input]["clave"] == contrasena_input:
+                st.session_state.autenticado = True
+                st.session_state.rol_usuario = db[usuario_input]["rol"]
+                st.success("✅ Acceso autorizado.")
+                time.sleep(0.4)
+                st.rerun()
+            else:
+                st.error("❌ Credenciales incorrectas.")
 
-        with tab_reg:
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            nuevo_u = st.text_input("Nombre de usuario", placeholder="Ej: pedro99", key="r_u").strip().lower()
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            nueva_p = st.text_input("Contraseña", type="password", placeholder="Mínimo 4 caracteres", key="r_p")
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            confirmar_p = st.text_input("Repite la contraseña", type="password", placeholder="••••••••", key="r_p2")
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            if st.button("Crear Cuenta", key="btn_reg", use_container_width=True):
-                if not nuevo_u or not nueva_p:
-                    st.warning("Rellena todos los campos.")
-                elif len(nueva_p) < 4:
-                    st.error("Mínimo 4 caracteres.")
-                elif nueva_p != confirmar_p:
-                    st.error("Las contraseñas no coinciden.")
-                elif nuevo_u in st.session_state.usuarios_db:
-                    st.error("Usuario ya existe.")
-                else:
-                    st.session_state.usuarios_db[nuevo_u] = {
-                        "clave": nueva_p,
-                        "rol": f"{nuevo_u.upper()} (CLIENTE)"
-                    }
-                    st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
-        st.markdown('</div>', unsafe_allow_html=True)
+    with tab_reg:
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        nuevo_u = st.text_input("Nombre de usuario", placeholder="Ej: pedro99", key="r_u").strip().lower()
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        nueva_p = st.text_input("Contraseña", type="password", placeholder="Mínimo 4 caracteres", key="r_p")
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        confirmar_p = st.text_input("Repite la contraseña", type="password", placeholder="••••••••", key="r_p2")
+        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+        if st.button("Crear Cuenta", key="btn_reg", use_container_width=True):
+            if not nuevo_u or not nueva_p:
+                st.warning("Rellena todos los campos.")
+            elif len(nueva_p) < 4:
+                st.error("Mínimo 4 caracteres.")
+            elif nueva_p != confirmar_p:
+                st.error("Las contraseñas no coinciden.")
+            elif nuevo_u in st.session_state.usuarios_db:
+                st.error("Usuario ya existe.")
+            else:
+                st.session_state.usuarios_db[nuevo_u] = {
+                    "clave": nueva_p,
+                    "rol": f"{nuevo_u.upper()} (CLIENTE)"
+                }
+                st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
+    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
-# ── NAVBAR INTEGRADA (ALINEADA EN UNA SOLA FILA REAL) ──────────────────────────
-# Maquetamos la barra superior usando columnas nativas para que los botones funcionen perfectamente sin saltar de línea
+# ── NAVBAR EN UNA SOLA FILA (SOLO TRAS AUTENTICARSE) ──────────────────────────
 nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([2.5, 3.5, 2, 1.5, 1.2])
 
 with nav_col1:
@@ -216,21 +208,18 @@ with nav_col3:
     """, unsafe_allow_html=True)
 
 with nav_col4:
-    # Selector de idioma limpio integrado directamente en la barra
     st.markdown("<div style='padding-top: 8px;'></div>", unsafe_allow_html=True)
     lang_map = {"Español": "es", "English": "en", "Français": "fr"}
     lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed", index=0, key="nav_lang")
     st.session_state.idioma = lang_map[lang_sel]
 
 with nav_col5:
-    # El botón de cerrar sesión ahora está perfectamente alineado a la derecha en la misma barra
     st.markdown("<div style='padding-top: 10px;'></div>", unsafe_allow_html=True)
     if st.button("🔴 SALIR", key="logout_btn", use_container_width=True):
         st.session_state.autenticado = False
         st.session_state.rol_usuario = ""
         st.rerun()
 
-# Línea divisoria inferior de la barra de navegación
 st.markdown("<div style='border-bottom: 1px solid #1a2744; margin-bottom: 0px; width: 100%;'></div>", unsafe_allow_html=True)
 
 # ── TEXTOS DEPENDIENTES DEL IDIOMA ─────────────────────────────────────────────
