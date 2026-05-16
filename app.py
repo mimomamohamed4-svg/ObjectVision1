@@ -51,7 +51,7 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* === PROPUESTA 3: LIMPIEZA LOGIN (Eliminado bloques fantasmas) === */
+/* === BLOQUE LOGIN === */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
     background-color: #0d1422 !important;
     border: 1px solid #1a2744 !important;
@@ -71,7 +71,7 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
     width: 100%;
     background: #05080f;
     border-bottom: 1px solid #1a2744;
-    padding: 12px 40px;
+    padding: 16px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -83,12 +83,13 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
     color: #fff;
     letter-spacing: 2px;
     text-transform: uppercase;
+    margin-top: 5px;
 }
 .nav-tech-pills {
     display: flex;
     gap: 8px;
     background: #0c1322;
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: 30px;
     border: 1px solid #1a2744;
 }
@@ -101,53 +102,63 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
     font-weight: 700;
 }
 .tech-tag:not(:last-child)::after {
-    content: "  |";
+    content: "   |";
     color: #1a2744;
 }
+
+/* === ZONA DE USUARIOS Y CORRECCIÓN DE COLORES BLANCOS === */
 .nav-user-zone {
     display: flex;
     align-items: center;
-    gap: 16px;
-}
-.user-role {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
-    color: #fff;
-    background: rgba(0, 102, 255, 0.1);
-    border: 1px solid rgba(0, 102, 255, 0.3);
-    padding: 6px 12px;
-    border-radius: 6px;
+    gap: 12px;
 }
 
-/* === PROPUESTA 2: ESTILOS MINIMALISTAS PARA SELECTOR Y BOTÓN SALIR === */
-/* Estilizar el selectbox de idioma para que sea diminuto y limpio */
-.stSelectbox div[data-baseweb="select"] {
-    background: #0c1322 !important;
+/* 1. Estilizar el rol del usuario para quitar el aspecto de caja pesada */
+.user-role {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: #00d4aa !important;
+    background: rgba(0, 212, 170, 0.05) !important;
+    border: 1px solid rgba(0, 212, 170, 0.15) !important;
+    padding: 8px 14px !important;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* 2. Forzar al selector de idioma a integrarse en el Dark Mode */
+div[data-testid="stHeader"] + div, .stSelectbox div[data-baseweb="select"] {
+    background-color: #0c1322 !important;
     border: 1px solid #1a2744 !important;
     border-radius: 6px !important;
-    width: 120px !important;
 }
-.stSelectbox div[data-baseweb="select"] * {
-    color: #6b7c96 !important;
+.stSelectbox div[data-baseweb="select"] div {
+    color: #e8eaf0 !important;
     font-family: 'Space Mono', monospace !important;
     font-size: 0.75rem !important;
 }
-
-/* Rediseño completo al botón Cerrar Sesión (Outlined Minimalist) */
-div.nav-user-zone .stButton > button {
-    background: transparent !important;
-    color: #ff4b4b !important;
-    border: 1px solid rgba(255, 75, 75, 0.3) !important;
-    border-radius: 6px !important;
-    padding: 4px 12px !important;
-    font-size: 0.72rem !important;
-    transition: all 0.3s ease;
+.stSelectbox svg {
+    fill: #4a6080 !important;
 }
-div.nav-user-zone .stButton > button:hover {
-    background: #ff4b4b !important;
-    color: #fff !important;
+
+/* 3. Forzar al botón Salir a abandonar el fondo blanco */
+.nav-user-zone .stButton > button {
+    background-color: rgba(255, 75, 75, 0.05) !important;
+    color: #ff4b4b !important;
+    border: 1px solid rgba(255, 75, 75, 0.25) !important;
+    border-radius: 6px !important;
+    padding: 6px 16px !important;
+    font-size: 0.75rem !important;
+    font-family: 'Space Mono', monospace !important;
+    font-weight: 700 !important;
+    transition: all 0.25s ease-in-out !important;
+    width: 100% !important;
+}
+.nav-user-zone .stButton > button:hover {
+    background-color: #ff4b4b !important;
+    color: #ffffff !important;
     border-color: #ff4b4b !important;
-    box-shadow: 0 0 15px rgba(255, 75, 75, 0.4);
+    box-shadow: 0 0 12px rgba(255, 75, 75, 0.35) !important;
 }
 
 /* Clases genéricas del cuerpo */
@@ -246,10 +257,8 @@ if not st.session_state.autenticado:
     st.stop()
 
 # ── SOLUCIÓN MAESTRA: NAVBAR REORGANIZADO EN COLUMNAS MATRICIALES DE STREAMLIT ──
-# Con esta estructura integramos widgets interactivos nativos dentro de tu contenedor CSS
 st.markdown('<div class="custom-navbar">', unsafe_allow_html=True)
 
-# Usamos columnas globales con proporciones específicas para forzar una única línea limpia
 nav_col1, nav_col2, nav_col3 = st.columns([2, 3, 3.5])
 
 with nav_col1:
@@ -267,9 +276,8 @@ with nav_col2:
     """, unsafe_allow_html=True)
 
 with nav_col3:
-    # Contenedor flex nativo para alinear el rol, el selector y el botón en un solo bloque derecho
-    st.markdown('<div class="nav-user-zone" style="justify-content:flex-end;">', unsafe_allow_html=True)
-    sub_c1, sub_c2, sub_c3 = st.columns([2, 1.3, 1.2])
+    st.markdown('<div class="nav-user-zone">', unsafe_allow_html=True)
+    sub_c1, sub_c2, sub_c3 = st.columns([2, 1.3, 1.1], vertical_alignment="center")
     
     with sub_c1:
         st.markdown(f'<div class="user-role">● {st.session_state.rol_usuario}</div>', unsafe_allow_html=True)
