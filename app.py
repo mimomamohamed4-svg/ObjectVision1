@@ -34,10 +34,8 @@ if "historial" not in st.session_state:
     st.session_state.historial = []
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
-if "login_tab" not in st.session_state:
-    st.session_state.login_tab = "login"  # Controla la pestaña activa del login ("login" o "registro")
 
-# 3. INTERFAZ CSS GLOBAL 
+# 3. INTERFAZ CSS GLOBAL (Súper limpio y controlado)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -51,7 +49,7 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Nueva Barra de navegación superior integrada mediante CSS Puro */
+/* Barra de navegación superior integrada mediante CSS Puro */
 .custom-navbar {
     background: #060a12; 
     padding: 15px 80px; 
@@ -69,35 +67,49 @@ footer { display: none !important; }
 .nav-badge-active { color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); }
 .nav-user { font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; }
 
-/* Contenedor del Login y Registro */
-.login-container { max-width: 450px; margin: 60px auto 10px auto; padding: 40px 40px 10px 40px; background: #0d1422; border: 1px solid #1a2744; border-radius: 16px; text-align: center; }
-.login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 8px; letter-spacing: -1px; }
+/* Tarjeta del Login Estilizada */
+.login-box-container { 
+    background: #0d1422 !important; 
+    border: 1px solid #1a2744 !important; 
+    border-radius: 16px !important; 
+    padding: 35px !important; 
+    margin-top: 50px;
+}
+.login-header-text { text-align: center; margin-bottom: 20px; }
+.login-title { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -1px; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
-.login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 25px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
+.login-subtitle { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; text-transform: uppercase; }
 
-/* ESTILOS DE LOS BOTONES DE PESTAÑA PERSONALIZADOS (LOGIN) */
-div[data-testid="stHorizontalBlock"].login-tabs-row {
+/* CONTROL TOTAL SOBRE LAS PESTAÑAS (LOGIN Y PANEL GENERAL) */
+div[data-testid="stTabs"] {
+    background: transparent !important;
+}
+div[data-baseweb="tab-list"] {
+    background-color: transparent !important;
     border-bottom: 1px solid #1a2744 !important;
-    padding-bottom: 0px !important;
-    margin-bottom: 25px !important;
+    gap: 4px !important;
 }
-.login-tab-btn-active button {
-    color: #fff !important;
-    background: transparent !important;
-    border: none !important;
-    border-bottom: 2px solid #0066ff !important;
-    border-radius: 0px !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
-}
-.login-tab-btn-inactive button {
+div[data-baseweb="tab"] {
+    background-color: transparent !important;
     color: #4a6080 !important;
-    background: transparent !important;
-    border: none !important;
-    border-bottom: 2px solid transparent !important;
-    border-radius: 0px !important;
-    font-weight: 500 !important;
-    font-size: 0.9rem !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    padding: 10px 16px !important;
+    transition: all 0.2s ease;
+}
+div[data-baseweb="tab"]:hover {
+    color: #a2b4d2 !important;
+}
+div[data-baseweb="tab"][aria-selected="true"] {
+    color: #fff !important;
+    border-bottom-color: #0066ff !important;
+    font-weight: 700 !important;
+}
+
+/* Forzar ancho completo y padding correcto a los paneles de las pestañas */
+div[data-baseweb="tab-panel"] {
+    padding: 20px 0 0 0 !important;
 }
 
 /* Hero Principal */
@@ -140,97 +152,81 @@ div[data-testid="stHorizontalBlock"].login-tabs-row {
 .bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
-/* Reescritura de componentes nativos */
+/* Reescritura de componentes nativos standard */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
 
-/* Botones nativos estándar */
-.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; }
+/* Botones globales estándar */
+.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; margin-top: 10px; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
-/* Ajuste de pestañas del Panel Principal */
-.stTabs [data-baseweb="tab-list"] { padding-left: 80px; background: #060a10; gap: 10px; }
-.stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
-.stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
+/* Ajustes de espaciado específicos para las pestañas de navegación superiores una vez logueado */
+.main-interface-tabs [data-baseweb="tab-list"] {
+    padding-left: 80px !important;
+    background: #060a10 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# 4. FLUJO DE CONTROL: LOGIN / REGISTRO
+# 4. FLUJO DE CONTROL: LOGIN / REGISTRO (CON CAJA CONTENEDORA PERFECTA)
 if not st.session_state.autenticado:
-    st.markdown("""
-    <div class="login-container">
-        <div class="login-title">Object<span>Vision</span> AI</div>
-        <div class="login-subtitle">PORTAL DE ACCESO Y REGISTRO DE USUARIOS</div>
-    </div>
-    """, unsafe_allow_html=True)
+    col_l1, col_l2, col_l3 = st.columns([1, 1.4, 1])
     
-    col_f1, col_f2, col_f3 = st.columns([1, 1.8, 1])
-    
-    with col_f2:
-        # PESTAÑAS CONTROLADAS MANUALMENTE MEDIANTE COLUMNAS NATIVAS (Asegura control total del espacio)
-        # El array [1, 1, 1.5] crea un espacio vacío enorme a la derecha para separar visualmente los dos botones
-        st.markdown('<div class="login-tabs-row">', unsafe_allow_html=True)
-        t_col1, t_col2, t_col3 = st.columns([1, 1, 1.2])
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        with t_col1:
-            clase_login = "login-tab-btn-active" if st.session_state.login_tab == "login" else "login-tab-btn-inactive"
-            st.markdown(f'<div class="{clase_login}">', unsafe_allow_html=True)
-            if st.button("🔑 Iniciar Sesión", key="tab_click_login"):
-                st.session_state.login_tab = "login"
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+    with col_l2:
+        # Contenedor seguro mediante st.container e inyección CSS limpia
+        with st.container():
+            st.markdown("""
+            <div class="login-box-container">
+                <div class="login-header-text">
+                    <div class="login-title">Object<span>Vision</span> AI</div>
+                    <div class="login-subtitle">Sistema de Control de Acceso</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
             
-        with t_col2:
-            clase_reg = "login-tab-btn-active" if st.session_state.login_tab == "registro" else "login-tab-btn-inactive"
-            st.markdown(f'<div class="{clase_reg}">', unsafe_allow_html=True)
-            if st.button("📝 Crear Cuenta", key="tab_click_reg"):
-                st.session_state.login_tab = "registro"
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+            # Pestañas NATIVAS de Streamlit dentro del bloque (No se rompen jamás)
+            login_tabs = st.tabs(["🔑 INICIAR SESIÓN", "📝 CREAR CUENTA"])
             
-        # VISTA FORMULARIO 1: INICIAR SESIÓN
-        if st.session_state.login_tab == "login":
-            st.markdown("<div style='height:5px'></div>", unsafe_allow_html=True)
-            usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="login_user").strip().lower()
-            contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="login_pass")
-            btn_login = st.button("Acceder al Sistema")
+            # SUB-PANEL 1: INICIAR SESIÓN
+            with login_tabs[0]:
+                usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="login_user").strip().lower()
+                contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="login_pass")
+                btn_login = st.button("Acceder al Sistema", key="btn_execute_login")
+                
+                if btn_login:
+                    if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
+                        st.session_state.autenticado = True
+                        st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
+                        st.success("Acceso autorizado. Cargando interfaz...")
+                        time.sleep(0.4)
+                        st.rerun()
+                    else:
+                        st.error("Credenciales incorrectas o usuario no registrado.")
             
-            if btn_login:
-                if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
-                    st.session_state.autenticado = True
-                    st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
-                    st.success("Acceso autorizado. Cargando interfaz...")
-                    time.sleep(0.5)
-                    st.rerun()
-                else:
-                    st.error("Credenciales incorrectas o usuario no registrado.")
-                    
-        # VISTA FORMULARIO 2: CREAR CUENTA
-        else:
-            st.markdown("<div style='height:5px'></div>", unsafe_allow_html=True)
-            nuevo_usuario = st.text_input("Elige un Nombre de Usuario", placeholder="Ej: pedro99", key="reg_user").strip().lower()
-            nueva_contrasena = st.text_input("Crea una Contraseña Segura", type="password", placeholder="Mínimo 4 caracteres", key="reg_pass")
-            confirmar_pass = st.text_input("Repite la Contraseña", type="password", placeholder="••••••••", key="reg_pass_conf")
-            btn_registrar = st.button("Finalizar Registro")
-            
-            if btn_registrar:
-                if not nuevo_usuario or not nueva_contrasena:
-                    st.warning("Por favor, rellena todos los campos.")
-                elif len(nueva_contrasena) < 4:
-                    st.error("La contraseña debe tener al menos 4 caracteres.")
-                elif nueva_contrasena != confirmar_pass:
-                    st.error("Las contraseñas no coinciden.")
-                elif nuevo_usuario in st.session_state.usuarios_db:
-                    st.error("Ese nombre de usuario ya está ocupado.")
-                else:
-                    st.session_state.usuarios_db[nuevo_usuario] = {
-                        "clave": nueva_contrasena,
-                        "rol": f"{nuevo_usuario.upper()} (CLIENTE)"
-                    }
-                    st.success(f"¡Usuario '{nuevo_usuario}' registrado! Ya puedes iniciar sesión.")
+            # SUB-PANEL 2: CREAR CUENTA
+            with login_tabs[1]:
+                nuevo_usuario = st.text_input("Elige un Nombre de Usuario", placeholder="Ej: pedro99", key="reg_user").strip().lower()
+                nueva_contrasena = st.text_input("Crea una Contraseña Segura", type="password", placeholder="Mínimo 4 caracteres", key="reg_pass")
+                confirmar_pass = st.text_input("Repite la Contraseña", type="password", placeholder="••••••••", key="reg_pass_conf")
+                btn_registrar = st.button("Finalizar Registro", key="btn_execute_register")
+                
+                if btn_registrar:
+                    if not nuevo_usuario or not nueva_contrasena:
+                        st.warning("Por favor, rellena todos los campos.")
+                    elif len(nueva_contrasena) < 4:
+                        st.error("La contraseña debe tener al menos 4 caracteres.")
+                    elif nueva_contrasena != confirmar_pass:
+                        st.error("Las contraseñas no coinciden.")
+                    elif nuevo_usuario in st.session_state.usuarios_db:
+                        st.error("Ese nombre de usuario ya está ocupado.")
+                    else:
+                        st.session_state.usuarios_db[nuevo_usuario] = {
+                            "clave": nueva_contrasena,
+                            "rol": f"{nuevo_usuario.upper()} (CLIENTE)"
+                        }
+                        st.success(f"¡Usuario '{nuevo_usuario}' registrado! Pasa a la pestaña de Iniciar Sesión.")
     st.stop()
 
 # --- TEXTOS E IDIOMAS ---
@@ -456,14 +452,17 @@ st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
 umbral_sel = st.slider("Filtro de Certeza Mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 st.markdown("</div>", unsafe_allow_html=True)
 
-# 7. GESTIÓN DE PESTAÑAS (TABS - PANEL GENERAL PRINCIPAL)
+# 7. GESTIÓN DE PESTAÑAS (PANEL GENERAL PRINCIPAL POST-LOGIN)
 lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 
 if es_admin:
     lista_tabs.append("👥 Panel Admin (Usuarios)")
 
+# Envolvemos las pestañas principales en un contenedor identificado para aplicarles padding izquierdo de 80px
+st.markdown('<div class="main-interface-tabs">', unsafe_allow_html=True)
 tabs_render = st.tabs(lista_tabs)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # TAB — ANALIZAR IMAGEN
 with tabs_render[0]:
