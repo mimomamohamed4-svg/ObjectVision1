@@ -1,7 +1,10 @@
 import streamlit as st
-import tensorflow as tf
 from PIL import Image
+import torch
+from torchvision import models, transforms
 import numpy as np
+import urllib.request
+import json
 
 st.set_page_config(page_title="ObjectVision", layout="wide")
 st.title("🔍 ObjectVision — Reconocimiento de objetos con IA")
@@ -9,9 +12,24 @@ st.markdown("Sube una imagen y la inteligencia artificial identificará qué hay
 
 @st.cache_resource
 def cargar_modelo():
-    return tf.keras.applications.MobileNetV2(weights="imagenet")
+    modelo = models.mobilenet_v2(weights="IMAGENET1K_V1")
+    modelo.eval()
+    return modelo
+
+@st.cache_data
+def cargar_etiquetas():
+    url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
+    with urllib.request.urlopen(url) as f:
+        return json.load(f)
 
 modelo = cargar_modelo()
+etiquetas = cargar_etiquetas()
+
+transformacion = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
 
 archivo = st.file_uploader("📁 Sube una imagen (JPG o PNG)", type=["jpg", "jpeg", "png"])
 
@@ -22,20 +40,20 @@ if archivo is not None:
     with col1:
         st.image(imagen, caption="Imagen subida", use_container_width=True)
 
-    img_resized = imagen.resize((224, 224))
-    img_array = np.array(img_resized)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = tf.keras.applications.mobilenet_v2.preprocess_input(img_array)
+    tensor = transformacion(imagen).unsqueeze(0)
 
-    with st.spinner("La IA está analizando tu imagen..."):
-        predicciones = modelo.predict(img_array)
-        resultados = tf.keras.applications.mobilenet_v2.decode_predictions(predicciones, top=3)[0]
+    with st.spinner("La IA está analizando..."):
+        with torch.no_grad():
+            salida = modelo(tensor)
+        probabilidades = torch.nn.functional.softmax(salida[0], dim=0)
+        top3 = torch.topk(probabilidades, 3)
 
     with col2:
         st.subheader("Resultados:")
-        for i, (id_clase, nombre, prob) in enumerate(resultados):
-            nombre_limpio = nombre.replace("_", " ").title()
-            st.write(f"**{i+1}. {nombre_limpio}**")
+        for i in range(3):
+            nombre = etiquetas[top3.indices[i].item()].replace("_", " ").title()
+            prob = top3.values[i].item()
+            st.write(f"**{i+1}. {nombre}**")
             st.progress(float(prob))
             st.caption(f"Confianza: {prob*100:.2f}%")
 else:
