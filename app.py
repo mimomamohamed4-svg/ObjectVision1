@@ -9,7 +9,7 @@ import base64
 import time
 from datetime import datetime
 
-# 1. CONFIGURACIÓN DE LA PÁGINA (Debe ser lo primero)
+# 1. CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(
     page_title="ObjectVision AI",
     page_icon="🔍",
@@ -35,21 +35,21 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# 3. INTERFAZ CSS GLOBAL (Sólida, limpia y sin parches experimentales)
+# 3. INTERFAZ CSS GLOBAL (Limpio, plano y estable)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght=300;400;500;600;700&family=Space+Mono:wght=400;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
 
-/* Ocultar elementos nativos molestos */
+/* Ocultar elementos nativos */
 [data-testid="stSidebar"] { display: none; }
 [data-testid="collapsedControl"] { display: none; }
 header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Barra de navegación superior integrada */
+/* Barra de navegación superior */
 .custom-navbar {
     background: #060a12; 
     padding: 15px 80px; 
@@ -66,18 +66,57 @@ footer { display: none !important; }
 .nav-badge-active { color: #00d4aa; background: rgba(0, 212, 170, 0.05); border: 1px solid rgba(0, 212, 170, 0.2); }
 .nav-user { font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; }
 
-/* Tarjeta del Login Estilizada (HTML Estático Blindado) */
-.login-box-html {
+/* CONTENEDOR INTEGRAL DEL LOGIN (HTML PURE BLOCK) */
+.login-card-integral {
     background: #0d1422;
     border: 1px solid #1a2744;
     border-radius: 16px;
     padding: 40px;
-    text-align: center;
     margin-top: 60px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
-.login-title { font-size: 1.9rem; font-weight: 700; color: #fff; margin-bottom: 6px; letter-spacing: -1px; }
-.login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
-.login-subtitle { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 25px; }
+.login-card-integral .title { font-size: 1.9rem; font-weight: 700; color: #fff; margin-bottom: 6px; text-align: center; letter-spacing: -1px; }
+.login-card-integral .title span { color: #0066ff; font-family: 'Space Mono', monospace; }
+.login-card-integral .subtitle { font-size: 0.8rem; color: #4a6080; text-align: center; font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 30px; }
+
+/* Ocultar etiquetas molestas de Streamlit en el login */
+div[data-testid="stForm"] { border: none !important; padding: 0 !important; background: transparent !important; }
+div[data-testid="stForm"] label { display: none !important; }
+
+/* Estilización forzada y unificada de inputs en login */
+div[data-testid="stTextInput"] input { 
+    background: #080c14 !important; 
+    color: #fff !important; 
+    border: 1px solid #1a2744 !important; 
+    border-radius: 8px !important;
+    padding: 12px !important;
+    height: 45px !important;
+}
+div[data-testid="stTextInput"] input:focus {
+    border-color: #0066ff !important;
+}
+
+/* Botón de login unificado */
+.stButton > button, button[data-testid="stFormSubmitButton"] { 
+    background: rgba(0, 102, 255, 0.1) !important; 
+    color: #0066ff !important; 
+    border: 1px solid #0066ff !important; 
+    padding: 12px 20px !important; 
+    border-radius: 8px !important; 
+    font-family: 'Space Mono', monospace !important; 
+    font-size: 0.8rem !important; 
+    font-weight: 700 !important; 
+    text-transform: uppercase !important; 
+    width: 100% !important; 
+    height: 48px !important;
+    margin-top: 10px !important; 
+}
+.stButton > button:hover, button[data-testid="stFormSubmitButton"]:hover { 
+    background: linear-gradient(90deg, #0066ff, #00d4aa) !important; 
+    color: white !important; 
+    border: none !important; 
+    box-shadow: 0 4px 15px rgba(0,102,255,0.3); 
+}
 
 /* Hero Principal */
 .hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 40px 80px; border-bottom: 1px solid #1a2744; }
@@ -91,7 +130,7 @@ footer { display: none !important; }
 .stat-number { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; }
 .stat-label { font-size: 0.7rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
 
-/* Secciones de análisis y resultados */
+/* Secciones modulos */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 20px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -119,53 +158,48 @@ footer { display: none !important; }
 .bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
-/* Inputs nativos controlados */
+/* File Uploader nativo controlado */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
-div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
-
-/* Botón de envío */
-.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 12px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.8rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; margin-top: 15px; }
-.stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 </style>
 """, unsafe_allow_html=True)
 
-# 4. FLUJO DE CONTROL: PORTAL DE ACCESO (DISEÑO BLINDADO)
+# 4. PORTAL DE ACCESO INTEGRAL (UNIFICADO EN UNA SOLA TARJETA SIN SEPARACIONES)
 if not st.session_state.autenticado:
     col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
-        # Renderizado estático HTML de la tarjeta (Imposible de romper por Streamlit)
+        # Metemos la apertura de la caja y los textos, e inmediatamente los inputs dentro para que flexbox los unifique
         st.markdown("""
-        <div class="login-box-html">
-            <div class="login-title">Object<span>Vision</span> AI</div>
-            <div class="login-subtitle">Control de Acceso de Investigadores</div>
-        </div>
+        <div class="login-card-integral">
+            <div class="title">Object<span>Vision</span> AI</div>
+            <div class="subtitle">Control de Acceso de Investigadores</div>
         """, unsafe_allow_html=True)
         
-        # Formulario limpio de recolección de credenciales justo debajo
-        with st.form("security_access_form"):
-            usuario_input = st.text_input("Identificador de Usuario (ID)", placeholder="Ej: mohamed").strip().lower()
-            contrasena_input = st.text_input("Clave de Seguridad", type="password", placeholder="••••••••")
+        with st.form("security_access_form_integral"):
+            usuario_input = st.text_input("Usuario", placeholder="Introduce tu ID de usuario (ej: mohamed)").strip().lower()
+            contrasena_input = st.text_input("Contraseña", type="password", placeholder="Introduce tu contraseña")
             btn_login = st.form_submit_button("Verificar Identidad y Acceder")
             
             if btn_login:
                 if usuario_input in st.session_state.usuarios_db and st.session_state.usuarios_db[usuario_input]["clave"] == contrasena_input:
                     st.session_state.autenticado = True
                     st.session_state.rol_usuario = st.session_state.usuarios_db[usuario_input]["rol"]
-                    st.success("Acceso concedido. Conectando con los módulos de visión...")
-                    time.sleep(0.5)
+                    st.success("Acceso concedido. Conectando...")
+                    time.sleep(0.4)
                     st.rerun()
                 else:
-                    st.error("Acceso denegado. Las credenciales proporcionadas no constan en el sistema.")
+                    st.error("Credenciales incorrectas.")
+        
+        st.markdown("</div>", unsafe_allow_html=True) # Cierre del div integral
                     
     st.stop()
 
 # --- TEXTOS E IDIOMAS ---
 TEXTOS = {
     "es": {
-        "titulo": "Visión artificial que <em>entiende</em> tu world.",
+        "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
         "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante.",
         "tab_analizar": "🔍 Analizar imagen",
         "tab_camara": "📷 Cámara en vivo",
