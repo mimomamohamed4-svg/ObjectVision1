@@ -9,6 +9,7 @@ import base64
 import time
 from datetime import datetime
 
+# 1. CONFIGURACIÓN DE LA PÁGINA (Debe ser lo primero)
 st.set_page_config(
     page_title="ObjectVision AI",
     page_icon="🔍",
@@ -16,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- PERSISTENCIA DE DATOS Y GESTIÓN DE SESIÓN ---
+# 2. PERSISTENCIA DE DATOS Y GESTIÓN DE SESIÓN
 if "usuarios_db" not in st.session_state:
     st.session_state.usuarios_db = {
         "mohamed": {"clave": "admin2026", "rol": "MOHAMED (ADMIN)"},
@@ -34,7 +35,7 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# INTERFAZ CSS POTENCIADA Y COMPLETA
+# 3. INTERFAZ CSS GLOBAL (Estilos de la aplicación)
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
@@ -52,7 +53,7 @@ footer { display: none !important; }
 .login-title span { color: #0066ff; font-family: 'Space Mono', monospace; }
 .login-subtitle { font-size: 0.85rem; color: #4a6080; margin-bottom: 20px; font-family: 'Space Mono', monospace; letter-spacing: 0.5px; }
 
-/* Hero Principal Limpio */
+/* Hero Principal */
 .hero-limpio { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 60px 80px 40px 80px; border-bottom: 1px solid #1a2744; }
 .hero-title { font-size: clamp(2.2rem, 4.5vw, 3.5rem); font-weight: 700; line-height: 1.2; letter-spacing: -1.5px; color: #fff; max-width: 800px; margin-bottom: 16px; }
 .hero-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -64,7 +65,7 @@ footer { display: none !important; }
 .stat-number { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; }
 .stat-label { font-size: 0.7rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
 
-/* Secciones de análisis */
+/* Secciones de análisis y resultados */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 20px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -88,18 +89,18 @@ footer { display: none !important; }
 .empty-text { font-size: 0.85rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 
 /* Footer barra inferior */
-.bottom-bar { padding: 30px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; background: #05080f; }
+.bottom-bar { padding: 30px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; background: #05080f; margin-top: 40px; }
 .bottom-left { font-size: 0.8rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; font-weight: 700; }
 
-/* Componentes de Streamlit */
+/* Reescritura de componentes nativos de Streamlit */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; }
 
-/* Botones genéricos de Streamlit */
-.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; }
+/* Botones nativos */
+.stButton > button { background: rgba(0, 102, 255, 0.1) !important; color: #0066ff !important; border: 1px solid #0066ff !important; padding: 10px 20px !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; width: 100%; }
 .stButton > button:hover { background: linear-gradient(90deg, #0066ff, #00d4aa) !important; color: white !important; border: none !important; box-shadow: 0 4px 15px rgba(0,102,255,0.3); }
 
 /* Pestañas (Tabs) */
@@ -107,12 +108,12 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stTabs [data-baseweb="tab"] { height: 50px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
 
-/* Slider */
+/* Slider de certeza */
 div[data-testid="stSlider"] { padding: 10px 20px; background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- FLUJO DE CONTROL 1: PANTALLA DE ACCESO / REGISTRO ---
+# 4. FLUJO DE CONTROL: CONFIGURACIÓN DE LOGIN / REGISTRO
 if not st.session_state.autenticado:
     st.markdown("""
     <div class="login-container">
@@ -166,7 +167,7 @@ if not st.session_state.autenticado:
                     st.success(f"¡Usuario '{nuevo_usuario}' registrado! Ya puedes iniciar sesión.")
     st.stop()
 
-# --- TEXTOS E IDIOMAS ---
+# 5. DICCIONARIOS DE IDIOMA Y TRADUCCIONES DE MODELO
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
@@ -261,6 +262,7 @@ def nivel_confianza(prob, t):
     else:
         return "#dc3545", t["baja"]
 
+# 6. INICIALIZACIÓN DE MODELOS DE INTELIGENCIA ARTIFICIAL
 @st.cache_resource
 def cargar_mobilenet():
     m = models.mobilenet_v2(weights="IMAGENET1K_V1")
@@ -366,27 +368,12 @@ def mostrar_resultados(top3, t, idm, umbral_minimo=10):
             key=f"dl_{nombre_top}"
         )
 
-# --- 1. BARRA DE NAVEGACIÓN SUPERIOR (FIJA Y COMPACTA) ---
-badge_rol_color = "rgba(255, 75, 75, 0.1)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.1)"
+# 7. BARRA DE NAVEGACIÓN SUPERIOR BLINDADA (Solución al error visual)
+badge_rol_color = "rgba(255, 75, 75, 0.15)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.15)"
 badge_text_color = "#ff4b4b" if "ADMIN" in st.session_state.rol_usuario else "#0066ff"
-badge_border_color = "rgba(255, 75, 75, 0.3)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.3)"
+badge_border_color = "rgba(255, 75, 75, 0.4)" if "ADMIN" in st.session_state.rol_usuario else "rgba(0, 102, 255, 0.4)"
 
-btn_logout_html = f"""
-    <a href="?logout=true" target="_self" style="
-        background: {badge_rol_color};
-        color: {badge_text_color};
-        border: 1px solid {badge_border_color};
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-family: 'Space Mono', monospace;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-decoration: none;
-        transition: all 0.2s;
-    ">🔴 CERRAR: {st.session_state.rol_usuario}</a>
-"""
-
-st.markdown(f"""
+navbar_html = f"""
 <div style="
     background: #060a12; 
     padding: 15px 40px; 
@@ -395,6 +382,7 @@ st.markdown(f"""
     align-items: center; 
     justify-content: space-between;
     width: 100%;
+    font-family: 'Sora', sans-serif;
     box-sizing: border-box;
 ">
     <div style="font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase;">
@@ -408,18 +396,30 @@ st.markdown(f"""
     </div>
     
     <div style="display: flex; align-items: center;">
-        {btn_logout_html}
+        <span style="
+            background: {badge_rol_color};
+            color: {badge_text_color};
+            border: 1px solid {badge_border_color};
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+        ">👤 {st.session_state.rol_usuario}</span>
     </div>
 </div>
-""", unsafe_allow_html=True)
+"""
+st.components.v1.html(navbar_html, height=70)
 
-if "logout" in st.query_params:
-    st.session_state.autenticado = False
-    st.session_state.rol_usuario = ""
-    st.query_params.clear()
-    st.rerun()
+# Botón nativo de salida (Logout)
+col_logout_1, col_logout_2 = st.columns([7, 1])
+with col_logout_2:
+    if st.button("🔴 SALIR", key="logout_system_btn"):
+        st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
+        st.rerun()
 
-# --- 2. HERO PRINCIPAL ---
+# 8. HERO SECCIÓN PRINCIPAL
 idioma = st.session_state.idioma
 t = TEXTOS[idioma]
 
@@ -436,7 +436,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# CONTROLES INTERACTIVOS SUPERIORES
+# Controles de Configuración superiores (Slider e Idioma)
 st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
 col_controles = st.columns([3, 1, 1])
 with col_controles[0]:
@@ -449,16 +449,16 @@ with col_controles[2]:
     t = TEXTOS[idioma]
 st.markdown("</div>", unsafe_allow_html=True)
 
-# --- CONFIGURACIÓN DE PESTAÑAS DINÁMICAS ---
+# 9. GESTIÓN Y RENDERIZADO DE PESTAÑAS (TABS)
 lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
-
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
+
 if es_admin:
     lista_tabs.append("👥 Panel Admin (Usuarios)")
 
 tabs_render = st.tabs(lista_tabs)
 
-# TAB 1 — ANALIZAR
+# TAB — ANALIZAR IMAGEN
 with tabs_render[0]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -480,6 +480,7 @@ with tabs_render[0]:
             st.markdown(f"<span style='font-family:Space Mono; font-size:0.75rem; color:#00d4aa; letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
             mostrar_resultados(top3, t, idioma, umbral_sel)
             
+            # Guardar en el Historial del Estado de Sesión
             buf = io.BytesIO()
             imagen.save(buf, format="JPEG")
             img_b64 = base64.b64encode(buf.getvalue()).decode()
@@ -497,7 +498,7 @@ with tabs_render[0]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["esperando"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 2 — CÁMARA
+# TAB — CÁMARA EN VIVO
 with tabs_render[1]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -519,7 +520,7 @@ with tabs_render[1]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 3 — COMPARAR
+# TAB — COMPARAR MODELOS (MobileNet vs ResNet)
 with tabs_render[2]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="upload2")
@@ -538,13 +539,12 @@ with tabs_render[2]:
             resnet = cargar_resnet()
             with st.spinner(t["procesando"]):
                 top3_resnet = predecir(imagen_comp, resnet)
-            resnet_top = top3_resnet
-            mostrar_resultados(resnet_top, t, idioma, umbral_sel)
+            mostrar_resultados(top3_resnet, t, idioma, umbral_sel)
     else:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 4 — HISTORIAL
+# TAB — HISTORIAL DE CONSULTAS
 with tabs_render[3]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
@@ -564,7 +564,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- TAB 5 — PANEL DE ADMINISTRACIÓN (CORREGIDO DE RAÍZ) ---
+# TAB — PANEL DE ADMINISTRACIÓN DE SEGURIDAD (Exclusivo para ADMIN)
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
@@ -572,7 +572,6 @@ if es_admin:
         st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # 1. Creamos la acumulación de las filas de forma limpia
         tabla_contenido = ""
         for usr, datos in st.session_state.usuarios_db.items():
             if "ADMIN" in datos["rol"]:
@@ -588,7 +587,6 @@ if es_admin:
             </tr>
             """
         
-        # 2. Estructuramos la tabla web completa dentro de un único string contenedor
         html_completo = f"""
         <div style="padding: 0 80px; background: #080c14; box-sizing: border-box;">
             <table style="width: 100%; border-collapse: collapse; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; font-family: 'Sora', sans-serif;">
@@ -605,11 +603,9 @@ if es_admin:
             </table>
         </div>
         """
-        
-        # 3. Forzamos de forma segura el renderizado visual con el componente nativo de Streamlit
         st.components.v1.html(html_completo, height=350, scrolling=True)
 
-# FOOTER DE MARCA PERSONAL
+# 10. PIE DE PÁGINA (FOOTER CORPORATIVO)
 st.markdown("""
 <div class="bottom-bar">
     <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
