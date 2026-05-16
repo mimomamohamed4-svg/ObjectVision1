@@ -47,14 +47,13 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Tarjeta contenedora para el Login (Centrada y estrecha) */
+/* Tarjeta contenedora para el Login (Centrada y compacta) */
 .login-box {
     background: #0d1422;
     border: 1px solid #1a2744;
     border-radius: 16px;
     padding: 35px 40px;
-    margin: 60px auto 20px auto;
-    max-width: 480px; /* Evita que los inputs se estiren por toda la pantalla */
+    margin-top: 80px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.6);
 }
 
@@ -93,18 +92,19 @@ footer { display: none !important; }
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
-div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
+div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; height: 44px !important; }
 
 /* Ajustar las pestañas globales */
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
 
-/* Ajustar las pestañas internas de la caja de login para que queden perfectas */
-.login-box .stTabs [data-baseweb="tab-list"] { padding-left: 0px !important; background: transparent !important; }
+/* Ajustar las pestañas internas de la caja de login */
+.login-box .stTabs [data-baseweb="tab-list"] { padding-left: 0px !important; background: transparent !important; gap: 10px !important; }
+.login-box .stTabs [data-baseweb="tab"] { height: 40px !important; }
 
 /* Botones genéricos */
-.stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
+.stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; height: 44px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
 /* Botón de cerrar sesión específico (Rojo cyberpunk) */
@@ -112,6 +112,7 @@ div.stButton > button[key^="logout_btn"] {
     background: rgba(255, 75, 75, 0.08) !important;
     color: #ff4b4b !important;
     border: 1px solid rgba(255, 75, 75, 0.3) !important;
+    height: 38px !important;
 }
 div.stButton > button[key^="logout_btn"]:hover {
     background: #ff4b4b !important;
@@ -120,65 +121,68 @@ div.stButton > button[key^="logout_btn"]:hover {
 </style>
 """, unsafe_allow_html=True)
 
-# ── LOGIN COMPACTADO Y ARREGLADO ───────────────────────────────────────────────
+# ── LOGIN TOTALMENTE CENTRADO Y COMPACTO ───────────────────────────────────────
 if not st.session_state.autenticado:
-    # Usamos un contenedor HTML específico controlado por el CSS superior (.login-box)
-    st.markdown('<div class="login-box">', unsafe_allow_html=True)
-    st.markdown("""
-    <div style="text-align:center; margin-bottom:10px;">
-        <div style="font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:#fff;">
-            Object<span style="color:#0066ff">Vision</span> <span style="color:#4a6080; font-size:1rem;">AI</span>
+    # Creamos 3 columnas en la pantalla para estrechar el contenedor central
+    col_izq, col_centro, col_der = st.columns([1.2, 1.0, 1.2])
+    
+    with col_centro:
+        st.markdown('<div class="login-box">', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="text-align:center; margin-bottom:10px;">
+            <div style="font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:#fff;">
+                Object<span style="color:#0066ff">Vision</span> <span style="color:#4a6080; font-size:1rem;">AI</span>
+            </div>
+            <div style="font-size:0.72rem; color:#4a6080; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
+                Portal de acceso · 2026
+            </div>
+            <div style="height:1px; background:#1a2744; margin:20px 0;"></div>
         </div>
-        <div style="font-size:0.72rem; color:#4a6080; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
-            Portal de acceso · 2026
-        </div>
-        <div style="height:1px; background:#1a2744; margin:20px 0;"></div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    tab_login, tab_reg = st.tabs(["🔑  Iniciar Sesión", "📝  Crear Cuenta"])
+        tab_login, tab_reg = st.tabs(["🔑  Iniciar Sesión", "📝  Crear Cuenta"])
 
-    with tab_login:
-        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-        usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="li_u").strip().lower()
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="li_p")
-        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
-        if st.button("Acceder al Sistema", key="btn_login", use_container_width=True):
-            db = st.session_state.usuarios_db
-            if usuario_input in db and db[usuario_input]["clave"] == contrasena_input:
-                st.session_state.autenticado = True
-                st.session_state.rol_usuario = db[usuario_input]["rol"]
-                st.success("✅ Acceso autorizado.")
-                time.sleep(0.4)
-                st.rerun()
-            else:
-                st.error("❌ Credenciales incorrectas.")
+        with tab_login:
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="li_u", label_visibility="collapsed").strip().lower()
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="li_p", label_visibility="collapsed")
+            st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+            if st.button("ACCEDER AL SISTEMA", key="btn_login", use_container_width=True):
+                db = st.session_state.usuarios_db
+                if usuario_input in db and db[usuario_input]["clave"] == contrasena_input:
+                    st.session_state.autenticado = True
+                    st.session_state.rol_usuario = db[usuario_input]["rol"]
+                    st.success("✅ Acceso autorizado.")
+                    time.sleep(0.4)
+                    st.rerun()
+                else:
+                    st.error("❌ Credenciales incorrectas.")
 
-    with tab_reg:
-        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-        nuevo_u = st.text_input("Nombre de usuario", placeholder="Ej: pedro99", key="r_u").strip().lower()
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        nueva_p = st.text_input("Contraseña", type="password", placeholder="Mínimo 4 caracteres", key="r_p")
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        confirmar_p = st.text_input("Repite la contraseña", type="password", placeholder="••••••••", key="r_p2")
-        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
-        if st.button("Crear Cuenta", key="btn_reg", use_container_width=True):
-            if not nuevo_u or not nueva_p:
-                st.warning("Rellena todos los campos.")
-            elif len(nueva_p) < 4:
-                st.error("Mínimo 4 caracteres.")
-            elif nueva_p != confirmar_p:
-                st.error("Las contraseñas no coinciden.")
-            elif nuevo_u in st.session_state.usuarios_db:
-                st.error("Usuario ya existe.")
-            else:
-                st.session_state.usuarios_db[nuevo_u] = {
-                    "clave": nueva_p,
-                    "rol": f"{nuevo_u.upper()} (CLIENTE)"
-                }
-                st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
-    st.markdown('</div>', unsafe_allow_html=True)
+        with tab_reg:
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            nuevo_u = st.text_input("Nombre de usuario", placeholder="Ej: pedro99", key="r_u", label_visibility="collapsed").strip().lower()
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            nueva_p = st.text_input("Contraseña", type="password", placeholder="Mínimo 4 caracteres", key="r_p", label_visibility="collapsed")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            confirmar_p = st.text_input("Repite la contraseña", type="password", placeholder="••••••••", key="r_p2", label_visibility="collapsed")
+            st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+            if st.button("Crear Cuenta", key="btn_reg", use_container_width=True):
+                if not nuevo_u or not nueva_p:
+                    st.warning("Rellena todos los campos.")
+                elif len(nueva_p) < 4:
+                    st.error("Mínimo 4 caracteres.")
+                elif nueva_p != confirmar_p:
+                    st.error("Las contraseñas no coinciden.")
+                elif nuevo_u in st.session_state.usuarios_db:
+                    st.error("Usuario ya existe.")
+                else:
+                    st.session_state.usuarios_db[nuevo_u] = {
+                        "clave": nueva_p,
+                        "rol": f"{nuevo_u.upper()} (CLIENTE)"
+                    }
+                    st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
+        st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # ── NAVBAR EN UNA SOLA FILA (SOLO TRAS AUTENTICARSE) ──────────────────────────
