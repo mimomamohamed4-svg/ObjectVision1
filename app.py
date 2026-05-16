@@ -38,7 +38,7 @@ if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
 # ==========================================
-# 3. INTERFAZ CSS GLOBAL (INYECTADO EN STREAMLIT)
+# 3. INTERFAZ CSS GLOBAL (¡MÁXIMA RESTRICCIÓN PARA EL LOGIN!)
 # ==========================================
 st.markdown("""
 <style>
@@ -53,14 +53,21 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Tarjeta contenedora para el Login (Estrecha y elegante) */
+/* TRUCO MAESTRO: Forzamos a que el contenedor de columnas de Streamlit no se desparrame */
+div[data-testid="stHorizontalBlock"]:has(.login-box) {
+    max-width: 450px !important;
+    margin: 0 auto !important;
+    padding-top: 80px;
+}
+
+/* Tarjeta contenedora para el Login */
 .login-box {
     background: #0d1422;
     border: 1px solid #1a2744;
     border-radius: 16px;
     padding: 35px 40px;
-    margin-top: 80px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    width: 100% !important;
 }
 
 /* Clases auxiliares para la maquetación del Análisis */
@@ -81,7 +88,7 @@ footer { display: none !important; }
 .history-meta { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; margin-top: 6px; }
 
 /* Estados vacíos */
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 15px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 15px; background: #090f1a; border-radius: 166px; border: 1px dashed #1a2744; }
 .empty-icon { font-size: 2.5rem; opacity: 0.2; }
 .empty-text { font-size: 0.85rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 
@@ -99,13 +106,13 @@ footer { display: none !important; }
 .bottom-left { font-size: 0.78rem; color: #4a6080; font-family: 'Space Mono', monospace; }
 .bottom-tag { font-size: 0.72rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; }
 
-/* Inputs e imágenes maquetados de forma controlada */
+/* Inputs e imágenes maquetados */
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; height: 44px !important; }
 
-/* Estilización personalizada de pestañas globales de Streamlit */
+/* Estilización de pestañas globales de Streamlit */
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
@@ -118,7 +125,7 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; height: 44px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
-/* Variación roja destructiva exclusiva para el botón SALIR */
+/* Botón salir rojo */
 div.stButton > button[key^="logout_btn"] {
     background: rgba(255, 75, 75, 0.08) !important;
     color: #ff4b4b !important;
@@ -134,11 +141,11 @@ div.stButton > button[key^="logout_btn"]:hover {
 
 
 # ==========================================
-# 4. SISTEMA DE LOGIN (ENCAPSUALDO EN EL CENTRO)
+# 4. SISTEMA DE LOGIN (FORZADO AL CENTRO)
 # ==========================================
 if not st.session_state.autenticado:
-    # Creamos un corsé de 3 columnas para obligar a la caja del login a quedarse centrada y estrecha
-    col_izq, col_centro, col_der = st.columns([1.2, 1.0, 1.2])
+    # Usamos una sola columna para que el truco del CSS `:has(.login-box)` la capture y la clave al centro en 450px
+    col_centro = st.columns(1)[0]
     
     with col_centro:
         st.markdown('<div class="login-box">', unsafe_allow_html=True)
@@ -158,7 +165,6 @@ if not st.session_state.autenticado:
 
         with tab_login:
             st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-            # label_visibility="collapsed" oculta la etiqueta nativa superior desalineada de Streamlit
             usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="li_u", label_visibility="collapsed").strip().lower()
             st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
             contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="li_p", label_visibility="collapsed")
@@ -204,7 +210,7 @@ if not st.session_state.autenticado:
 
 
 # ==========================================
-# 5. NAVBAR HEADER SUPERIOR (SOLO TRAS LOGUEARSE)
+# 5. NAVBAR HEADER SUPERIOR (TRAS EL LOGIN)
 # ==========================================
 nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([2.5, 3.5, 2, 1.5, 1.2])
 
@@ -248,11 +254,11 @@ st.markdown("<div style='border-bottom: 1px solid #1a2744; margin-bottom: 0px; w
 
 
 # ==========================================
-# 6. SISTEMA DE TRADUCCIÓN MULTI-IDIOMA Y ETIQUETAS
+# 6. TRADUCCIÓN MULTI-IDIOMA Y DICCIONARIOS
 # ==========================================
 TEXTOS = {
     "es": {
-        "titulo": "Visión artificial que <em>entiende</em> tu world.",
+        "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
         "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante con datos de confianza en tiempo real.",
         "tab_analizar": "Analizar imagen", "tab_camara": "Cámara en vivo",
         "tab_comparar": "Comparar modelos", "tab_historial": "Historial",
@@ -321,7 +327,7 @@ def nivel_confianza(prob, t):
 
 
 # ==========================================
-# 7. INFERENCIA DE INTELIGENCIA ARTIFICIAL (PYTORCH)
+# 7. CARGA DE MODELOS INTELIGENCIA ARTIFICIAL
 # ==========================================
 @st.cache_resource
 def cargar_mobilenet():
@@ -344,7 +350,6 @@ def cargar_etiquetas():
     except Exception:
         return ["background", "laptop", "golden retriever", "sports car", "backpack", "pizza"]
 
-# Inicializamos modelos y etiquetas
 mobilenet = cargar_mobilenet()
 etiquetas = cargar_etiquetas()
 
@@ -403,7 +408,6 @@ def mostrar_resultados(top3, t, idm, umbral):
     nombre_top = traducir(etiquetas[top3.indices[0].item()], idm)
     prob_top = top3.values[0].item() * 100
     
-    # Configuración de voz según idioma seleccionado
     if idm == "es":
         msg_voz = f"Objeto detectado: {nombre_top}, con un {prob_top:.0f} por ciento de certeza."
         lang_voz = "es-ES"
@@ -485,7 +489,6 @@ with tabs_render[0]:
             st.markdown(f"<span style='font-family:Space Mono;font-size:0.72rem;color:#00d4aa;letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
             mostrar_resultados(top3, t, idioma, umbral_sel)
             
-            # Guardado automático en el Historial local
             buf = io.BytesIO()
             imagen.save(buf, format="JPEG")
             img_b64 = base64.b64encode(buf.getvalue()).decode()
@@ -563,7 +566,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# --- PESTAÑA 5: PANEL ADMIN (SÓLO ADMINTIDO SI ES MOHAMED) ---
+# --- PESTAÑA 5: PANEL ADMIN ---
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
@@ -594,7 +597,7 @@ if es_admin:
 
 
 # ==========================================
-# 11. PIE DE PÁGINA (FOOTER FINAL E INFOS)
+# 11. PIE DE PÁGINA (FOOTER)
 # ==========================================
 st.markdown("""
 <div class="bottom-bar">
