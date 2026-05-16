@@ -91,7 +91,7 @@ div.stButton > button[key^="logout_btn"]:hover {
 .stat-number { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fff; }
 .stat-label { font-size: 0.7rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
 
-/* Secciones de análisis y tablas admin */
+/* Secciones de análisis */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 20px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -101,14 +101,6 @@ div.stButton > button[key^="logout_btn"]:hover {
 .bar-track { height: 6px; background: #1a2744; border-radius: 3px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 3px; }
 .rank-badge { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; margin-right: 12px; font-weight: 700; }
-
-/* Tabla estilizada de administración */
-.admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #0d1422; border-radius: 8px; overflow: hidden; border: 1px solid #1a2744; }
-.admin-table th { background: #111a2e; color: #0066ff; font-family: 'Space Mono', monospace; font-size: 0.8rem; text-align: left; padding: 12px 16px; letter-spacing: 1px; }
-.admin-table td { padding: 14px 16px; border-bottom: 1px solid #1a2744; color: #e8eaf0; font-size: 0.9rem; }
-.admin-table tr:last-child td { border-bottom: none; }
-.badge-rol { font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: rgba(0, 212, 170, 0.1); color: #00d4aa; border: 1px solid rgba(0, 212, 170, 0.2); }
-.badge-rol-admin { font-family: 'Space Mono', monospace; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; background: rgba(0, 102, 255, 0.1); color: #0066ff; border: 1px solid rgba(0, 102, 255, 0.2); }
 
 /* Historial */
 .history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
@@ -573,36 +565,44 @@ with tabs_render[3]:
 # --- TAB 5 — PANEL DE ADMINISTRACIÓN (MOHAMED EXCLUSIVE) ---
 if es_admin:
     with tabs_render[4]:
-        st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+        st.markdown("<div style='padding: 40px 80px 10px 80px;'>", unsafe_allow_html=True)
         st.markdown('<div class="zone-label">— AUDITORÍA DE SEGURIDAD INTERNA</div>', unsafe_allow_html=True)
         st.markdown("<p style='color:#6b7c96; margin-bottom: 20px; font-size:0.9rem;'>Lista de credenciales y perfiles almacenados temporalmente en la memoria del servidor.</p>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
         
-        # Construcción dinámica de la tabla HTML con los datos de usuarios_db
-        tabla_html = """
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID USUARIO</th>
-                    <th>CONTRASEÑA EN CLARO</th>
-                    <th>ROL ASIGNADO</th>
-                </tr>
-            </thead>
-            <tbody>
+        # 1. Creamos las filas dinámicamente aplicando estilos Inline robustos
+        tabla_contenido = ""
+        for usr, datos in st.session_state.usuarios_db.items():
+            badge_style = "background:rgba(0,102,255,0.1); color:#0066ff; border:1px solid rgba(0,102,255,0.2);" if "ADMIN" in datos["rol"] else "background:rgba(0,212,170,0.1); color:#00d4aa; border:1px solid rgba(0,212,170,0.2);"
+            
+            tabla_contenido += f"""
+            <tr>
+                <td style="padding:14px 16px; border-bottom:1px solid #1a2744; color:#e8eaf0; font-family:'Space Mono', monospace; font-weight:700;">{usr}</td>
+                <td style="padding:14px 16px; border-bottom:1px solid #1a2744; color:#a2b4d2; font-family:'Space Mono', monospace;">{datos['clave']}</td>
+                <td style="padding:14px 16px; border-bottom:1px solid #1a2744;"><span style="font-family:'Space Mono', monospace; font-size:0.75rem; padding:4px 8px; border-radius:4px; {badge_style}">{datos['rol']}</span></td>
+            </tr>
+            """
+        
+        # 2. Construimos la estructura HTML contenedora
+        html_completo = f"""
+        <div style="padding: 0 80px; background:#080c14;">
+            <table style="width:100%; border-collapse:collapse; background:#0d1422; border-radius:8px; overflow:hidden; border:1px solid #1a2744; font-family:'Sora', sans-serif;">
+                <thead>
+                    <tr style="background:#111a2e; color:#0066ff; font-family:'Space Mono', monospace; font-size:0.8rem; text-align:left; letter-spacing:1px;">
+                        <th style="padding:12px 16px;">ID USUARIO</th>
+                        <th style="padding:12px 16px;">CONTRASEÑA EN CLARO</th>
+                        <th style="padding:12px 16px;">ROL ASIGNADO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {tabla_contenido}
+                </tbody>
+            </table>
+        </div>
         """
         
-        for usr, datos in st.session_state.usuarios_db.items():
-            badge_class = "badge-rol-admin" if "ADMIN" in datos["rol"] else "badge-rol"
-            tabla_html += f"""
-                <tr>
-                    <td style="font-family:'Space Mono', monospace; font-weight:700;">{usr}</td>
-                    <td style="font-family:'Space Mono', monospace; color:#a2b4d2;">{datos['clave']}</td>
-                    <td><span class="{badge_class}">{datos['rol']}</span></td>
-                </tr>
-            """
-            
-        tabla_html += "</tbody></table>"
-        st.markdown(tabla_html, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        # 3. Forzamos el renderizado web estricto mediante un iFrame nativo de Streamlit
+        st.components.v1.html(html_completo, height=350, scrolling=True)
 
 # FOOTER DE MARCA PERSONAL
 st.markdown("""
