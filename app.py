@@ -11,10 +11,8 @@ st.set_page_config(
     layout="wide"
 )
 
-# Estilo CSS personalizado
 st.markdown("""
     <style>
-    .main { background-color: #f8f9fa; }
     .title { 
         font-size: 2.5em; 
         font-weight: bold; 
@@ -43,10 +41,59 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Traducciones español
+TRADUCCIONES = {
+    "car": "Coche", "sports car": "Coche deportivo", "convertible": "Descapotable",
+    "dog": "Perro", "cat": "Gato", "bird": "Pájaro", "fish": "Pez",
+    "labrador retriever": "Labrador Retriever", "golden retriever": "Golden Retriever",
+    "pizza": "Pizza", "hamburger": "Hamburguesa", "hot dog": "Perrito caliente",
+    "banana": "Plátano", "apple": "Manzana", "orange": "Naranja",
+    "chair": "Silla", "table": "Mesa", "laptop": "Portátil", "phone": "Teléfono",
+    "bicycle": "Bicicleta", "motorcycle": "Moto", "bus": "Autobús", "truck": "Camión",
+    "airplane": "Avión", "boat": "Barco", "train": "Tren",
+    "lion": "León", "tiger": "Tigre", "elephant": "Elefante", "bear": "Oso",
+    "zebra": "Cebra", "giraffe": "Jirafa", "horse": "Caballo", "cow": "Vaca",
+    "sheep": "Oveja", "rabbit": "Conejo", "mouse": "Ratón",
+    "cup": "Taza", "bottle": "Botella", "book": "Libro", "clock": "Reloj",
+    "keyboard": "Teclado", "computer mouse": "Ratón de ordenador",
+    "shield": "Escudo", "soccer ball": "Balón de fútbol",
+    "kuvasz": "Kuvasz (raza de perro)", "chesapeake bay retriever": "Chesapeake Bay Retriever"
+}
+
+MENSAJES = {
+    "perro": "🐶 ¡Es un perro! Los perros son los animales más leales del mundo.",
+    "gato": "🐱 ¡Es un gato! Los gatos duermen hasta 16 horas al día.",
+    "coche": "🚗 ¡Es un coche! Los primeros coches apenas llegaban a 15 km/h.",
+    "pizza": "🍕 ¡Es una pizza! La pizza más cara del mundo cuesta más de 12.000€.",
+    "avión": "✈️ ¡Es un avión! Volar es el medio de transporte más seguro del mundo.",
+    "león": "🦁 ¡Es un león! El rugido de un león se escucha a 8 km de distancia.",
+}
+
+def traducir(nombre_ingles):
+    nombre_lower = nombre_ingles.lower().replace("_", " ")
+    return TRADUCCIONES.get(nombre_lower, nombre_ingles.replace("_", " ").title())
+
+def color_barra(prob):
+    if prob >= 0.6:
+        return "verde"
+    elif prob >= 0.3:
+        return "amarillo"
+    else:
+        return "rojo"
+
+def mensaje_curioso(nombre_es):
+    for clave, msg in MENSAJES.items():
+        if clave in nombre_es.lower():
+            return msg
+    return None
+
+# Inicializar contador
+if "contador" not in st.session_state:
+    st.session_state.contador = 0
+
 # Sidebar
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/PyTorch_logo_icon.svg/496px-PyTorch_logo_icon.svg.png", width=60)
-    st.markdown("## ⚙️ ObjectVision")
+    st.markdown("## 🔍 ObjectVision")
     st.markdown("---")
     st.markdown("**Modelo:** MobileNetV2")
     st.markdown("**Framework:** PyTorch")
@@ -60,13 +107,15 @@ with st.sidebar:
     st.markdown("### Formatos aceptados")
     st.markdown("JPG · JPEG · PNG")
     st.markdown("---")
+    st.metric("📸 Imágenes analizadas", st.session_state.contador)
+    st.markdown("---")
     st.markdown("**ODS 4** — Educación de calidad")
     st.markdown("**ODS 9** — Innovación e infraestructura")
     st.markdown("---")
     st.caption("Proyecto Intermodular 2025/2026")
     st.caption("Mohamed Mohamed Embarec")
 
-# Título principal
+# Título
 st.markdown('<div class="title">🔍 ObjectVision</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Reconocimiento de objetos con Inteligencia Artificial</div>', unsafe_allow_html=True)
 st.markdown("---")
@@ -109,22 +158,52 @@ if archivo is not None:
         probabilidades = torch.nn.functional.softmax(salida[0], dim=0)
         top3 = torch.topk(probabilidades, 3)
 
+    st.session_state.contador += 1
+
     with col2:
         st.markdown('<div class="result-box">', unsafe_allow_html=True)
         st.subheader("📊 Resultados del análisis")
         st.markdown("---")
 
-        colores = ["🥇", "🥈", "🥉"]
+        colores_emoji = ["🥇", "🥈", "🥉"]
+        primer_nombre = None
+
         for i in range(3):
-            nombre = etiquetas[top3.indices[i].item()].replace("_", " ").title()
+            nombre_en = etiquetas[top3.indices[i].item()]
+            nombre_es = traducir(nombre_en)
             prob = top3.values[i].item()
-            st.markdown(f"#### {colores[i]} {nombre}")
-            st.progress(float(prob))
-            st.caption(f"Confianza: {prob*100:.2f}%")
+            nivel = color_barra(prob)
+
+            if i == 0:
+                primer_nombre = nombre_es
+
+            if nivel == "verde":
+                color_hex = "#28a745"
+                etiqueta_nivel = "✅ Alta confianza"
+            elif nivel == "amarillo":
+                color_hex = "#ffc107"
+                etiqueta_nivel = "⚠️ Confianza media"
+            else:
+                color_hex = "#dc3545"
+                etiqueta_nivel = "❌ Confianza baja"
+
+            st.markdown(f"#### {colores_emoji[i]} {nombre_es}")
+            st.markdown(
+                f'<div style="background:{color_hex};height:18px;width:{int(prob*100)}%;border-radius:8px;margin-bottom:4px"></div>',
+                unsafe_allow_html=True
+            )
+            st.caption(f"Confianza: {prob*100:.2f}% · {etiqueta_nivel}")
+
             if i < 2:
                 st.markdown("---")
 
         st.markdown('</div>', unsafe_allow_html=True)
+
+        # Dato curioso
+        if primer_nombre:
+            msg = mensaje_curioso(primer_nombre)
+            if msg:
+                st.info(msg)
 
 else:
     col1, col2, col3 = st.columns([1, 2, 1])
