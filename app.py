@@ -38,7 +38,7 @@ if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
 # ==========================================
-# 3. TRUCO DE INYECCIÓN CSS CRÍTICO (OPTIMIZADO)
+# 3. INYECCIÓN CSS CORÍTICO (ESTILOS GLOBALES FIJOS)
 # ==========================================
 st.markdown("""
 <style>
@@ -51,39 +51,14 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* === BLOQUE LOGIN === */
-div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
-    background-color: #0d1422 !important;
-    border: 1px solid #1a2744 !important;
-    border-radius: 16px !important;
-    padding: 35px 30px !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
-    margin-top: 30px !important;
-}
-
-div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [data-baseweb="tab-list"] {
-    padding-left: 0px !important;
-    background: transparent !important;
-}
-
-/* === ESTRUCTURA HEADER REORGANIZADA (3 COLUMNAS) === */
-.custom-navbar {
-    width: 100%;
-    background: #05080f;
-    border-bottom: 1px solid #1a2744;
-    padding: 16px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
+/* === INTERFAZ NAVBAR GENERAL === */
 .nav-logo {
     font-family: 'Space Mono', monospace;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: #fff;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-top: 5px;
 }
 .nav-tech-pills {
     display: flex;
@@ -106,62 +81,49 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
     color: #1a2744;
 }
 
-/* === ZONA DE USUARIOS Y CORRECCIÓN DE COLORES BLANCOS === */
-.nav-user-zone {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-/* 1. Estilizar el rol del usuario para quitar el aspecto de caja pesada */
+/* === EMBEDDING DE CONTROLES NATIVOS (ELIMINA EL BLANCO) === */
 .user-role {
     font-family: 'Space Mono', monospace;
     font-size: 0.72rem;
     color: #00d4aa !important;
     background: rgba(0, 212, 170, 0.05) !important;
-    border: 1px solid rgba(0, 212, 170, 0.15) !important;
-    padding: 8px 14px !important;
+    border: 1px solid rgba(0, 212, 170, 0.2) !important;
+    padding: 8px 12px;
     border-radius: 6px;
-    white-space: nowrap;
     text-align: center;
+    white-space: nowrap;
 }
 
-/* 2. Forzar al selector de idioma a integrarse en el Dark Mode */
-div[data-testid="stHeader"] + div, .stSelectbox div[data-baseweb="select"] {
+/* Corrección radical del selector selector de idioma Streamlit */
+div[data-baseweb="select"] {
     background-color: #0c1322 !important;
     border: 1px solid #1a2744 !important;
     border-radius: 6px !important;
 }
-.stSelectbox div[data-baseweb="select"] div {
+div[data-baseweb="select"] * {
     color: #e8eaf0 !important;
     font-family: 'Space Mono', monospace !important;
     font-size: 0.75rem !important;
 }
-.stSelectbox svg {
-    fill: #4a6080 !important;
-}
 
-/* 3. Forzar al botón Salir a abandonar el fondo blanco */
-.nav-user-zone .stButton > button {
-    background-color: rgba(255, 75, 75, 0.05) !important;
+/* Corrección radical del botón Salir para integrarse en el diseño oscuro */
+div.stButton > button[key*="logout"] {
+    background-color: rgba(255, 75, 75, 0.08) !important;
     color: #ff4b4b !important;
-    border: 1px solid rgba(255, 75, 75, 0.25) !important;
-    border-radius: 6px !important;
-    padding: 6px 16px !important;
-    font-size: 0.75rem !important;
+    border: 1px solid rgba(255, 75, 75, 0.3) !important;
     font-family: 'Space Mono', monospace !important;
+    font-size: 0.75rem !important;
     font-weight: 700 !important;
-    transition: all 0.25s ease-in-out !important;
-    width: 100% !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease-in-out;
 }
-.nav-user-zone .stButton > button:hover {
+div.stButton > button[key*="logout"]:hover {
     background-color: #ff4b4b !important;
-    color: #ffffff !important;
-    border-color: #ff4b4b !important;
-    box-shadow: 0 0 12px rgba(255, 75, 75, 0.35) !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(255, 75, 75, 0.4);
 }
 
-/* Clases genéricas del cuerpo */
+/* Elementos comunes del cuerpo */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 22px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -196,7 +158,7 @@ div[data-testid="stHeader"] + div, .stSelectbox div[data-baseweb="select"] {
 </style>
 """, unsafe_allow_html=True)
 
-# ── LOGIN ──────────────────────────────────────────────────────────────────────
+# ── LOGIN (Se mantiene intacto) ────────────────────────────────────────────────
 if not st.session_state.autenticado:
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
@@ -256,10 +218,13 @@ if not st.session_state.autenticado:
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── SOLUCIÓN MAESTRA: NAVBAR REORGANIZADO EN COLUMNAS MATRICIALES DE STREAMLIT ──
-st.markdown('<div class="custom-navbar">', unsafe_allow_html=True)
 
-nav_col1, nav_col2, nav_col3 = st.columns([2, 3, 3.5])
+# ── NUEVA ESTRUCTURA DE NAVBAR: CONTROL MATRICIAL SIN CONFIGURACIONES MIXTAS ──
+# Contenedor visual base superior
+st.markdown("<div style='background:#05080f; padding: 12px 40px; border-bottom:1px solid #1a2744;'>", unsafe_allow_html=True)
+
+# Creamos una cuadrícula limpia usando el parámetro native vertical_alignment
+nav_col1, nav_col2, nav_col3 = st.columns([2, 3, 4.5], vertical_alignment="center")
 
 with nav_col1:
     st.markdown('<div class="nav-logo">Object<span style="color:#0066ff">Vision</span></div>', unsafe_allow_html=True)
@@ -276,31 +241,32 @@ with nav_col2:
     """, unsafe_allow_html=True)
 
 with nav_col3:
-    st.markdown('<div class="nav-user-zone">', unsafe_allow_html=True)
-    sub_c1, sub_c2, sub_c3 = st.columns([2, 1.3, 1.1], vertical_alignment="center")
+    # Sub-columnas internas para alinear perfectamente los tres componentes derechos
+    sub_c1, sub_c2, sub_c3 = st.columns([2, 1.2, 1], vertical_alignment="center")
     
     with sub_c1:
         st.markdown(f'<div class="user-role">● {st.session_state.rol_usuario}</div>', unsafe_allow_html=True)
         
     with sub_c2:
         lang_map = {"Español": "es", "English": "en", "Français": "fr"}
+        # El selectbox ya no heredará el color blanco gracias al query CSS universal asignado a div[data-baseweb="select"]
         lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed", key="nav_lang")
         st.session_state.idioma = lang_map[lang_sel]
         
     with sub_c3:
+        # Añadimos una clave única controlada desde CSS global
         if st.button("🚪 Salir", key="logout"):
             st.session_state.autenticado = False
             st.session_state.rol_usuario = ""
             st.rerun()
-            
-    st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-# ── TEXTOS Y LOGICA DE DICCIONARIOS (Se mantiene intacta) ──────────────────────
+
+# ── LOGICA DE DICCIONARIOS Y PROCESAMIENTO RESTRICUCTURADO ──────────────────
 TEXTOS = {
     "es": {
-        "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
+        "titulo": "Visión artificial que <em>entiende</em> tu world.",
         "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante con datos de confianza en tiempo real.",
         "tab_analizar": "Analizar imagen", "tab_camara": "Cámara en vivo",
         "tab_comparar": "Comparar modelos", "tab_historial": "Historial",
@@ -466,7 +432,7 @@ def mostrar_resultados(top3, t, idm, umbral):
                            file_name="reporte_objectvision.txt", mime="text/plain",
                            key=f"dl_{nombre_top}_{idm}")
 
-# ── HERO Y RESTO DEL SISTEMA ──────────────────────────────────────────────────
+# ── HERO Y SECCIONES DEL SISTEMA ──────────────────────────────────────────────
 idioma = st.session_state.idioma
 t = TEXTOS[idioma]
 
@@ -487,7 +453,7 @@ st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
 umbral_sel = st.slider("Filtro de certeza mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ── TABS ───────────────────────────────────────────────────────────────────────
+# ── TABS RENDERING ─────────────────────────────────────────────────────────────
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 if es_admin:
