@@ -37,7 +37,7 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# Escucha de acciones desde los enlaces nativos de la Navbar integrada
+# Procesar los parámetros de la URL manteniendo el estado correcto
 if "action" in st.query_params:
     accion = st.query_params["action"]
     if accion == "logout":
@@ -47,6 +47,7 @@ if "action" in st.query_params:
         st.rerun()
     elif accion in ["set_es", "set_en", "set_fr"]:
         st.session_state.idioma = accion.split("_")[1]
+        # Limpiamos el parámetro para evitar bucles de recarga
         st.query_params.clear()
         st.rerun()
 
@@ -114,7 +115,7 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
-/* === CLASES REPARADAS DE LA NAVBAR === */
+/* === CLASES DE LA NAVBAR === */
 .nav-right-container { display: flex; align-items: center; gap: 20px; }
 .nav-lang-menu { display: flex; gap: 8px; background: rgba(13,20,34,0.6); padding: 4px; border-radius: 8px; border: 1px solid #1a2744; }
 .nav-lang-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #4a6080; text-decoration: none; padding: 4px 8px; border-radius: 5px; transition: all 0.2s; }
@@ -435,7 +436,7 @@ with tabs_render[0]:
         if archivo:
             with st.spinner(t["procesando"]):
                 t0 = time.time()
-                top3 = prepredict = predecir(imagen, mobilenet)
+                top3 = predecir(imagen, mobilenet)
                 ms = (time.time() - t0) * 1000
             st.markdown(f"<span style='font-family:Space Mono;font-size:0.72rem;color:#00d4aa;letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
             mostrar_resultados(top3, t, idioma, umbral_sel)
