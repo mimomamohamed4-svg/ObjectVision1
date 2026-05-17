@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. GESTIÓN DE SESIÓN
+# 2. GESTIÓN DE SESIÓN Y PARÁMETROS URL
 # ==========================================
 if "usuarios_db" not in st.session_state:
     st.session_state.usuarios_db = {
@@ -37,37 +37,27 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# Procesar cambio de idioma por URL sin romper la app
-query_params = st.query_params
-if "action" in query_params:
-    accion = query_params["action"]
-    if accion == "set_es":
-        st.session_state.idioma = "es"
-    elif accion == "set_en":
-        st.session_state.idioma = "en"
-    elif accion == "set_fr":
-        st.session_state.idioma = "fr"
-    elif accion == "logout":
+# Escucha de acciones desde los enlaces nativos de la Navbar integrada
+if "action" in st.query_params:
+    accion = st.query_params["action"]
+    if accion == "logout":
         st.session_state.autenticado = False
         st.session_state.rol_usuario = ""
-    st.query_params.clear()
-    st.rerun()
+        st.query_params.clear()
+        st.rerun()
+    elif accion in ["set_es", "set_en", "set_fr"]:
+        st.session_state.idioma = accion.split("_")[1]
+        st.query_params.clear()
+        st.rerun()
 
 # ==========================================
-# 3. CONTROL DE ESTILOS CSS GENERALES
+# 3. CONTROL DE ESTILOS CSS (DISEÑO LIMPIO)
 # ==========================================
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght=300;400;500;600;700&family=Space+Mono:wght=400;700&display=swap');
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
-html, body, .stApp {
-    background: #080c14 !important;
-    color: #e8eaf0 !important;
-    font-family: 'Sora', sans-serif !important;
-}
-
+html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
 [data-testid="stSidebar"] { display: none; }
 [data-testid="collapsedControl"] { display: none; }
 header { display: none !important; }
@@ -84,35 +74,11 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
     margin-top: 10px !important;
 }
 
-/* === NAVBAR PREMIUM === */
-.navbar-container {
-    width: 100%;
-    background: #060a12;
-    border-bottom: 1px solid #1a2744;
-    padding: 18px 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 999;
+div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [data-baseweb="tab-list"] {
+    padding-left: 0px !important;
+    background: transparent !important;
 }
-.nav-left { display: flex; align-items: center; gap: 35px; }
-.nav-logo { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; color: #fff; letter-spacing: 3px; text-transform: uppercase; }
-.nav-logo span { color: #0066ff; }
-.nav-badges { display: flex; gap: 10px; }
-.nav-badge { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: #4a6080; background: rgba(26,39,68,0.5); border: 1px solid #1a2744; padding: 5px 12px; border-radius: 6px; font-family: 'Space Mono', monospace; font-weight: 700; }
-.nav-right { display: flex; align-items: center; gap: 24px; }
-.nav-user { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: #00d4aa; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
-.nav-user::before { content: "●"; color: #00d4aa; font-size: 0.6rem; }
-.nav-lang-selector { display: flex; background: #0d1422; border: 1px solid #1a2744; padding: 3px; border-radius: 8px; }
-.nav-lang-submit-btn { background: transparent; border: none; color: #4a6080; font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700; padding: 5px 10px; cursor: pointer; border-radius: 5px; transition: all 0.2s; }
-.nav-lang-submit-btn.activo { background: #1a2744; color: #00d4aa; }
-.nav-lang-submit-btn:hover { color: #fff; }
-.nav-logout-btn { background: rgba(255, 75, 75, 0.08); border: 1px solid rgba(255, 75, 75, 0.2); color: #ff4b4b; font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; padding: 6px 14px; border-radius: 8px; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-.nav-logout-btn:hover { background: #ff4b4b; color: #fff; }
 
-/* === INTERFAZ DE CONTENIDO === */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 22px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -142,13 +108,20 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
-
-/* Tabs estilizadas */
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
+
+/* === CLASES REPARADAS DE LA NAVBAR === */
+.nav-right-container { display: flex; align-items: center; gap: 20px; }
+.nav-lang-menu { display: flex; gap: 8px; background: rgba(13,20,34,0.6); padding: 4px; border-radius: 8px; border: 1px solid #1a2744; }
+.nav-lang-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #4a6080; text-decoration: none; padding: 4px 8px; border-radius: 5px; transition: all 0.2s; }
+.nav-lang-btn.active { color: #00d4aa; background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); }
+.nav-lang-btn:hover:not(.active) { color: #fff; background: rgba(254,254,254,0.05); }
+.nav-logout-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #ff4b4b; background: rgba(255,75,75,0.08); border: 1px solid rgba(255,75,75,0.2); text-decoration: none; padding: 6px 14px; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+.nav-logout-btn:hover { background: #ff4b4b !important; color: #fff !important; box-shadow: 0 0 15px rgba(255,75,75,0.3); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -183,7 +156,7 @@ if not st.session_state.autenticado:
                     st.session_state.autenticado = True
                     st.session_state.rol_usuario = db[usuario_input]["rol"]
                     st.success("✅ Acceso autorizado.")
-                    time.sleep(0.3)
+                    time.sleep(0.4)
                     st.rerun()
                 else:
                     st.error("❌ Credenciales incorrectas.")
@@ -213,38 +186,38 @@ if not st.session_state.autenticado:
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── NAVBAR ORIGINAL REPARADA (SIN LA FRANJA BLANCA) ───────────────────────────
-clase_es = "activo" if st.session_state.idioma == "es" else "inactivo"
-clase_en = "activo" if st.session_state.idioma == "en" else "inactivo"
-clase_fr = "activo" if st.session_state.idioma == "fr" else "inactivo"
-
+# ── NAVBAR TOTALMENTE FIJA, INTEGRADA Y PROTEGIDA CONTRA NUEVAS PESTAÑAS ─────
+idm_curr = st.session_state.idioma
 st.markdown(f"""
-<div class="navbar-container">
-    <div class="nav-left">
-        <div class="nav-logo">Object<span>Vision</span></div>
-        <div class="nav-badges">
-            <div class="nav-badge">MobileNetV2</div>
-            <div class="nav-badge">PyTorch</div>
-            <div class="nav-badge">ImageNet</div>
-        </div>
+<base target="_self">
+
+<div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
+        Object<span style="color:#0066ff">Vision</span>
     </div>
-    <div class="nav-right">
-        <div class="nav-user">{st.session_state.rol_usuario}</div>
-        <div class="nav-lang-selector">
-            <form method="get" style="display:inline;">
-                <button type="submit" name="action" value="set_es" class="nav-lang-submit-btn {clase_es}">ES</button>
-                <button type="submit" name="action" value="set_en" class="nav-lang-submit-btn {clase_en}">EN</button>
-                <button type="submit" name="action" value="set_fr" class="nav-lang-submit-btn {clase_fr}">FR</button>
-            </form>
+    <div style="display:flex;gap:10px;">
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">MobileNetV2</span>
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">PyTorch</span>
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">ImageNet</span>
+    </div>
+    <div class="nav-right-container">
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;margin-right:10px;">
+            ● {st.session_state.rol_usuario}
         </div>
-        <a href="?action=logout" class="nav-logout-btn">🔴 Salir</a>
+        <div class="nav-lang-menu">
+            <a href="?action=set_es" target="_self" class="nav-lang-btn {'active' if idm_curr == 'es' else ''}">ES</a>
+            <a href="?action=set_en" target="_self" class="nav-lang-btn {'active' if idm_curr == 'en' else ''}">EN</a>
+            <a href="?action=set_fr" target="_self" class="nav-lang-btn {'active' if idm_curr == 'fr' else ''}">FR</a>
+        </div>
+        <a href="?action=logout" target="_self" class="nav-logout-btn">🔴 Salir</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── TEXTOS MULTIDIOMA ORIGINALES ──────────────────────────────────────────────
+# Asignación del idioma activo de traducción
 idioma = st.session_state.idioma
 
+# ── TEXTOS MULTIDIOMA ORIGINALES ──────────────────────────────────────────────
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu world.",
@@ -315,7 +288,7 @@ def nivel_confianza(prob, t):
     else:
         return "#dc3545", t["baja"]
 
-# ── LÓGICA DE INTELIGENCIA ARTIFICIAL DE BACKEND ──────────────────────────────
+# ── LOGICA DE MODELOS DE BACKEND (COMPLETA) ───────────────────────────────────
 @st.cache_resource
 def cargar_mobilenet():
     m = models.mobilenet_v2(weights="IMAGENET1K_V1")
@@ -414,7 +387,7 @@ def mostrar_resultados(top3, t, idm, umbral):
                            file_name="reporte_objectvision.txt", mime="text/plain",
                            key=f"dl_{nombre_top}_{idm}")
 
-# ── HERO ───────────────────────────────────────────────────────────────────────
+# ── CUERPO DE LA APP (HERO SECTION) ──────────────────────────────────────────
 t = TEXTOS[idioma]
 
 st.markdown(f"""
@@ -434,7 +407,7 @@ st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
 umbral_sel = st.slider("Filtro de certeza mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ── TABS ───────────────────────────────────────────────────────────────────────
+# ── RENDERIZADO DE LAS PESTAÑAS DEL PANEL ─────────────────────────────────────
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 if es_admin:
@@ -442,7 +415,7 @@ if es_admin:
 
 tabs_render = st.tabs(lista_tabs)
 
-# TAB 1 — ANALIZAR
+# TAB 1 — ANALIZAR IMAGEN
 with tabs_render[0]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -473,7 +446,7 @@ with tabs_render[0]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["esperando"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 2 — CÁMARA
+# TAB 2 — CÁMARA EN VIVO
 with tabs_render[1]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -494,7 +467,7 @@ with tabs_render[1]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 3 — COMPARAR
+# TAB 3 — COMPARAR MODELOS (MOBILENET VS RESNET)
 with tabs_render[2]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="up2")
@@ -518,7 +491,7 @@ with tabs_render[2]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 4 — HISTORIAL
+# TAB 4 — HISTORIAL CON TARJETAS VISUALES
 with tabs_render[3]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
@@ -536,7 +509,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 5 — ADMIN
+# TAB 5 — PANEL DE ADMINISTRACIÓN COMPLETO
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
@@ -565,7 +538,7 @@ if es_admin:
         """, height=300, scrolling=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-# ── FOOTER ─────────────────────────────────────────────────────────────────────
+# ── FOOTER CORPORATIVO FINAL ──────────────────────────────────────────────────
 st.markdown("""
 <div class="bottom-bar">
     <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
