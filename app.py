@@ -52,7 +52,6 @@ header { display: none !important; }
 footer { display: none !important; }
 
 /* === SOLUCIÓN MAESTRA PARA LA TARJETA DE LOGIN === */
-/* Detecta el contenedor vertical donde están las pestañas del login y le aplica el diseño de tarjeta encapsulada */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
     background-color: #0d1422 !important;
     border: 1px solid #1a2744 !important;
@@ -62,7 +61,6 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
     margin-top: 10px !important;
 }
 
-/* Forzar que las pestañas dentro del contenedor de login no tengan padding lateral heredado */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [data-baseweb="tab-list"] {
     padding-left: 0px !important;
     background: transparent !important;
@@ -96,13 +94,34 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
 .bottom-tag { font-size: 0.72rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; }
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
+
+/* === CORRECCIÓN EXCLUSIVA PARA EL DESPLEGABLE DE IDIOMA === */
 .stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
+div[data-baseweb="select"] * { color: #e8eaf0 !important; background-color: #0d1422 !important; }
+ul[role="listbox"] { background-color: #0d1422 !important; border: 1px solid #1a2744 !important; }
+ul[role="listbox"] li { color: #e8eaf0 !important; background-color: #0d1422 !important; }
+ul[role="listbox"] li:hover { background-color: #1a2744 !important; }
+
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
+
+/* === CONFIGURACIÓN GENERAL DE BOTONES NATIVOS === */
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
+
+/* === CORRECCIÓN EXCLUSIVA PARA EL BOTÓN CERRAR SESIÓN (ROJO INTEGRADO) === */
+div.stButton > button[key="logout"] {
+    background: rgba(255, 75, 75, 0.08) !important;
+    color: #ff4b4b !important;
+    border: 1px solid rgba(255, 75, 75, 0.3) !important;
+    margin-top: 10px !important;
+}
+div.stButton > button[key="logout"]:hover {
+    background: #ff4b4b !important;
+    color: #fff !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -228,7 +247,7 @@ TEXTOS = {
         "alta": "HAUTE CONFIANCE", "media": "CONFIANCE MOYENNE", "baja": "FAIBLE CONFIANCE",
         "esperando": "En attente...", "procesando": "Traitement...",
         "historial_vacio": "Pas encore d'analyse", "camara_info": "Activez la caméra",
-        "comparar_info": "Téléchargez une image pour comparer",
+        "comparar_info": "Téléchargez une image pour comparar",
         "modelo_a": "— MobileNetV2 (Rapide)", "modelo_b": "— ResNet50 (Précis)",
         "boton_voz": "🔊 Écouter le résultat",
     }
