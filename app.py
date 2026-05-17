@@ -37,15 +37,21 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# Escucha estricta de Logout por URL (Solo para salir del sistema)
-if "action" in st.query_params and st.query_params["action"] == "logout":
-    st.session_state.autenticado = False
-    st.session_state.rol_usuario = ""
-    st.query_params.clear()
-    st.rerun()
+# Procesar los clicks de idioma y logout capturados de forma segura por URL/Formulario
+if "action" in st.query_params:
+    accion = st.query_params["action"]
+    if accion == "logout":
+        st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
+        st.query_params.clear()
+        st.rerun()
+    elif accion in ["set_es", "set_en", "set_fr"]:
+        st.session_state.idioma = accion.split("_")[1]
+        st.query_params.clear()
+        st.rerun()
 
 # ==========================================
-# 3. CONTROL DE ESTILOS CSS (DISEÑO FOTO 1)
+# 3. CONTROL DE ESTILOS CSS GENERALES
 # ==========================================
 st.markdown("""
 <style>
@@ -58,7 +64,7 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* === TARJETA DE LOGIN === */
+/* === TARJETA DE LOGIN PERFECTA === */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
     background-color: #0d1422 !important;
     border: 1px solid #1a2744 !important;
@@ -72,34 +78,7 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
     background: transparent !important;
 }
 
-/* === DISEÑO DE NAVBAR CONTENEDOR === */
-.custom-navbar-flex {
-    width: 100%; 
-    background: #060a12; 
-    border-bottom: 1px solid #1a2744; 
-    padding: 0 60px; 
-    height: 62px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between;
-}
-
-/* === INYECCIÓN PARA CAMUFLAR BOTONES DE IDIOMA COMO LINKS === */
-div.stButton > button[key^="lang_"] {
-    font-family: 'Space Mono', monospace !important;
-    font-size: 0.68rem !important;
-    font-weight: 700 !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 4px 10px !important;
-    border-radius: 5px !important;
-    cursor: pointer !important;
-    transition: all 0.2s !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0px !important;
-}
-
-/* Clases de apoyo visual */
+/* === HOVER Y DETALLES VISUALES === */
 .zone-label { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
 .result-item { padding: 22px 0; border-bottom: 1px solid #1a2744; }
 .result-item:last-child { border-bottom: none; }
@@ -132,12 +111,15 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
+.stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
+.stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
-/* Botón salir */
-.nav-logout-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #ff4b4b; background: rgba(255,75,75,0.08); border: 1px solid rgba(255,75,75,0.2); text-decoration: none; padding: 6px 14px; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+/* === BOTÓN SALIR PREMIUM === */
+.nav-logout-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #ff4b4b; background: rgba(255,75,75,0.08); border: 1px solid rgba(255,75,75,0.2); text-decoration: none; padding: 6px 14px; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
 .nav-logout-btn:hover { background: #ff4b4b !important; color: #fff !important; box-shadow: 0 0 15px rgba(255,75,75,0.3); }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ── PORTAL DE ACCESO (LOGIN) ──────────────────────────────────────────────────
 if not st.session_state.autenticado:
@@ -200,65 +182,55 @@ if not st.session_state.autenticado:
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── NAVBAR REPARADA (DISEÑO FOTO 1 - SIN RECARGAS DE LOGIN) ───────────────────
+
+# ── NAVBAR 100% FIEL AL DISEÑO ORIGINAL (PERFECTAMENTE ALINEADA) ──────────────
 idm_curr = st.session_state.idioma
 
-# Maquetación de la cabecera usando las columnas nativas pero integradas estéticamente
-st.markdown('<base target="_self">', unsafe_allow_html=True)
+# Definición de estilos CSS embebidos para los botones dentro de la barra HTML limpia
+st.markdown(f"""
+<style>
+.nav-lang-submit-btn {{
+    font-family: 'Space Mono', monospace !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 8px !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+}}
+.nav-lang-submit-btn.es-act {{ color: #00d4aa !important; background: rgba(0,212,170,0.08) !important; border: 1px solid rgba(0,212,170,0.2) !important; }}
+.nav-lang-submit-btn.en-act {{ color: #00d4aa !important; background: rgba(0,212,170,0.08) !important; border: 1px solid rgba(0,212,170,0.2) !important; }}
+.nav-lang-submit-btn.fr-act {{ color: #00d4aa !important; background: rgba(0,212,170,0.08) !important; border: 1px solid rgba(0,212,170,0.2) !important; }}
+.nav-lang-submit-btn.inactivo {{ color: #4a6080 !important; }}
+.nav-lang-submit-btn.inactivo:hover {{ color: #fff !important; background: rgba(254,254,254,0.05) !important; }}
+</style>
 
-nc1, nc2, nc3 = st.columns([1.5, 2, 2.5])
-
-with nc1:
-    st.markdown("""
-    <div style="padding-left:40px; height:62px; display:flex; align-items:center; background:#060a12;">
-        <div style="font-family:'Space Mono',monospace; font-size:1rem; font-weight:700; color:#fff; letter-spacing:3px; text-transform:uppercase;">
-            Object<span style="color:#0066ff">Vision</span>
-        </div>
+<div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
+        Object<span style="color:#0066ff">Vision</span>
     </div>
-    """, unsafe_allow_html=True)
-
-with nc2:
-    st.markdown("""
-    <div style="height:62px; display:flex; align-items:center; justify-content:center; gap:10px; background:#060a12;">
-        <span style="font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:#4a6080; background:rgba(26,39,68,0.5); border:1px solid #1a2744; padding:5px 12px; border-radius:6px; font-family:'Space Mono',monospace; font-weight:700;">MobileNetV2</span>
-        <span style="font-size:0.65rem; letter-spacing:1px; text-transform:uppercase; color:#4a6080; background:rgba(26,39,68,0.5); border:1px solid #1a2744; padding:5px 12px; border-radius:6px; font-family:'Space Mono',monospace; font-weight:700;">PyTorch</span>
+    <div style="display:flex;gap:10px;">
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">MobileNetV2</span>
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">PyTorch</span>
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">ImageNet</span>
     </div>
-    """, unsafe_allow_html=True)
-
-with nc3:
-    # Contenedor derecho que integra el Rol, el Selector de Idioma Seguro y el Botón de Salida
-    col_rol, col_es, col_en, col_fr, col_exit = st.columns([2.2, 0.7, 0.7, 0.7, 1.2])
-    
-    with col_rol:
-        st.markdown(f"""
-        <div style="height:62px; display:flex; align-items:center; background:#060a12; font-family:'Space Mono',monospace; font-size:0.72rem; color:#00d4aa; letter-spacing:1px;">
+    <div style="display:flex; align-items:center; gap:20px;">
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;">
             ● {st.session_state.rol_usuario}
         </div>
-        """, unsafe_allow_html=True)
         
-    # Cambio de idioma reactivo interno en memoria sin tocar la URL
-    with col_es:
-        if st.button("ES", key="lang_es", help="Cambiar a Español"):
-            st.session_state.idioma = "es"
-            st.rerun()
-    with col_en:
-        if st.button("EN", key="lang_en", help="Switch to English"):
-            st.session_state.idioma = "en"
-            st.rerun()
-    with col_fr:
-        if st.button("FR", key="lang_fr", help="Passer en Français"):
-            st.session_state.idioma = "fr"
-            st.rerun()
-            
-    with col_exit:
-        st.markdown("""
-        <div style="height:62px; display:flex; align-items:center; background:#060a12; padding-right:40px;">
-            <a href="?action=logout" target="_self" class="nav-logout-btn">🔴 Salir</a>
-        </div>
-        """, unsafe_allow_html=True)
-
-# Divisor inferior para cerrar la Navbar limpia
-st.markdown("<div style='width:100%; height:1px; background:#1a2744; margin-bottom:0px;'></div>", unsafe_allow_html=True)
+        <form action="/" method="get" style="display:flex; gap:6px; background:rgba(13,20,34,0.6); padding:4px; border-radius:8px; border:1px solid #1a2744; margin:0;">
+            <button type="submit" name="action" value="set_es" class="nav-lang-submit-btn {'es-act' if idm_curr == 'es' else 'inactivo'}">ES</button>
+            <button type="submit" name="action" value="set_en" class="nav-lang-submit-btn {'en-act' if idm_curr == 'en' else 'inactivo'}">EN</button>
+            <button type="submit" name="action" value="set_fr" class="nav-lang-submit-btn {'fr-act' if idm_curr == 'fr' else 'inactivo'}">FR</button>
+        </form>
+        
+        <a href="?action=logout" target="_self" class="nav-logout-btn">🔴 Salir</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Asignación del idioma activo de traducción
 idioma = st.session_state.idioma
