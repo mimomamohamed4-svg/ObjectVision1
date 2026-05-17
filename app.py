@@ -8,8 +8,19 @@ import io
 import base64
 import time
 from datetime import datetime
+
 # ==========================================
-# 2. GESTIÓN DE SESIÓN Y URL INTERACTIVA
+# 1. CONFIGURACIÓN DE LA PÁGINA
+# ==========================================
+st.set_page_config(
+    page_title="ObjectVision AI",
+    page_icon="🔍",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# ==========================================
+# 2. GESTIÓN DE SESIÓN
 # ==========================================
 if "usuarios_db" not in st.session_state:
     st.session_state.usuarios_db = {
@@ -31,29 +42,135 @@ if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
 # ==========================================
-# CONTROL DE IDIOMA Y LOGOUT
+# 3. CSS
 # ==========================================
-if "lang_btn" not in st.session_state:
-    st.session_state.lang_btn = None
+st.markdown("""
+<style>
 
-if "logout_click" not in st.session_state:
-    st.session_state.logout_click = False
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
-if st.session_state.lang_btn:
-    st.session_state.idioma = st.session_state.lang_btn
-    st.session_state.lang_btn = None
+html, body, .stApp {
+    background: #080c14 !important;
+    color: #e8eaf0 !important;
+    font-family: 'Sora', sans-serif !important;
+}
 
-if st.session_state.logout_click:
-    st.session_state.autenticado = False
-    st.session_state.rol_usuario = ""
-    st.session_state.logout_click = False
-    st.rerun()
+[data-testid="stSidebar"] {
+    display:none;
+}
 
+header {
+    display:none;
+}
 
-# ── LOGIN ──────────────────────────────────────────────────────────────────────
+footer {
+    display:none;
+}
+
+.block-container {
+    padding:0 !important;
+    max-width:100% !important;
+}
+
+.navbar {
+    width:100%;
+    height:62px;
+    background:#060a12;
+    border-bottom:1px solid #1a2744;
+    padding:0 60px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.nav-logo {
+    font-family:'Space Mono', monospace;
+    font-size:1rem;
+    font-weight:700;
+    color:#fff;
+    letter-spacing:3px;
+    text-transform:uppercase;
+}
+
+.nav-right {
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.lang-btn button {
+    background:rgba(0,102,255,0.08) !important;
+    color:#0066ff !important;
+    border:1px solid rgba(0,102,255,0.3) !important;
+    border-radius:6px !important;
+    font-family:'Space Mono', monospace !important;
+    font-size:0.68rem !important;
+    font-weight:700 !important;
+}
+
+.logout-btn button {
+    background:rgba(255,75,75,0.08) !important;
+    color:#ff4b4b !important;
+    border:1px solid rgba(255,75,75,0.2) !important;
+    border-radius:6px !important;
+    font-family:'Space Mono', monospace !important;
+    font-size:0.68rem !important;
+    font-weight:700 !important;
+}
+
+.hero {
+    background: linear-gradient(135deg, #080c14 0%, #0d1829 100%);
+    padding: 70px 80px 50px 80px;
+    border-bottom: 1px solid #1a2744;
+}
+
+.hero-title {
+    font-size:3rem;
+    font-weight:700;
+    color:#fff;
+}
+
+.hero-title em {
+    color:#0066ff;
+    font-style:normal;
+}
+
+.hero-sub {
+    margin-top:15px;
+    color:#6b7c96;
+    max-width:600px;
+}
+
+.empty-state {
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-height:280px;
+    border:1px dashed #1a2744;
+    border-radius:16px;
+    background:#090f1a;
+}
+
+.zone-label {
+    font-family:'Space Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#0066ff;
+    margin-bottom:20px;
+    font-weight:700;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# LOGIN
+# ==========================================
 if not st.session_state.autenticado:
 
-    col1, col2, col3 = st.columns([1, 1.2, 1])
+    col1, col2, col3 = st.columns([1,1.2,1])
 
     with col2:
 
@@ -61,7 +178,13 @@ if not st.session_state.autenticado:
 
         st.markdown("""
         <div style="text-align:center; margin-bottom:30px;">
-            <div style="font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:#fff;">
+
+            <div style="
+                font-family:'Space Mono',monospace;
+                font-size:2rem;
+                font-weight:700;
+                color:#fff;
+            ">
                 Object<span style="color:#0066ff">Vision</span>
                 <span style="color:#4a6080; font-size:1rem;">AI</span>
             </div>
@@ -78,41 +201,29 @@ if not st.session_state.autenticado:
             </div>
 
             <div style="height:1px; background:#1a2744; margin:24px 0;"></div>
+
         </div>
         """, unsafe_allow_html=True)
 
         tab_login, tab_reg = st.tabs([
-            "🔑   Iniciar Sesión",
-            "📝   Crear Cuenta"
+            "🔑 Iniciar Sesión",
+            "📝 Crear Cuenta"
         ])
 
-        # LOGIN
         with tab_login:
-
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
             usuario_input = st.text_input(
                 "Usuario",
-                placeholder="Tu ID de usuario",
-                key="li_u"
+                placeholder="Tu ID de usuario"
             ).strip().lower()
-
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
             contrasena_input = st.text_input(
                 "Contraseña",
                 type="password",
-                placeholder="••••••••",
-                key="li_p"
+                placeholder="••••••••"
             )
 
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-
-            if st.button(
-                "Acceder al Sistema",
-                key="btn_login",
-                use_container_width=True
-            ):
+            if st.button("Acceder al Sistema", use_container_width=True):
 
                 db = st.session_state.usuarios_db
 
@@ -122,62 +233,38 @@ if not st.session_state.autenticado:
                     st.session_state.rol_usuario = db[usuario_input]["rol"]
 
                     st.success("✅ Acceso autorizado.")
-
-                    time.sleep(0.4)
-
+                    time.sleep(0.5)
                     st.rerun()
 
                 else:
                     st.error("❌ Credenciales incorrectas.")
 
-        # REGISTRO
         with tab_reg:
-
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
             nuevo_u = st.text_input(
                 "Nombre de usuario",
-                placeholder="Ej: pedro99",
-                key="r_u"
+                key="nuevo_user"
             ).strip().lower()
-
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
             nueva_p = st.text_input(
                 "Contraseña",
                 type="password",
-                placeholder="Mínimo 4 caracteres",
-                key="r_p"
+                key="nuevo_pass"
             )
-
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
             confirmar_p = st.text_input(
                 "Repite la contraseña",
                 type="password",
-                placeholder="••••••••",
-                key="r_p2"
+                key="confirmar_pass"
             )
 
-            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            if st.button("Crear Cuenta", use_container_width=True):
 
-            if st.button(
-                "Crear Cuenta",
-                key="btn_reg",
-                use_container_width=True
-            ):
-
-                if not nuevo_u or not nueva_p:
-                    st.warning("Rellena todos los campos.")
-
-                elif len(nueva_p) < 4:
-                    st.error("Mínimo 4 caracteres.")
+                if nuevo_u in st.session_state.usuarios_db:
+                    st.error("Usuario ya existe.")
 
                 elif nueva_p != confirmar_p:
                     st.error("Las contraseñas no coinciden.")
-
-                elif nuevo_u in st.session_state.usuarios_db:
-                    st.error("Usuario ya existe.")
 
                 else:
 
@@ -186,130 +273,194 @@ if not st.session_state.autenticado:
                         "rol": f"{nuevo_u.upper()} (CLIENTE)"
                     }
 
-                    st.success(
-                        f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión."
-                    )
+                    st.success("Cuenta creada correctamente.")
 
     st.stop()
 
+# ==========================================
+# NAVBAR
+# ==========================================
+st.markdown("""
+<div class="navbar">
 
-# ── NAVBAR ORIGINAL CORREGIDA ────────────────────────────────────────────────
-idm_curr = st.session_state.idioma
-
-st.markdown(f"""
-<div style="
-    width:100%;
-    background:#060a12;
-    border-bottom:1px solid #1a2744;
-    padding:0 60px;
-    height:62px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-">
-
-    <div style="
-        font-family:'Space Mono',monospace;
-        font-size:1rem;
-        font-weight:700;
-        color:#fff;
-        letter-spacing:3px;
-        text-transform:uppercase;
-    ">
+    <div class="nav-logo">
         Object<span style="color:#0066ff">Vision</span>
-    </div>
-
-    <div style="display:flex; gap:10px;">
-
-        <span style="
-            font-size:0.65rem;
-            letter-spacing:1px;
-            text-transform:uppercase;
-            color:#4a6080;
-            background:rgba(26,39,68,0.5);
-            border:1px solid #1a2744;
-            padding:5px 12px;
-            border-radius:6px;
-            font-family:'Space Mono',monospace;
-            font-weight:700;
-        ">
-            MobileNetV2
-        </span>
-
-        <span style="
-            font-size:0.65rem;
-            letter-spacing:1px;
-            text-transform:uppercase;
-            color:#4a6080;
-            background:rgba(26,39,68,0.5);
-            border:1px solid #1a2744;
-            padding:5px 12px;
-            border-radius:6px;
-            font-family:'Space Mono',monospace;
-            font-weight:700;
-        ">
-            PyTorch
-        </span>
-
-        <span style="
-            font-size:0.65rem;
-            letter-spacing:1px;
-            text-transform:uppercase;
-            color:#4a6080;
-            background:rgba(26,39,68,0.5);
-            border:1px solid #1a2744;
-            padding:5px 12px;
-            border-radius:6px;
-            font-family:'Space Mono',monospace;
-            font-weight:700;
-        ">
-            ImageNet
-        </span>
-
-    </div>
-
-    <div class="nav-right-container">
-
-        <div style="
-            font-family:'Space Mono',monospace;
-            font-size:0.72rem;
-            color:#00d4aa;
-            letter-spacing:1px;
-            margin-right:10px;
-        ">
-            <span style="color:#00d4aa; margin-right:6px;">●</span>
-            {st.session_state.rol_usuario}
-        </div>
-
     </div>
 
 </div>
 """, unsafe_allow_html=True)
 
-
-# ── BOTONES DE IDIOMA Y LOGOUT ───────────────────────────────────────────────
 col_space, col_es, col_en, col_fr, col_logout = st.columns([8,1,1,1,2])
 
 with col_es:
-    if st.button("ES", key="btn_es"):
-        st.session_state.lang_btn = "es"
+    if st.button("ES"):
+        st.session_state.idioma = "es"
         st.rerun()
 
 with col_en:
-    if st.button("EN", key="btn_en"):
-        st.session_state.lang_btn = "en"
+    if st.button("EN"):
+        st.session_state.idioma = "en"
         st.rerun()
 
 with col_fr:
-    if st.button("FR", key="btn_fr"):
-        st.session_state.lang_btn = "fr"
+    if st.button("FR"):
+        st.session_state.idioma = "fr"
         st.rerun()
 
 with col_logout:
-    if st.button("🔴 SALIR", key="btn_logout"):
-        st.session_state.logout_click = True
+    if st.button("🔴 SALIR"):
+        st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
         st.rerun()
 
+# ==========================================
+# TEXTOS
+# ==========================================
+TEXTOS = {
+    "es": {
+        "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
+        "subtitulo": "Sube cualquier imagen y nuestra IA identifica objetos."
+    },
+    "en": {
+        "titulo": "Artificial vision that <em>understands</em> your world.",
+        "subtitulo": "Upload any image and our AI identifies objects."
+    },
+    "fr": {
+        "titulo": "Vision artificielle qui <em>comprend</em> votre monde.",
+        "subtitulo": "Téléchargez une image et notre IA identifie les objets."
+    }
+}
 
-# Asignación de idioma activo tras renderizar
-idioma = st.session_state.idioma
+t = TEXTOS[st.session_state.idioma]
+
+# ==========================================
+# HERO
+# ==========================================
+st.markdown(f"""
+<div class="hero">
+
+    <div class="hero-title">
+        {t["titulo"]}
+    </div>
+
+    <div class="hero-sub">
+        {t["subtitulo"]}
+    </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# MODELO IA
+# ==========================================
+@st.cache_resource
+def cargar_modelo():
+    modelo = models.mobilenet_v2(weights="IMAGENET1K_V1")
+    modelo.eval()
+    return modelo
+
+modelo = cargar_modelo()
+
+@st.cache_resource
+def cargar_etiquetas():
+    url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
+
+    with urllib.request.urlopen(url) as f:
+        return json.load(f)
+
+etiquetas = cargar_etiquetas()
+
+transformacion = transforms.Compose([
+    transforms.Resize((224,224)),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        [0.485,0.456,0.406],
+        [0.229,0.224,0.225]
+    )
+])
+
+# ==========================================
+# ANALIZADOR
+# ==========================================
+st.markdown("<div style='padding:40px 80px;'>", unsafe_allow_html=True)
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    st.markdown(
+        '<div class="zone-label">— Entrada</div>',
+        unsafe_allow_html=True
+    )
+
+    archivo = st.file_uploader(
+        "",
+        type=["jpg","jpeg","png"]
+    )
+
+    if archivo:
+        imagen = Image.open(archivo).convert("RGB")
+        st.image(imagen, use_container_width=True)
+
+with col2:
+
+    st.markdown(
+        '<div class="zone-label">— Análisis</div>',
+        unsafe_allow_html=True
+    )
+
+    if archivo:
+
+        tensor = transformacion(imagen).unsqueeze(0)
+
+        with torch.no_grad():
+            salida = modelo(tensor)
+
+        probs = torch.nn.functional.softmax(salida[0], dim=0)
+
+        top3 = torch.topk(probs, 3)
+
+        for i in range(3):
+
+            nombre = etiquetas[top3.indices[i].item()]
+            prob = top3.values[i].item() * 100
+
+            st.markdown(f"""
+            <div style="
+                background:#0d1422;
+                border:1px solid #1a2744;
+                border-radius:12px;
+                padding:18px;
+                margin-bottom:14px;
+            ">
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                ">
+                    <span style="color:#fff;font-weight:600;">
+                        {nombre}
+                    </span>
+
+                    <span style="
+                        color:#00d4aa;
+                        font-family:'Space Mono', monospace;
+                    ">
+                        {prob:.1f}%
+                    </span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    else:
+
+        st.markdown("""
+        <div class="empty-state">
+            <div style="font-size:2rem; opacity:0.2;">⬡</div>
+            <div style="color:#4a6080;">
+                Esperando imagen...
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
