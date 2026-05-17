@@ -1,15 +1,16 @@
 import streamlit as st
 from PIL import Image
 import torch
-import torchvision.models as models
-import torchvision.transforms as transforms
-import json
+from torchvision import models, transforms
 import urllib.request
+import json
+import io
+import base64
 import time
 from datetime import datetime
 
 # ==========================================
-# 1. CONFIGURACIÓN DE LA PÁGINA (MAESTRA)
+# 1. CONFIGURACIÓN DE LA PÁGINA (Estricto inicio)
 # ==========================================
 st.set_page_config(
     page_title="ObjectVision AI",
@@ -19,41 +20,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. OPTIMIZACIÓN Y CARGA DE MODELO IA (REAL)
-# ==========================================
-@st.cache_resource
-def cargar_modelo_ia():
-    # Cargamos MobileNetV2 preentrenado con ImageNet de forma eficiente
-    weights = models.MobileNet_V2_Weights.DEFAULT
-    model = models.mobilenet_v2(weights=weights)
-    model.eval()
-    
-    # Descargamos las etiquetas oficiales de ImageNet en español, inglés y francés
-    # Para agilizar el script, usamos este mapeo directo integrado
-    try:
-        url_labels = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
-        with urllib.request.urlopen(url_labels) as url:
-            labels_raw = json.loads(url.read().decode())
-    except:
-        labels_raw = ["objeto desconocido"] * 1000
-        
-    return model, labels_raw, weights.transforms()
-
-model, labels_imagenet, transformaciones = cargar_modelo_ia()
-
-# Mapeo rápido interno para dar variedad a los idiomas del modelo
-TRADUCCIONES_PRED = {
-    "es": {"tabby": "gato doméstico", "ox": "buey", "sports car": "coche deportivo", "laptop": "ordenador portátil", "banana": "plátano", "golden retriever": "perro cobrador dorado"},
-    "fr": {"tabby": "chat de gouttière", "ox": "bœuf", "sports car": "voiture de sport", "laptop": "ordinateur portable", "banana": "banane", "golden retriever": "retriever doré"}
-}
-
-def traducir_prediccion(label, idioma_actual):
-    if idioma_actual == "en":
-        return label.capitalize()
-    return TRADUCCIONES_PRED.get(idioma_actual, {}).get(label.lower(), label).capitalize()
-
-# ==========================================
-# 3. GESTIÓN DEL ESTADO DE LA SESIÓN
+# 2. GESTIÓN DE SESIÓN Y PARÁMETROS URL
 # ==========================================
 if "usuarios_db" not in st.session_state:
     st.session_state.usuarios_db = {
@@ -70,277 +37,512 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
+# Escucha de acciones desde los nuevos botones de la Navbar integrada
+if "action" in st.query_params:
+    accion = st.query_params["action"]
+    if accion == "logout":
+        st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
+        st.query_params.clear()
+        st.rerun()
+    elif accion in ["set_es", "set_en", "set_fr"]:
+        st.session_state.idioma = accion.split("_")[1]
+        st.query_params.clear()
+        st.rerun()
+
 # ==========================================
-# 4. INYECCIÓN CSS: REINVENCIÓN CYBERPUNK
+# 3. TRUCO DE INYECCIÓN CSS CRÍTICO
 # ==========================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
-
-/* Reset global del contenedor de Streamlit */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght=300;400;500;600;700&family=Space+Mono:wght=400;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body, .stApp { background: #070b12 !important; color: #e2e8f0 !important; font-family: 'Sora', sans-serif !important; }
+html, body, .stApp { background: #080c14 !important; color: #e8eaf0 !important; font-family: 'Sora', sans-serif !important; }
 [data-testid="stSidebar"] { display: none; }
+[data-testid="collapsedControl"] { display: none; }
 header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* Estilización Limpia del Contenedor de Login */
+/* === SOLUCIÓN MAESTRA PARA LA TARJETA DE LOGIN === */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
-    background-color: #0c1322 !important;
-    border: 1px solid #162545 !important;
+    background-color: #0d1422 !important;
+    border: 1px solid #1a2744 !important;
     border-radius: 16px !important;
-    padding: 40px 35px !important;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+    padding: 35px 30px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+    margin-top: 10px !important;
 }
 
-/* --- DISEÑO DE LA NAVBAR INTEGRADA --- */
-.custom-navbar {
-    width: 100%; background: #04070d; border-bottom: 1px solid #162545;
-    padding: 0 60px; height: 65px; display: flex; align-items: center; 
-    justify-content: space-between;
-}
-.nav-logo { font-family: 'Space Mono', monospace; font-size: 1.05rem; font-weight: 700; color: #fff; letter-spacing: 3px; text-transform: uppercase; }
-.nav-pill { font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase; color: #415675; background: rgba(22,37,69,0.4); border: 1px solid #162545; padding: 5px 12px; border-radius: 5px; font-family: 'Space Mono', monospace; }
-.nav-user { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: #00d4aa; letter-spacing: 1px; }
-
-/* Ocultación Inteligente del Selector Selectbox Nativo para camuflarlo en el diseño */
-div[data-testid="stSelectbox"]:has(label:contains("LANG_SELECTOR")) {
+div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [data-baseweb="tab-list"] {
+    padding-left: 0px !important;
     background: transparent !important;
-    border: none !important;
-    margin-top: -15px !important;
-}
-div[data-testid="stSelectbox"]:has(label:contains("LANG_SELECTOR")) label { display: none !important; }
-div[data-testid="stSelectbox"]:has(label:contains("LANG_SELECTOR")) div[data-baseweb="select"] {
-    background-color: #0c1322 !important;
-    border: 1px solid #162545 !important;
-    border-radius: 8px !important;
-    color: #fff !important;
-    font-family: 'Space Mono', monospace !important;
-    font-size: 0.75rem !important;
-    width: 130px !important;
 }
 
-/* Botón de Cerrar Sesión Nativo Estilizado Premium */
-.btn-salir-container .stButton > button {
-    background: rgba(255, 75, 75, 0.08) !important; color: #ff4b4b !important;
-    border: 1px solid rgba(255, 75, 75, 0.25) !important; border-radius: 8px !important;
-    font-family: 'Space Mono', monospace !important; font-size: 0.72rem !important;
-    padding: 5px 18px !important; text-transform: uppercase !important; font-weight: 700 !important;
-    transition: all 0.2s;
-}
-.btn-salir-container .stButton > button:hover { 
-    background: #ff4b4b !important; color: #fff !important; 
-    box-shadow: 0 0 15px rgba(255, 75, 75, 0.35);
-}
-
-/* Estilos de las pestañas funcionales (Tabs) */
-.stTabs [data-baseweb="tab-list"] { padding-left: 80px; border-bottom: 1px solid #162545; background: #050911; }
-.stTabs [data-baseweb="tab"] { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: #415675 !important; height: 48px; }
+.zone-label { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: #0066ff; margin-bottom: 20px; font-weight: 700; }
+.result-item { padding: 22px 0; border-bottom: 1px solid #1a2744; }
+.result-item:last-child { border-bottom: none; }
+.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.result-name { font-size: 1.1rem; font-weight: 500; color: #e8eaf0; }
+.result-pct { font-family: 'Space Mono', monospace; font-size: 0.95rem; font-weight: 700; }
+.bar-track { height: 5px; background: #1a2744; border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; }
+.rank-badge { font-family: 'Space Mono', monospace; font-size: 0.68rem; padding: 4px 10px; border-radius: 6px; margin-right: 12px; font-weight: 700; }
+.history-card { background: #0d1422; border: 1px solid #1a2744; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+.history-thumb { width: 65px; height: 65px; object-fit: cover; border-radius: 8px; }
+.history-name { font-weight: 600; color: #e8eaf0; font-size: 0.95rem; }
+.history-meta { font-size: 0.75rem; color: #4a6080; font-family: 'Space Mono', monospace; margin-top: 6px; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; gap: 15px; background: #090f1a; border-radius: 16px; border: 1px dashed #1a2744; }
+.empty-icon { font-size: 2.5rem; opacity: 0.2; }
+.empty-text { font-size: 0.85rem; color: #4a6080; font-family: 'Space Mono', monospace; }
+.hero { background: linear-gradient(135deg, #080c14 0%, #0d1829 100%); padding: 70px 80px 50px 80px; border-bottom: 1px solid #1a2744; }
+.hero-title { font-size: clamp(2rem, 4vw, 3.8rem); font-weight: 700; line-height: 1.15; letter-spacing: -2px; color: #fff; max-width: 800px; margin-bottom: 18px; }
+.hero-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { font-size: 1.05rem; color: #6b7c96; max-width: 520px; line-height: 1.7; margin-bottom: 40px; }
+.stats-bar { display: flex; gap: 50px; padding-top: 30px; border-top: 1px solid #1a2744; }
+.stat-number { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #fff; }
+.stat-label { font-size: 0.68rem; color: #4a6080; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+.bottom-bar { padding: 28px 80px; border-top: 1px solid #1a2744; display: flex; justify-content: space-between; align-items: center; background: #05080f; }
+.bottom-left { font-size: 0.78rem; color: #4a6080; font-family: 'Space Mono', monospace; }
+.bottom-tag { font-size: 0.72rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; }
+.stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
+.stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
+div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
+.stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
+.stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
+.stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
+.stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
-/* Caja de Resultados de la Inferencia */
-.prediction-box {
-    background: #0c1322; border: 1px solid #162545; border-radius: 12px;
-    padding: 25px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-}
-
-/* Encabezado Principal */
-.hero-section { background: linear-gradient(135deg, #070b12 0%, #0b1526 100%); padding: 55px 80px; border-bottom: 1px solid #162545; }
-.hero-main-title { font-size: 3.2rem; font-weight: 700; color: #fff; letter-spacing: -2px; }
-.hero-main-title em { font-style: normal; background: linear-gradient(90deg, #0066ff, #00d4aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.hero-sub-title { color: #64758e; max-width: 600px; margin-top: 12px; font-size: 1.05rem; line-height: 1.6; }
+/* === NUEVOS ESTILOS PARA LA NAVBAR TOTALMENTE INTEGRADA === */
+.nav-right-container { display: flex; align-items: center; gap: 20px; }
+.nav-lang-menu { display: flex; gap: 8px; background: rgba(13,20,34,0.6); padding: 4px; border-radius: 8px; border: 1px solid #1a2744; }
+.nav-lang-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #4a6080; text-decoration: none; padding: 4px 8px; border-radius: 5px; transition: all 0.2s; }
+.nav-lang-btn.active { color: #00d4aa; background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); }
+.nav-lang-btn:hover:not(.active) { color: #fff; background: rgba(254,254,254,0.05); }
+.nav-logout-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #ff4b4b; background: rgba(255,75,75,0.08); border: 1px solid rgba(255,75,75,0.2); text-decoration: none; padding: 6px 14px; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+.nav-logout-btn:hover { background: #ff4b4b !important; color: #fff !important; box-shadow: 0 0 15px rgba(255,75,75,0.3); }
 </style>
 """, unsafe_allow_html=True)
 
-# ── PÁGINA DE AUTENTICACIÓN (LOGIN) ─────────────────────────────────────────────
+# ── LOGIN ──────────────────────────────────────────────────────────────────────
 if not st.session_state.autenticado:
-    col_l1, col_l2, col_l3 = st.columns([1, 1.1, 1])
-    with col_l2:
-        st.markdown("<div style='height:120px'></div>", unsafe_allow_html=True)
-        st.markdown("<div style='text-align:center; margin-bottom:25px;'><h1 style='color:#fff; font-family:Space Mono; font-size:2.3rem;'>Object<span style='color:#0066ff'>Vision</span> AI</h1><p style='color:#415675; text-transform:uppercase; letter-spacing:2px; font-size:0.7rem;'>Portal de Acceso · Core Engine v3</p></div>", unsafe_allow_html=True)
-        
-        tab_login, tab_registro = st.tabs(["🔑   Iniciar Sesión", "📝   Crear Cuenta"])
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+    with col2:
+        st.markdown("<div style='height:80px'></div>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style="text-align:center; margin-bottom:30px;">
+            <div style="font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:#fff;">
+                Object<span style="color:#0066ff">Vision</span> <span style="color:#4a6080; font-size:1rem;">AI</span>
+            </div>
+            <div style="font-size:0.72rem; color:#2a3a54; letter-spacing:2px; text-transform:uppercase; margin-top:8px; font-family:'Space Mono',monospace;">
+                Portal de acceso · 2026
+            </div>
+            <div style="height:1px; background:#1a2744; margin:24px 0;"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        tab_login, tab_reg = st.tabs(["🔑   Iniciar Sesión", "📝   Crear Cuenta"])
+
         with tab_login:
-            txt_user = st.text_input("Identificador de Usuario", key="login_u").strip().lower()
-            txt_pass = st.text_input("Código de Acceso", type="password", key="login_p")
-            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-            if st.button("Acceder al Sistema", use_container_width=True):
-                if txt_user in st.session_state.usuarios_db and st.session_state.usuarios_db[txt_user]["clave"] == txt_pass:
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            usuario_input = st.text_input("Usuario", placeholder="Tu ID de usuario", key="li_u").strip().lower()
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            contrasena_input = st.text_input("Contraseña", type="password", placeholder="••••••••", key="li_p")
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            if st.button("Acceder al Sistema", key="btn_login", use_container_width=True):
+                db = st.session_state.usuarios_db
+                if usuario_input in db and db[usuario_input]["clave"] == contrasena_input:
                     st.session_state.autenticado = True
-                    st.session_state.rol_usuario = st.session_state.usuarios_db[txt_user]["rol"]
+                    st.session_state.rol_usuario = db[usuario_input]["rol"]
+                    st.success("✅ Acceso autorizado.")
+                    time.sleep(0.4)
                     st.rerun()
                 else:
-                    st.error("Credenciales incorrectas. Verifique los datos de acceso.")
-        with tab_registro:
-            reg_user = st.text_input("Asignar Nuevo Usuario", key="reg_u").strip().lower()
-            reg_pass = st.text_input("Asignar Contraseña Segura", type="password", key="reg_p")
-            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-            if st.button("Registrar Credenciales", use_container_width=True):
-                if reg_user:
-                    st.session_state.usuarios_db[reg_user] = {"clave": reg_pass, "rol": f"{reg_user.upper()} (CLIENTE)"}
-                    st.success("Usuario registrado con éxito. Ya puedes iniciar sesión.")
+                    st.error("❌ Credenciales incorrectas.")
+
+        with tab_reg:
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            nuevo_u = st.text_input("Nombre de usuario", placeholder="Ej: pedro99", key="r_u").strip().lower()
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            nueva_p = st.text_input("Contraseña", type="password", placeholder="Mínimo 4 caracteres", key="r_p")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            confirmar_p = st.text_input("Repite la contraseña", type="password", placeholder="••••••••", key="r_p2")
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            if st.button("Crear Cuenta", key="btn_reg", use_container_width=True):
+                if not nuevo_u or not nueva_p:
+                    st.warning("Rellena todos los campos.")
+                elif len(nueva_p) < 4:
+                    st.error("Mínimo 4 caracteres.")
+                elif nueva_p != confirmar_p:
+                    st.error("Las contraseñas no coinciden.")
+                elif nuevo_u in st.session_state.usuarios_db:
+                    st.error("Usuario ya existe.")
                 else:
-                    st.warning("El nombre de usuario no puede estar vacío.")
+                    st.session_state.usuarios_db[nuevo_u] = {
+                        "clave": nueva_p,
+                        "rol": f"{nuevo_u.upper()} (CLIENTE)"
+                    }
+                    st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── NAVBAR REHECHA PROFESIONAL (ESTRUCTURA DE FLUJO CONTINUO) ──────────────────
-# Usamos un contenedor HTML de base para renderizar la barra limpia
+# ── NAVBAR TOTALMENTE FIJA E INTEGRADA ─────────────────────────────────────────
+idm_curr = st.session_state.idioma
 st.markdown(f"""
-<div class="custom-navbar">
-    <div class="nav-logo">Object<span style="color:#0066ff">Vision</span></div>
-    <div style="display:flex; gap:10px;">
-        <span class="nav-pill">MobileNetV2</span>
-        <span class="nav-pill">PyTorch 2.2</span>
-        <span class="nav-pill">ImageNet Dataset</span>
+<div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
+        Object<span style="color:#0066ff">Vision</span>
     </div>
-    <div style="display:flex; align-items:center; gap:25px;">
-        <div class="nav-user">● {st.session_state.rol_usuario}</div>
-        <div id="streamlit-controls-anchor" style="display:flex; align-items:center; gap:15px;"></div>
+    <div style="display:flex;gap:10px;">
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">MobileNetV2</span>
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">PyTorch</span>
+        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">ImageNet</span>
+    </div>
+    <div class="nav-right-container">
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;margin-right:10px;">
+            ● {st.session_state.rol_usuario}
+        </div>
+        <div class="nav-lang-menu">
+            <a href="?action=set_es" class="nav-lang-btn {'active' if idm_curr == 'es' else ''}">ES</a>
+            <a href="?action=set_en" class="nav-lang-btn {'active' if idm_curr == 'en' else ''}">EN</a>
+            <a href="?action=set_fr" class="nav-lang-btn {'active' if idm_curr == 'fr' else ''}">FR</a>
+        </div>
+        <a href="?action=logout" class="nav-logout-btn">🔴 Salir</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Justo debajo inyectamos los selectores reales alineados a la derecha usando columnas de apoyo
-# Esto simula estar metido dentro de la navbar pero con estabilidad garantizada al 100%
-nav_space, nav_ctrl1, nav_ctrl2 = st.columns([7.8, 1.2, 1.0])
+# Asignación del diccionario de traducción activo
+idioma = st.session_state.idioma
 
-with nav_ctrl1:
-    # Selector de idioma limpio con clave de cambio controlado
-    dicc_idiomas = {"es": "Español", "en": "English", "fr": "Français"}
-    idioma_seleccionado = st.selectbox(
-        "LANG_SELECTOR",
-        options=["es", "en", "fr"],
-        format_func=lambda x: dicc_idiomas[x],
-        index=["es", "en", "fr"].index(st.session_state.idioma)
-    )
-    if idioma_seleccionado != st.session_state.idioma:
-        st.session_state.idioma = idioma_seleccionado
-        st.rerun()
-
-with nav_ctrl2:
-    st.markdown('<div class="btn-salir-container" style="margin-top:-14px;">', unsafe_allow_html=True)
-    if st.button("Salir", key="action_logout_btn"):
-        st.session_state.autenticado = False
-        st.session_state.rol_usuario = ""
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ── DICCIONARIO DE DICCIONARIOS (INTERNACIONALIZACIÓN COMPLETA) ───────────────
-TEXTOS_SISTEMA = {
+# ── TEXTOS ─────────────────────────────────────────────────────────────────────
+TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu mundo.",
-        "sub": "Sube cualquier imagen para iniciar el procesamiento neuronal. Nuestra red neuronal convolucional identificará los elementos en tiempo real con sus métricas de confianza.",
-        "tab_an": "Analizar Imagen", "tab_cam": "Cámara en Vivo", "tab_comp": "Comparar Modelos", "tab_hist": "Historial",
-        "lbl_subir": "Arrastra o selecciona una imagen de tu equipo", "lbl_btn_an": "Ejecutar Inferencia",
-        "lbl_res": "Resultado del Análisis Neuronal", "lbl_conf": "Nivel de Confianza", "lbl_vacio_hist": "El registro histórico se encuentra vacío."
+        "subtitulo": "Sube cualquier imagen y nuestra IA identifica los objetos al instante con datos de confianza en tiempo real.",
+        "tab_analizar": "Analizar imagen", "tab_camara": "Cámara en vivo",
+        "tab_comparar": "Comparar modelos", "tab_historial": "Historial",
+        "entrada": "— Entrada", "analisis": "— Análisis",
+        "alta": "CONFIANZA ALTA", "media": "CONFIANZA MEDIA", "baja": "CONFIANZA BAJA",
+        "esperando": "Esperando imagen...", "procesando": "Procesando...",
+        "historial_vacio": "Sin análisis todavía", "camara_info": "Activa la cámara y toma una foto",
+        "comparar_info": "Sube una imagen para comparar modelos",
+        "modelo_a": "— MobileNetV2 (Rápido)", "modelo_b": "— ResNet50 (Preciso)",
+        "boton_voz": "🔊 Escuchar resultado",
     },
     "en": {
-        "titulo": "AI Vision that <em>understands</em> your world.",
-        "sub": "Upload any image to trigger neural network processing. Our convolutional architecture will identify objects in real-time alongside confidence metrics.",
-        "tab_an": "Analyze Image", "tab_cam": "Live Camera", "tab_comp": "Compare Models", "tab_hist": "History",
-        "lbl_subir": "Drag and drop or browse an image from your device", "lbl_btn_an": "Run Inference Engine",
-        "lbl_res": "Neural Analysis Summary", "lbl_conf": "Confidence Level", "lbl_vacio_hist": "Historical log is currently empty."
+        "titulo": "Artificial vision that <em>understands</em> your world.",
+        "subtitulo": "Upload any image and our AI instantly identifies objects with real-time confidence data.",
+        "tab_analizar": "Analyze image", "tab_camara": "Live camera",
+        "tab_comparar": "Compare models", "tab_historial": "History",
+        "entrada": "— Input", "analisis": "— Analysis",
+        "alta": "HIGH CONFIDENCE", "media": "MEDIUM CONFIDENCE", "baja": "LOW CONFIDENCE",
+        "esperando": "Waiting for image...", "procesando": "Processing...",
+        "historial_vacio": "No analysis yet", "camara_info": "Activate camera and take a photo",
+        "comparar_info": "Upload an image to compare models",
+        "modelo_a": "— MobileNetV2 (Fast)", "modelo_b": "— ResNet50 (Accurate)",
+        "boton_voz": "🔊 Listen to result",
     },
     "fr": {
-        "titulo": "Vision IA qui <em>comprend</em> votre monde.",
-        "sub": "Téléchargez une image pour lancer le traitement neuronal. Notre réseau de neurones convolutif identifiera les objets en temps réel avec leurs indices de confiance.",
-        "tab_an": "Analyser l'Image", "tab_cam": "Caméra en Direct", "tab_comp": "Comparer les Modèles", "tab_hist": "Historique",
-        "lbl_subir": "Glissez-déposez ou parcourez une image depuis votre appareil", "lbl_btn_an": "Exécuter l'Inférence",
-        "lbl_res": "Résumé de l'Analyse Neuronale", "lbl_conf": "Indice de Confiance", "lbl_vacio_hist": "L'historique est actuellement vide."
+        "titulo": "Vision artificielle qui <em>comprend</em> votre monde.",
+        "subtitulo": "Téléchargez une image et notre IA identifie les objets instantanément.",
+        "tab_analizar": "Analyser image", "tab_camara": "Caméra live",
+        "tab_comparar": "Comparer modèles", "tab_historial": "Historique",
+        "entrada": "— Entrée", "analisis": "— Analyse",
+        "alta": "HAUTE CONFIANCE", "media": "CONFIANCE MOYENNE", "baja": "FAIBLE CONFIANCE",
+        "esperando": "En attente...", "procesando": "Traitement...",
+        "historial_vacio": "Pas encore d'analyse", "camara_info": "Activez la caméra",
+        "comparar_info": "Téléchargez une image pour comparar",
+        "modelo_a": "— MobileNetV2 (Rapide)", "modelo_b": "— ResNet50 (Précis)",
+        "boton_voz": "🔊 Écouter le résultat",
     }
 }
-idioma_activo = TEXTOS_SISTEMA[st.session_state.idioma]
 
-# ── HERO DINÁMICO ─────────────────────────────────────────────────────────────
+TRADUCCIONES = {
+    "car": "Coche", "sports car": "Coche deportivo", "convertible": "Descapotable",
+    "dog": "Perro", "cat": "Gato", "bird": "Pájaro", "labrador retriever": "Labrador Retriever",
+    "golden retriever": "Golden Retriever", "pizza": "Pizza", "hamburger": "Hamburguesa",
+    "banana": "Plátano", "apple": "Manzana", "chair": "Silla", "laptop": "Portátil",
+    "bicycle": "Bicicleta", "motorcycle": "Moto", "bus": "Autobús", "truck": "Camión",
+    "airplane": "Avión", "lion": "León", "tiger": "Tigre", "elephant": "Elefante",
+    "soccer ball": "Balón de fútbol", "keyboard": "Teclado", "bottle": "Botella",
+    "cup": "Taza", "book": "Libro", "clock": "Reloj", "horse": "Caballo",
+    "kuvasz": "Kuvasz", "shield": "Escudo", "minivan": "Minivan",
+    "chesapeake bay retriever": "Chesapeake Bay Retriever",
+    "computer mouse": "Ratón de ordenador", "sunglasses": "Gafas de sol",
+    "backpack": "Mochila", "table lamp": "Lámpara"
+}
+
+def traducir(n, idm="es"):
+    if idm != "es":
+        return n.replace("_", " ").title()
+    return TRADUCCIONES.get(n.lower().replace("_", " "), n.replace("_", " ").title())
+
+def nivel_confianza(prob, t):
+    if prob >= 0.6:
+        return "#28a745", t["alta"]
+    elif prob >= 0.3:
+        return "#ffc107", t["media"]
+    else:
+        return "#dc3545", t["baja"]
+
+@st.cache_resource
+def cargar_mobilenet():
+    m = models.mobilenet_v2(weights="IMAGENET1K_V1")
+    m.eval()
+    return m
+
+@st.cache_resource
+def cargar_resnet():
+    m = models.resnet50(weights="IMAGENET1K_V1")
+    m.eval()
+    return m
+
+@st.cache_resource
+def cargar_etiquetas():
+    try:
+        url = "https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json"
+        with urllib.request.urlopen(url, timeout=5) as f:
+            return json.load(f)
+    except Exception:
+        return ["background", "laptop", "golden retriever", "sports car", "backpack", "pizza"]
+
+mobilenet = cargar_mobilenet()
+etiquetas = cargar_etiquetas()
+
+transformacion = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
+
+def predecir(imagen, modelo):
+    tensor = transformacion(imagen).unsqueeze(0)
+    with torch.no_grad():
+        salida = modelo(tensor)
+    probs = torch.nn.functional.softmax(salida[0], dim=0)
+    return torch.topk(probs, 3)
+
+def mostrar_resultados(top3, t, idm, umbral):
+    badge_colors = ["#0066ff", "#00d4aa", "#6644ff"]
+    visibles = 0
+    reporte = f"OBJECTVISION AI — REPORTE\nFecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n\n"
+    for i in range(3):
+        nombre = traducir(etiquetas[top3.indices[i].item()], idm)
+        prob = top3.values[i].item()
+        pct = prob * 100
+        if pct < umbral:
+            continue
+        visibles += 1
+        color_bar, nivel = nivel_confianza(prob, t)
+        reporte += f"#{i+1} {nombre}: {pct:.1f}%\n"
+        st.markdown(f"""
+        <div class="result-item">
+            <div class="result-header">
+                <div style="display:flex;align-items:center">
+                    <span class="rank-badge" style="background:{badge_colors[i]}22;color:{badge_colors[i]};border:1px solid {badge_colors[i]}44">#{str(i+1).zfill(2)}</span>
+                    <span class="result-name">{nombre}</span>
+                </div>
+                <span class="result-pct" style="color:{badge_colors[i]}">{pct:.1f}%</span>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill" style="width:{pct}%;background:{color_bar}"></div>
+            </div>
+            <div style="margin-top:6px;font-size:0.72rem;color:#4a6080;font-family:'Space Mono',monospace;letter-spacing:1px">{nivel}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    if visibles == 0:
+        st.markdown(f'<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Ningún objeto supera el {umbral}% mínimo.</div></div>', unsafe_allow_html=True)
+        return
+
+    nombre_top = traducir(etiquetas[top3.indices[0].item()], idm)
+    prob_top = top3.values[0].item() * 100
+    if idm == "es":
+        msg_voz = f"Objeto detectado: {nombre_top}, con un {prob_top:.0f} por ciento de certeza."
+        lang_voz = "es-ES"
+    elif idm == "en":
+        msg_voz = f"Object detected: {nombre_top}, with {prob_top:.0f} percent confidence."
+        lang_voz = "en-US"
+    else:
+        msg_voz = f"Objet détecté: {nombre_top}, avec {prob_top:.0f} pourcent de confiance."
+        lang_voz = "fr-FR"
+
+    col_b1, col_b2 = st.columns(2)
+    with col_b1:
+        if st.button(t["boton_voz"], key=f"voz_{nombre_top}_{idm}"):
+            st.components.v1.html(f"""
+            <script>
+                var msg = new SpeechSynthesisUtterance("{msg_voz}");
+                msg.lang = "{lang_voz}";
+                msg.rate = 0.95;
+                window.speechSynthesis.speak(msg);
+            </script>
+            """, height=0)
+    with col_b2:
+        st.download_button("📥 Descargar reporte", data=reporte,
+                           file_name="reporte_objectvision.txt", mime="text/plain",
+                           key=f"dl_{nombre_top}_{idm}")
+
+# ── HERO ───────────────────────────────────────────────────────────────────────
+t = TEXTOS[idioma]
+
 st.markdown(f"""
-<div class="hero-section">
-    <div class="hero-main-title">{idioma_activo['titulo']}</div>
-    <div class="hero-sub-title">{idioma_activo['sub']}</div>
+<div class="hero">
+    <div class="hero-title">{t["titulo"]}</div>
+    <div class="hero-sub">{t["subtitulo"]}</div>
+    <div class="stats-bar">
+        <div><div class="stat-number">1000+</div><div class="stat-label">Clases</div></div>
+        <div><div class="stat-number">Top-3</div><div class="stat-label">Predicciones</div></div>
+        <div><div class="stat-number">Cloud</div><div class="stat-label">Servidor remoto</div></div>
+        <div><div class="stat-number">24/7</div><div class="stat-label">Disponibilidad</div></div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── SISTEMA DE PESTAÑAS (TABS RENDERING) ───────────────────────────────────────
-tabs_app = st.tabs([
-    f"🔍 {idioma_activo['tab_an']}", 
-    f"📷 {idioma_activo['tab_cam']}", 
-    f"📊 {idioma_activo['tab_comp']}", 
-    f"🕒 {idioma_activo['tab_hist']}"
-])
+st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
+umbral_sel = st.slider("Filtro de certeza mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
+st.markdown("</div>", unsafe_allow_html=True)
 
-# ---- TAB 1: MOTOR DE INFERENCIA DE IMÁGENES ----
-with tabs_app[0]:
+# ── TABS ───────────────────────────────────────────────────────────────────────
+es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
+lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
+if es_admin:
+    lista_tabs.append("👥 Panel Admin")
+
+tabs_render = st.tabs(lista_tabs)
+
+# TAB 1 — ANALIZAR
+with tabs_render[0]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
-    
-    archivo_subido = st.file_uploader(
-        idioma_activo['lbl_subir'], 
-        type=["jpg", "png", "jpeg"], 
-        key="uploader_main"
-    )
-    
-    if archivo_subido:
-        col_img, col_pred = st.columns([1.1, 0.9])
-        
-        with col_img:
-            imagen_pil = Image.open(archivo_subido).convert("RGB")
-            st.image(imagen_pil, use_container_width=True, caption="Imagen cargada al búfer")
-            
-        with col_pred:
-            st.markdown(f"### ⚙️ {idioma_activo['lbl_btn_an']}")
-            if st.button("LAUNCH INFERENCE", use_container_width=True, type="primary"):
-                with st.spinner("Procesando tensores..."):
-                    # 1. Preprocesar la imagen para PyTorch
-                    tensor_imagen = transformaciones(imagen_pil).unsqueeze(0)
-                    
-                    # 2. Desactivar cálculo de gradientes y pasar por el modelo
-                    with torch.no_grad():
-                        salida_modelo = model(tensor_imagen)
-                        probabilidades = torch.nn.functional.softmax(salida_modelo[0], dim=0)
-                    
-                    # 3. Obtener el índice con mayor puntuación
-                    top_prob, top_cat = torch.topk(probabilidades, 1)
-                    porcentaje_confianza = top_prob.item() * 100
-                    nombre_etiqueta_raw = labels_imagenet[top_cat.item()]
-                    
-                    # Traducir resultado según idioma seleccionado
-                    resultado_final = traducir_prediccion(nombre_etiqueta_raw, st.session_state.idioma)
-                    
-                    # Guardar en el historial de sesión
-                    timestamp_actual = datetime.now().strftime("%H:%M:%S")
-                    st.session_state.historial.insert(0, {
-                        "hora": timestamp_actual,
-                        "clase": resultado_final,
-                        "confianza": f"{porcentaje_confianza:.2f}%"
-                    })
-                    
-                    # Mostrar resultados estilizados en caja
-                    st.markdown(f"""
-                    <div class="prediction-box">
-                        <h4 style="color:#0066ff; margin-bottom:8px; font-family:'Space Mono'; text-transform:uppercase; font-size:0.8rem;">{idioma_activo['lbl_res']}</h4>
-                        <h2 style="color:#fff; font-size:2rem; font-weight:700; margin-bottom:15px;">{resultado_final}</h2>
-                        <p style="color:#64758e; font-size:0.85rem;">{idioma_activo['lbl_conf']}: <span style="color:#00d4aa; font-weight:700;">{porcentaje_confianza:.2f}%</span></p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.balloons()
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        st.markdown(f'<div class="zone-label">{t["entrada"]}</div>', unsafe_allow_html=True)
+        archivo = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="up1")
+        if archivo:
+            imagen = Image.open(archivo).convert("RGB")
+            st.image(imagen, use_container_width=True)
+    with col2:
+        st.markdown(f'<div class="zone-label">{t["analisis"]}</div>', unsafe_allow_html=True)
+        if archivo:
+            with st.spinner(t["procesando"]):
+                t0 = time.time()
+                top3 = predecir(imagen, mobilenet)
+                ms = (time.time() - t0) * 1000
+            st.markdown(f"<span style='font-family:Space Mono;font-size:0.72rem;color:#00d4aa;letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
+            mostrar_resultados(top3, t, idioma, umbral_sel)
+            buf = io.BytesIO()
+            imagen.save(buf, format="JPEG")
+            img_b64 = base64.b64encode(buf.getvalue()).decode()
+            nombre_top = traducir(etiquetas[top3.indices[0].item()], idioma)
+            prob_top = top3.values[0].item()
+            if not st.session_state.historial or st.session_state.historial[0]["nombre"] != nombre_top:
+                st.session_state.historial.insert(0, {"nombre": nombre_top, "prob": prob_top, "img": img_b64, "hora": datetime.now().strftime("%H:%M")})
+                st.session_state.historial = st.session_state.historial[:5]
+        else:
+            st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["esperando"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ---- TAB 4: MÓDULO DE HISTORIAL ----
-with tabs_app[3]:
+# TAB 2 — CÁMARA
+with tabs_render[1]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
-    if not st.session_state.historial:
-        st.markdown(f"<p style='color:#415675; font-family:Space Mono; font-size:0.85rem;'>{idioma_activo['lbl_vacio_hist']}</p>", unsafe_allow_html=True)
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
+        st.markdown(f'<div class="zone-label">{t["entrada"]}</div>', unsafe_allow_html=True)
+        foto = st.camera_input("", label_visibility="collapsed")
+    with col2:
+        st.markdown(f'<div class="zone-label">{t["analisis"]}</div>', unsafe_allow_html=True)
+        if foto:
+            img_cam = Image.open(foto).convert("RGB")
+            with st.spinner(t["procesando"]):
+                t0 = time.time()
+                top3_cam = predecir(img_cam, mobilenet)
+                ms = (time.time() - t0) * 1000
+            st.markdown(f"<span style='font-family:Space Mono;font-size:0.72rem;color:#00d4aa;letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
+            mostrar_resultados(top3_cam, t, idioma, umbral_sel)
+        else:
+            st.markdown(f'<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# TAB 3 — COMPARAR
+with tabs_render[2]:
+    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+    archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="up2")
+    if archivo_comp:
+        img_comp = Image.open(archivo_comp).convert("RGB")
+        st.image(img_comp, width=380)
+        st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+        col_a, col_b = st.columns(2, gap="large")
+        with col_a:
+            st.markdown(f'<div class="zone-label">{t["modelo_a"]}</div>', unsafe_allow_html=True)
+            with st.spinner(t["procesando"]):
+                top3_mob = predecir(img_comp, mobilenet)
+            mostrar_resultados(top3_mob, t, idioma, umbral_sel)
+        with col_b:
+            st.markdown(f'<div class="zone-label">{t["modelo_b"]}</div>', unsafe_allow_html=True)
+            resnet = cargar_resnet()
+            with st.spinner(t["procesando"]):
+                top3_res = predecir(img_comp, resnet)
+            mostrar_resultados(top3_res, t, idioma, umbral_sel)
     else:
+        st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# TAB 4 — HISTORIAL
+with tabs_render[3]:
+    st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+    st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
+    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+    if st.session_state.historial:
         for item in st.session_state.historial:
             st.markdown(f"""
-            <div style="background:#0c1322; border:1px solid #162545; padding:15px 25px; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <span style="color:#415675; font-family:'Space Mono'; font-size:0.75rem; margin-right:15px;">[{item['hora']}]</span>
-                    <strong style="color:#fff; font-size:1rem;">{item['clase']}</strong>
-                </div>
-                <div style="color:#00d4aa; font-family:'Space Mono'; font-size:0.85rem; font-weight:700;">{item['confianza']}</div>
+            <div class="history-card">
+                <img class="history-thumb" src="data:image/jpeg;base64,{item['img']}" />
+                <div><div class="history-name">{item['nombre']}</div>
+                <div class="history-meta">{item['prob']*100:.1f}% · {item['hora']}</div></div>
             </div>
             """, unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ── FOOTER UNIFICADO DE PROYECTO ───────────────────────────────────────────────
-st.markdown("<div style='padding: 35px 80px; border-top:1px solid #162545; font-family:Space Mono; font-size:0.7rem; color:#415675;'>© 2026 ObjectVision · Desarrollo Avanzado Intermodular · Alumno: Mohamed Mohamed Embarec</div>", unsafe_allow_html=True)
+# TAB 5 — ADMIN
+if es_admin:
+    with tabs_render[4]:
+        st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
+        st.markdown('<div class="zone-label">— Panel de Administración</div>', unsafe_allow_html=True)
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        filas = ""
+        for usr, datos in st.session_state.usuarios_db.items():
+            es_adm = "ADMIN" in datos["rol"]
+            badge = "background:rgba(0,102,255,0.15);color:#0066ff;border:1px solid rgba(0,102,255,0.3);" if es_adm else "background:rgba(0,212,170,0.1);color:#00d4aa;border:1px solid rgba(0,212,170,0.2);"
+            clave_oculta = "*" * len(datos["clave"])
+            filas += f"""
+            <tr>
+                <td style="padding:14px 16px;border-bottom:1px solid #1a2744;color:#e8eaf0;font-family:'Space Mono',monospace;font-weight:700">{usr}</td>
+                <td style="padding:14px 16px;border-bottom:1px solid #1a2744;color:#4a6080;font-family:'Space Mono',monospace">{clave_oculta}</td>
+                <td style="padding:14px 16px;border-bottom:1px solid #1a2744"><span style="font-family:'Space Mono',monospace;font-size:0.72rem;padding:4px 10px;border-radius:4px;{badge}">{datos['rol']}</span></td>
+            </tr>"""
+        st.components.v1.html(f"""
+        <table style="width:100%;border-collapse:collapse;background:#0d1422;border-radius:8px;border:1px solid #1a2744;">
+            <thead><tr style="background:#111a2e;color:#0066ff;font-family:'Space Mono',monospace;font-size:0.75rem;letter-spacing:1px;text-align:left">
+                <th style="padding:12px 16px">USUARIO</th>
+                <th style="padding:12px 16px">CONTRASEÑA</th>
+                <th style="padding:12px 16px">ROL</th>
+            </tr></thead>
+            <tbody>{filas}</tbody>
+        </table>
+        """, height=300, scrolling=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+# ── FOOTER ─────────────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="bottom-bar">
+    <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
+    <div>
+        <span class="bottom-tag">ODS 4</span>
+        <span class="bottom-tag">ODS 9</span>
+        <span class="bottom-tag">PyTorch + Streamlit</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
