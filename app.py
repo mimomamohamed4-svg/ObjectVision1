@@ -51,6 +51,18 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
+/* === SOLUCIÓN MAESTRA PARA LA NAVBAR FIJA === */
+.main-navbar-container {
+    width: 100%;
+    background: #060a12 !important;
+    border-bottom: 1px solid #1a2744 !important;
+    padding: 10px 60px !important;
+    margin: 0 !important;
+}
+div[data-testid="stHorizontalBlock"]:has(button[key^="btn_lang_"]) {
+    align-items: center !important;
+}
+
 /* === SOLUCIÓN MAESTRA PARA LA TARJETA DE LOGIN === */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
     background-color: #0d1422 !important;
@@ -102,11 +114,6 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 /* Redefinición específica de botones generales de Streamlit */
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
-
-/* == ESTILIZADO DE LOS BOTONES DE LA NAVBAR INTERACTIVA == */
-div[data-testid="stHorizontalBlock"]:has(button[key^="btn_lang_"]), div[data-testid="stHorizontalBlock"]:has(button[key="btn_nav_logout"]) {
-    align-items: center !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -171,51 +178,58 @@ if not st.session_state.autenticado:
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── NAVBAR TOTALMENTE FIJA E INTEGRADA (SOLUCIÓN INTERACTIVA) ─────────────────
+# ── NAVBAR REESCRITA Y ALINEADA INTERACTIVA ───────────────────────────────────
 idm_curr = st.session_state.idioma
 
-# 1. Capa de diseño estático HTML/CSS
-st.markdown(f"""
-<div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
-    <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
+st.markdown('<div class="main-navbar-container">', unsafe_allow_html=True)
+col_nav_logo, col_nav_tags, col_nav_user, col_nav_es, col_nav_en, col_nav_fr, col_nav_logout = st.columns(
+    [1.6, 2.7, 1.8, 0.4, 0.4, 0.4, 1.0]
+)
+
+with col_nav_logo:
+    st.markdown("""
+    <div style="font-family:'Space Mono',monospace; font-size:1.05rem; font-weight:700; color:#fff; letter-spacing:3px; text-transform:uppercase; padding-top:4px;">
         Object<span style="color:#0066ff">Vision</span>
     </div>
-    <div style="display:flex;gap:10px;margin-right:auto;margin-left:40px;">
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">MobileNetV2</span>
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">PyTorch</span>
-        <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">ImageNet</span>
+    """, unsafe_allow_html=True)
+
+with col_nav_tags:
+    st.markdown("""
+    <div style="display:flex; gap:8px; padding-top:5px;">
+        <span style="font-size:0.62rem; letter-spacing:1px; text-transform:uppercase; color:#4a6080; background:rgba(26,39,68,0.5); border:1px solid #1a2744; padding:3px 8px; border-radius:4px; font-family:'Space Mono',monospace; font-weight:700;">MobileNetV2</span>
+        <span style="font-size:0.62rem; letter-spacing:1px; text-transform:uppercase; color:#4a6080; background:rgba(26,39,68,0.5); border:1px solid #1a2744; padding:3px 8px; border-radius:4px; font-family:'Space Mono',monospace; font-weight:700;">PyTorch</span>
+        <span style="font-size:0.62rem; letter-spacing:1px; text-transform:uppercase; color:#4a6080; background:rgba(26,39,68,0.5); border:1px solid #1a2744; padding:3px 8px; border-radius:4px; font-family:'Space Mono',monospace; font-weight:700;">ImageNet</span>
     </div>
-    <div style="width:480px; height:2px;"></div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-# 2. Súperposición de los componentes de Streamlit (Evita recargas de página completas)
-st.markdown("<div style='margin-top:-48px; padding:0 60px 0 0; display:flex; justify-content:flex-end; position:relative; z-index:99999;'>", unsafe_allow_html=True)
-col_nav1, col_nav2, col_nav3, col_nav4, col_nav5 = st.columns([1.8, 0.4, 0.4, 0.4, 1.0])
+with col_nav_user:
+    st.markdown(f"""
+    <div style="font-family:'Space Mono',monospace; font-size:0.72rem; color:#00d4aa; letter-spacing:1px; text-align:right; padding-top:8px; padding-right:10px;">
+        ● {st.session_state.rol_usuario}
+    </div>
+    """, unsafe_allow_html=True)
 
-with col_nav1:
-    st.markdown(f"<div style='font-family:\"Space Mono\",monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;text-align:right;padding-top:10px;margin-right:15px;'>● {st.session_state.rol_usuario}</div>", unsafe_allow_html=True)
-
-with col_nav2:
-    if st.button("ES", key="btn_lang_es", help="Español"):
+with col_nav_es:
+    if st.button("ES", key="btn_lang_es", help="Español", use_container_width=True):
         st.session_state.idioma = "es"
         st.rerun()
 
-with col_nav3:
-    if st.button("EN", key="btn_lang_en", help="English"):
+with col_nav_en:
+    if st.button("EN", key="btn_lang_en", help="English", use_container_width=True):
         st.session_state.idioma = "en"
         st.rerun()
 
-with col_nav4:
-    if st.button("FR", key="btn_lang_fr", help="Français"):
+with col_nav_fr:
+    if st.button("FR", key="btn_lang_fr", help="Français", use_container_width=True):
         st.session_state.idioma = "fr"
         st.rerun()
 
-with col_nav5:
-    if st.button("🔴 SALIR", key="btn_nav_logout"):
+with col_nav_logout:
+    if st.button("🔴 SALIR", key="btn_nav_logout", use_container_width=True):
         st.session_state.autenticado = False
         st.session_state.rol_usuario = ""
         st.rerun()
+
 st.markdown("</div>", unsafe_allow_html=True)
 st.markdown("<div style='height:15px;'></div>", unsafe_allow_html=True)
 
@@ -521,6 +535,7 @@ if es_admin:
         st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
         filas = ""
         for usr, datos in st.session_state.usuarios_db.items():
+            st.markdown("</div>", unsafe_allow_html=True)
             es_adm = "ADMIN" in datos["rol"]
             badge = "background:rgba(0,102,255,0.15);color:#0066ff;border:1px solid rgba(0,102,255,0.3);" if es_adm else "background:rgba(0,212,170,0.1);color:#00d4aa;border:1px solid rgba(0,212,170,0.2);"
             clave_oculta = "*" * len(datos["clave"])
