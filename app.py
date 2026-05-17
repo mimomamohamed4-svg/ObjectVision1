@@ -188,6 +188,11 @@ if not st.session_state.autenticado:
 
 # ── NAVBAR TOTALMENTE FIJA, INTEGRADA Y PROTEGIDA CONTRA NUEVAS PESTAÑAS ─────
 idm_curr = st.session_state.idioma
+
+clase_es = "active" if idm_curr == "es" else ""
+clase_en = "active" if idm_curr == "en" else ""
+clase_fr = "active" if idm_curr == "fr" else ""
+
 st.markdown(f"""
 <base target="_self">
 
@@ -205,9 +210,9 @@ st.markdown(f"""
             ● {st.session_state.rol_usuario}
         </div>
         <div class="nav-lang-menu">
-            <a href="?action=set_es" target="_self" class="nav-lang-btn {'active' if idm_curr == 'es' else ''}">ES</a>
-            <a href="?action=set_en" target="_self" class="nav-lang-btn {'active' if idm_curr == 'en' else ''}">EN</a>
-            <a href="?action=set_fr" target="_self" class="nav-lang-btn {'active' if idm_curr == 'fr' else ''}">FR</a>
+            <a href="?action=set_es" target="_self" class="nav-lang-btn {clase_es}">ES</a>
+            <a href="?action=set_en" target="_self" class="nav-lang-btn {clase_en}">EN</a>
+            <a href="?action=set_fr" target="_self" class="nav-lang-btn {clase_fr}">FR</a>
         </div>
         <a href="?action=logout" target="_self" class="nav-logout-btn">🔴 Salir</a>
     </div>
@@ -430,7 +435,7 @@ with tabs_render[0]:
         if archivo:
             with st.spinner(t["procesando"]):
                 t0 = time.time()
-                top3 = predecir(imagen, mobilenet)
+                top3 = prepredict = predecir(imagen, mobilenet)
                 ms = (time.time() - t0) * 1000
             st.markdown(f"<span style='font-family:Space Mono;font-size:0.72rem;color:#00d4aa;letter-spacing:1px'>⚡ INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
             mostrar_resultados(top3, t, idioma, umbral_sel)
