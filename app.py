@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. GESTIÓN DE SESIÓN
+# 2. GESTIÓN DE SESIÓN Y PARÁMETROS URL
 # ==========================================
 if "usuarios_db" not in st.session_state:
     st.session_state.usuarios_db = {
@@ -36,6 +36,19 @@ if "historial" not in st.session_state:
     st.session_state.historial = []
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
+
+# Escucha de acciones desde los nuevos botones de la Navbar integrada
+if "action" in st.query_params:
+    accion = st.query_params["action"]
+    if accion == "logout":
+        st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
+        st.query_params.clear()
+        st.rerun()
+    elif accion in ["set_es", "set_en", "set_fr"]:
+        st.session_state.idioma = accion.split("_")[1]
+        st.query_params.clear()
+        st.rerun()
 
 # ==========================================
 # 3. TRUCO DE INYECCIÓN CSS CRÍTICO
@@ -94,34 +107,21 @@ div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) .stTabs [
 .bottom-tag { font-size: 0.72rem; color: #4a6080; font-family: 'Space Mono', monospace; letter-spacing: 1px; margin-left: 28px; }
 .stFileUploader > div { background: #0d1422 !important; border: 1px dashed #1a2744 !important; border-radius: 12px !important; }
 .stImage img { border-radius: 12px !important; border: 1px solid #1a2744; }
-
-/* === CORRECCIÓN EXCLUSIVA PARA EL DESPLEGABLE DE IDIOMA === */
-.stSelectbox > div > div { background: #0d1422 !important; border: 1px solid #1a2744 !important; color: #e8eaf0 !important; }
-div[data-baseweb="select"] * { color: #e8eaf0 !important; background-color: #0d1422 !important; }
-ul[role="listbox"] { background-color: #0d1422 !important; border: 1px solid #1a2744 !important; }
-ul[role="listbox"] li { color: #e8eaf0 !important; background-color: #0d1422 !important; }
-ul[role="listbox"] li:hover { background-color: #1a2744 !important; }
-
 div[data-testid="stTextInput"] > div > div > input { background: #080c14 !important; color: #fff !important; border: 1px solid #1a2744 !important; border-radius: 8px !important; }
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
-
-/* === CONFIGURACIÓN GENERAL DE BOTONES NATIVOS === */
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
-/* === CORRECCIÓN EXCLUSIVA PARA EL BOTÓN CERRAR SESIÓN (ROJO INTEGRADO) === */
-div.stButton > button[key="logout"] {
-    background: rgba(255, 75, 75, 0.08) !important;
-    color: #ff4b4b !important;
-    border: 1px solid rgba(255, 75, 75, 0.3) !important;
-    margin-top: 10px !important;
-}
-div.stButton > button[key="logout"]:hover {
-    background: #ff4b4b !important;
-    color: #fff !important;
-}
+/* === NUEVOS ESTILOS PARA LA NAVBAR TOTALMENTE INTEGRADA === */
+.nav-right-container { display: flex; align-items: center; gap: 20px; }
+.nav-lang-menu { display: flex; gap: 8px; background: rgba(13,20,34,0.6); padding: 4px; border-radius: 8px; border: 1px solid #1a2744; }
+.nav-lang-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #4a6080; text-decoration: none; padding: 4px 8px; border-radius: 5px; transition: all 0.2s; }
+.nav-lang-btn.active { color: #00d4aa; background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); }
+.nav-lang-btn:hover:not(.active) { color: #fff; background: rgba(254,254,254,0.05); }
+.nav-logout-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #ff4b4b; background: rgba(255,75,75,0.08); border: 1px solid rgba(255,75,75,0.2); text-decoration: none; padding: 6px 14px; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+.nav-logout-btn:hover { background: #ff4b4b !important; color: #fff !important; box-shadow: 0 0 15px rgba(255,75,75,0.3); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -186,7 +186,8 @@ if not st.session_state.autenticado:
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── NAVBAR ─────────────────────────────────────────────────────────────────────
+# ── NAVBAR TOTALMENTE FIJA E INTEGRADA ─────────────────────────────────────────
+idm_curr = st.session_state.idioma
 st.markdown(f"""
 <div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
     <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
@@ -197,18 +198,22 @@ st.markdown(f"""
         <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">PyTorch</span>
         <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">ImageNet</span>
     </div>
-    <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;">
-        ● {st.session_state.rol_usuario}
+    <div class="nav-right-container">
+        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;margin-right:10px;">
+            ● {st.session_state.rol_usuario}
+        </div>
+        <div class="nav-lang-menu">
+            <a href="?action=set_es" class="nav-lang-btn {'active' if idm_curr == 'es' else ''}">ES</a>
+            <a href="?action=set_en" class="nav-lang-btn {'active' if idm_curr == 'en' else ''}">EN</a>
+            <a href="?action=set_fr" class="nav-lang-btn {'active' if idm_curr == 'fr' else ''}">FR</a>
+        </div>
+        <a href="?action=logout" class="nav-logout-btn">🔴 Salir</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-col_logout = st.columns([6, 1])
-with col_logout[1]:
-    if st.button("🔴 Cerrar sesión", key="logout"):
-        st.session_state.autenticado = False
-        st.session_state.rol_usuario = ""
-        st.rerun()
+# Asignación del diccionario de traducción activo
+idioma = st.session_state.idioma
 
 # ── TEXTOS ─────────────────────────────────────────────────────────────────────
 TEXTOS = {
@@ -379,14 +384,7 @@ def mostrar_resultados(top3, t, idm, umbral):
                            file_name="reporte_objectvision.txt", mime="text/plain",
                            key=f"dl_{nombre_top}_{idm}")
 
-# ── IDIOMA Y HERO ──────────────────────────────────────────────────────────────
-col_lang = st.columns([5, 1])
-with col_lang[1]:
-    lang_map = {"Español": "es", "English": "en", "Français": "fr"}
-    lang_sel = st.selectbox("", list(lang_map.keys()), label_visibility="collapsed")
-    st.session_state.idioma = lang_map[lang_sel]
-
-idioma = st.session_state.idioma
+# ── HERO ───────────────────────────────────────────────────────────────────────
 t = TEXTOS[idioma]
 
 st.markdown(f"""
