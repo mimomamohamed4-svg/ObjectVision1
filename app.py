@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. GESTIÓN DE SESIÓN Y PARÁMETROS URL
+# 2. GESTIÓN DE SESIÓN
 # ==========================================
 if "usuarios_db" not in st.session_state:
     st.session_state.usuarios_db = {
@@ -36,19 +36,6 @@ if "historial" not in st.session_state:
     st.session_state.historial = []
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
-
-# Escucha de acciones desde los nuevos botones de la Navbar integrada
-if "action" in st.query_params:
-    accion = st.query_params["action"]
-    if accion == "logout":
-        st.session_state.autenticado = False
-        st.session_state.rol_usuario = ""
-        st.query_params.clear()
-        st.rerun()
-    elif accion in ["set_es", "set_en", "set_fr"]:
-        st.session_state.idioma = accion.split("_")[1]
-        st.query_params.clear()
-        st.rerun()
 
 # ==========================================
 # 3. TRUCO DE INYECCIÓN CSS CRÍTICO
@@ -111,17 +98,15 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stTabs [data-baseweb="tab-list"] { gap: 24px; padding-left: 80px; border-bottom: 1px solid #1a2744; background: #060a10; }
 .stTabs [data-baseweb="tab"] { height: 52px; background-color: transparent !important; color: #4a6080 !important; font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; }
 .stTabs [data-baseweb="tab"][aria-selected="true"] { color: #fff !important; border-bottom-color: #0066ff !important; }
+
+/* Redefinición específica de botones generales de Streamlit */
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
-/* === NUEVOS ESTILOS PARA LA NAVBAR TOTALMENTE INTEGRADA === */
-.nav-right-container { display: flex; align-items: center; gap: 20px; }
-.nav-lang-menu { display: flex; gap: 8px; background: rgba(13,20,34,0.6); padding: 4px; border-radius: 8px; border: 1px solid #1a2744; }
-.nav-lang-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #4a6080; text-decoration: none; padding: 4px 8px; border-radius: 5px; transition: all 0.2s; }
-.nav-lang-btn.active { color: #00d4aa; background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); }
-.nav-lang-btn:hover:not(.active) { color: #fff; background: rgba(254,254,254,0.05); }
-.nav-logout-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #ff4b4b; background: rgba(255,75,75,0.08); border: 1px solid rgba(255,75,75,0.2); text-decoration: none; padding: 6px 14px; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
-.nav-logout-btn:hover { background: #ff4b4b !important; color: #fff !important; box-shadow: 0 0 15px rgba(255,75,75,0.3); }
+/* == ESTILIZADO DE LOS BOTONES DE LA NAVBAR INTERACTIVA == */
+div[data-testid="stHorizontalBlock"]:has(button[key^="btn_lang_"]), div[data-testid="stHorizontalBlock"]:has(button[key="btn_nav_logout"]) {
+    align-items: center !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -186,33 +171,55 @@ if not st.session_state.autenticado:
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── NAVBAR TOTALMENTE FIJA E INTEGRADA ─────────────────────────────────────────
+# ── NAVBAR TOTALMENTE FIJA E INTEGRADA (SOLUCIÓN INTERACTIVA) ─────────────────
 idm_curr = st.session_state.idioma
+
+# 1. Capa de diseño estático HTML/CSS
 st.markdown(f"""
 <div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
     <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
         Object<span style="color:#0066ff">Vision</span>
     </div>
-    <div style="display:flex;gap:10px;">
+    <div style="display:flex;gap:10px;margin-right:auto;margin-left:40px;">
         <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">MobileNetV2</span>
         <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">PyTorch</span>
         <span style="font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;color:#4a6080;background:rgba(26,39,68,0.5);border:1px solid #1a2744;padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-weight:700;">ImageNet</span>
     </div>
-    <div class="nav-right-container">
-        <div style="font-family:'Space Mono',monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;margin-right:10px;">
-            ● {st.session_state.rol_usuario}
-        </div>
-        <div class="nav-lang-menu">
-            <a href="?action=set_es" class="nav-lang-btn {'active' if idm_curr == 'es' else ''}">ES</a>
-            <a href="?action=set_en" class="nav-lang-btn {'active' if idm_curr == 'en' else ''}">EN</a>
-            <a href="?action=set_fr" class="nav-lang-btn {'active' if idm_curr == 'fr' else ''}">FR</a>
-        </div>
-        <a href="?action=logout" class="nav-logout-btn">🔴 Salir</a>
-    </div>
+    <div style="width:480px; height:2px;"></div>
 </div>
 """, unsafe_allow_html=True)
 
-# Asignación del diccionario de traducción activo
+# 2. Súperposición de los componentes de Streamlit (Evita recargas de página completas)
+st.markdown("<div style='margin-top:-48px; padding:0 60px 0 0; display:flex; justify-content:flex-end; position:relative; z-index:99999;'>", unsafe_allow_html=True)
+col_nav1, col_nav2, col_nav3, col_nav4, col_nav5 = st.columns([1.8, 0.4, 0.4, 0.4, 1.0])
+
+with col_nav1:
+    st.markdown(f"<div style='font-family:\"Space Mono\",monospace;font-size:0.72rem;color:#00d4aa;letter-spacing:1px;text-align:right;padding-top:10px;margin-right:15px;'>● {st.session_state.rol_usuario}</div>", unsafe_allow_html=True)
+
+with col_nav2:
+    if st.button("ES", key="btn_lang_es", help="Español"):
+        st.session_state.idioma = "es"
+        st.rerun()
+
+with col_nav3:
+    if st.button("EN", key="btn_lang_en", help="English"):
+        st.session_state.idioma = "en"
+        st.rerun()
+
+with col_nav4:
+    if st.button("FR", key="btn_lang_fr", help="Français"):
+        st.session_state.idioma = "fr"
+        st.rerun()
+
+with col_nav5:
+    if st.button("🔴 SALIR", key="btn_nav_logout"):
+        st.session_state.autenticado = False
+        st.session_state.rol_usuario = ""
+        st.rerun()
+st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("<div style='height:15px;'></div>", unsafe_allow_html=True)
+
+# Asignación del diccionario de traducción activo basado en el State
 idioma = st.session_state.idioma
 
 # ── TEXTOS ─────────────────────────────────────────────────────────────────────
