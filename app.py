@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 
 # ==========================================
-# 1. CONFIGURACIÓN DE LA PÁGINA (Estricto inicio)
+# 1. CONFIGURACIÓN DE LA PÁGINA
 # ==========================================
 st.set_page_config(
     page_title="ObjectVision AI",
@@ -37,7 +37,7 @@ if "historial" not in st.session_state:
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
 
-# Escucha de acciones desde los nuevos botones de la Navbar integrada
+# Escucha de acciones desde los enlaces nativos de la Navbar integrada
 if "action" in st.query_params:
     accion = st.query_params["action"]
     if accion == "logout":
@@ -51,7 +51,7 @@ if "action" in st.query_params:
         st.rerun()
 
 # ==========================================
-# 3. TRUCO DE INYECCIÓN CSS CRÍTICO
+# 3. CONTROL DE ESTILOS CSS (DISEÑO LIMPIO)
 # ==========================================
 st.markdown("""
 <style>
@@ -64,7 +64,7 @@ header { display: none !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 footer { display: none !important; }
 
-/* === SOLUCIÓN MAESTRA PARA LA TARJETA DE LOGIN === */
+/* === TARJETA DE LOGIN PERFECTA === */
 div[data-testid="stVerticalBlock"]:has(div[data-testid="stTextInput"]) {
     background-color: #0d1422 !important;
     border: 1px solid #1a2744 !important;
@@ -114,7 +114,7 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 .stButton > button { background: rgba(0,102,255,0.08) !important; color: #0066ff !important; border: 1px solid rgba(0,102,255,0.3) !important; border-radius: 8px !important; font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 1px !important; }
 .stButton > button:hover { background: #0066ff !important; color: #fff !important; }
 
-/* === NUEVOS ESTILOS PARA LA NAVBAR TOTALMENTE INTEGRADA === */
+/* === CLASES REPARADAS DE LA NAVBAR === */
 .nav-right-container { display: flex; align-items: center; gap: 20px; }
 .nav-lang-menu { display: flex; gap: 8px; background: rgba(13,20,34,0.6); padding: 4px; border-radius: 8px; border: 1px solid #1a2744; }
 .nav-lang-btn { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 700; color: #4a6080; text-decoration: none; padding: 4px 8px; border-radius: 5px; transition: all 0.2s; }
@@ -125,7 +125,7 @@ div[data-testid="stTextInput"] > div > div > input { background: #080c14 !import
 </style>
 """, unsafe_allow_html=True)
 
-# ── LOGIN ──────────────────────────────────────────────────────────────────────
+# ── PORTAL DE ACCESO (LOGIN) ──────────────────────────────────────────────────
 if not st.session_state.autenticado:
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
@@ -186,9 +186,11 @@ if not st.session_state.autenticado:
                     st.success(f"✅ Cuenta '{nuevo_u}' creada. Ya puedes iniciar sesión.")
     st.stop()
 
-# ── NAVBAR TOTALMENTE FIJA E INTEGRADA ─────────────────────────────────────────
+# ── NAVBAR TOTALMENTE FIJA, INTEGRADA Y PROTEGIDA CONTRA NUEVAS PESTAÑAS ─────
 idm_curr = st.session_state.idioma
 st.markdown(f"""
+<base target="_self">
+
 <div style="width:100%;background:#060a12;border-bottom:1px solid #1a2744;padding:0 60px;height:62px;display:flex;align-items:center;justify-content:space-between;">
     <div style="font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:#fff;letter-spacing:3px;text-transform:uppercase;">
         Object<span style="color:#0066ff">Vision</span>
@@ -203,19 +205,19 @@ st.markdown(f"""
             ● {st.session_state.rol_usuario}
         </div>
         <div class="nav-lang-menu">
-            <a href="?action=set_es" class="nav-lang-btn {'active' if idm_curr == 'es' else ''}">ES</a>
-            <a href="?action=set_en" class="nav-lang-btn {'active' if idm_curr == 'en' else ''}">EN</a>
-            <a href="?action=set_fr" class="nav-lang-btn {'active' if idm_curr == 'fr' else ''}">FR</a>
+            <a href="?action=set_es" target="_self" class="nav-lang-btn {'active' if idm_curr == 'es' else ''}">ES</a>
+            <a href="?action=set_en" target="_self" class="nav-lang-btn {'active' if idm_curr == 'en' else ''}">EN</a>
+            <a href="?action=set_fr" target="_self" class="nav-lang-btn {'active' if idm_curr == 'fr' else ''}">FR</a>
         </div>
-        <a href="?action=logout" class="nav-logout-btn">🔴 Salir</a>
+        <a href="?action=logout" target="_self" class="nav-logout-btn">🔴 Salir</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Asignación del diccionario de traducción activo
+# Asignación del idioma activo de traducción
 idioma = st.session_state.idioma
 
-# ── TEXTOS ─────────────────────────────────────────────────────────────────────
+# ── TEXTOS MULTIDIOMA ORIGINALES ──────────────────────────────────────────────
 TEXTOS = {
     "es": {
         "titulo": "Visión artificial que <em>entiende</em> tu world.",
@@ -286,6 +288,7 @@ def nivel_confianza(prob, t):
     else:
         return "#dc3545", t["baja"]
 
+# ── LOGICA DE MODELOS DE BACKEND (COMPLETA) ───────────────────────────────────
 @st.cache_resource
 def cargar_mobilenet():
     m = models.mobilenet_v2(weights="IMAGENET1K_V1")
@@ -384,7 +387,7 @@ def mostrar_resultados(top3, t, idm, umbral):
                            file_name="reporte_objectvision.txt", mime="text/plain",
                            key=f"dl_{nombre_top}_{idm}")
 
-# ── HERO ───────────────────────────────────────────────────────────────────────
+# ── CUERPO DE LA APP (HERO SECTION) ──────────────────────────────────────────
 t = TEXTOS[idioma]
 
 st.markdown(f"""
@@ -404,7 +407,7 @@ st.markdown("<div style='padding: 20px 80px 0 80px;'>", unsafe_allow_html=True)
 umbral_sel = st.slider("Filtro de certeza mínima", min_value=5, max_value=90, value=25, step=5, format="%d%%")
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ── TABS ───────────────────────────────────────────────────────────────────────
+# ── RENDERIZADO DE LAS PESTAÑAS DEL PANEL ─────────────────────────────────────
 es_admin = "MOHAMED (ADMIN)" in st.session_state.rol_usuario
 lista_tabs = [t["tab_analizar"], t["tab_camara"], t["tab_comparar"], t["tab_historial"]]
 if es_admin:
@@ -412,7 +415,7 @@ if es_admin:
 
 tabs_render = st.tabs(lista_tabs)
 
-# TAB 1 — ANALIZAR
+# TAB 1 — ANALIZAR IMAGEN
 with tabs_render[0]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -443,7 +446,7 @@ with tabs_render[0]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["esperando"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 2 — CÁMARA
+# TAB 2 — CÁMARA EN VIVO
 with tabs_render[1]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -464,7 +467,7 @@ with tabs_render[1]:
             st.markdown(f'<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 3 — COMPARAR
+# TAB 3 — COMPARAR MODELOS (MOBILENET VS RESNET)
 with tabs_render[2]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="up2")
@@ -488,7 +491,7 @@ with tabs_render[2]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">⬡</div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 4 — HISTORIAL
+# TAB 4 — HISTORIAL CON TARJETAS VISUALES
 with tabs_render[3]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
@@ -506,7 +509,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon">🕐</div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# TAB 5 — ADMIN
+# TAB 5 — PANEL DE ADMINISTRACIÓN COMPLETO
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
@@ -519,7 +522,7 @@ if es_admin:
             clave_oculta = "*" * len(datos["clave"])
             filas += f"""
             <tr>
-                <td style="padding:14px 166;border-bottom:1px solid #1a2744;color:#e8eaf0;font-family:'Space Mono',monospace;font-weight:700">{usr}</td>
+                <td style="padding:14px 16px;border-bottom:1px solid #1a2744;color:#e8eaf0;font-family:'Space Mono',monospace;font-weight:700">{usr}</td>
                 <td style="padding:14px 16px;border-bottom:1px solid #1a2744;color:#4a6080;font-family:'Space Mono',monospace">{clave_oculta}</td>
                 <td style="padding:14px 16px;border-bottom:1px solid #1a2744"><span style="font-family:'Space Mono',monospace;font-size:0.72rem;padding:4px 10px;border-radius:4px;{badge}">{datos['rol']}</span></td>
             </tr>"""
@@ -535,7 +538,7 @@ if es_admin:
         """, height=300, scrolling=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-# ── FOOTER ─────────────────────────────────────────────────────────────────────
+# ── FOOTER CORPORATIVO FINAL ──────────────────────────────────────────────────
 st.markdown("""
 <div class="bottom-bar">
     <div class="bottom-left">© 2026 ObjectVision · Mohamed Mohamed Embarec · Proyecto Intermodular</div>
