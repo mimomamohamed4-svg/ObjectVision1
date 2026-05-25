@@ -30,6 +30,13 @@ if "historial" not in st.session_state:
     st.session_state.historial = []
 if "idioma" not in st.session_state:
     st.session_state.idioma = "es"
+# Contador global de widgets — garantiza keys únicos en cada render
+if "_widget_counter" not in st.session_state:
+    st.session_state._widget_counter = 0
+
+def next_key(prefix="w"):
+    st.session_state._widget_counter += 1
+    return f"{prefix}_{st.session_state._widget_counter}"
 
 st.markdown("""
 <style>
@@ -315,10 +322,13 @@ def predecir(imagen, modelo):
     probs = torch.nn.functional.softmax(salida[0], dim=0)
     return torch.topk(probs, 3)
 
-def mostrar_resultados(top3, t, idm, umbral):
+# Devuelve el HTML de los resultados y los datos del top1 — SIN crear widgets
+def render_resultados_html(top3, t, idm, umbral):
     badge_colors = ["#0066ff", "#00d4aa", "#6644ff"]
+    html = ""
     visibles = 0
     reporte = f"OBJECTVISION AI — REPORTE\nFecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n\n"
+
     for i in range(3):
         nombre = traducir(etiquetas[top3.indices[i].item()], idm)
         prob = top3.values[i].item()
@@ -328,7 +338,7 @@ def mostrar_resultados(top3, t, idm, umbral):
         visibles += 1
         color_bar, nivel = nivel_confianza(prob, t)
         reporte += f"#{i+1} {nombre}: {pct:.1f}%\n"
-        st.markdown(f"""
+        html += f"""
         <div class="result-item">
             <div class="result-header">
                 <div style="display:flex;align-items:center">
@@ -341,15 +351,16 @@ def mostrar_resultados(top3, t, idm, umbral):
                 <div class="bar-fill" style="width:{pct}%;background:{color_bar}"></div>
             </div>
             <div style="margin-top:6px;font-size:0.72rem;color:#4a6080;font-family:'DM Mono',monospace;letter-spacing:1px">{nivel}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        </div>"""
 
     if visibles == 0:
-        st.markdown(f'<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="empty-text">Ningún objeto supera el {umbral}% mínimo.</div></div>', unsafe_allow_html=True)
-        return
+        html = '<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="empty-text">Ningún objeto supera el umbral mínimo.</div></div>'
+        return html, None, None, None, reporte
 
-    nombre_top = traducir(etiquetas[top3.indices[0].item()], idm)
+    idx_top = top3.indices[0].item()
+    nombre_top = traducir(etiquetas[idx_top], idm)
     prob_top = top3.values[0].item() * 100
+
     if idm == "es":
         msg_voz = f"Objeto detectado: {nombre_top}, con un {prob_top:.0f} por ciento de certeza."
         lang_voz = "es-ES"
@@ -360,9 +371,20 @@ def mostrar_resultados(top3, t, idm, umbral):
         msg_voz = f"Objet détecté: {nombre_top}, avec {prob_top:.0f} pourcent de confiance."
         lang_voz = "fr-FR"
 
+    return html, msg_voz, lang_voz, nombre_top, reporte
+
+
+# Muestra resultados + botones. key_prefix DEBE ser único en cada llamada del script
+def mostrar_resultados(top3, t, idm, umbral, key_prefix):
+    html, msg_voz, lang_voz, nombre_top, reporte = render_resultados_html(top3, t, idm, umbral)
+    st.markdown(html, unsafe_allow_html=True)
+
+    if msg_voz is None:
+        return nombre_top if nombre_top else None, None
+
     col_b1, col_b2 = st.columns(2)
     with col_b1:
-        if st.button(f"▶  {t['boton_voz']}", key=f"voz_{nombre_top}_{idm}"):
+        if st.button(f"▶  {t['boton_voz']}", key=f"voz_{key_prefix}"):
             st.components.v1.html(f"""
             <script>
                 var msg = new SpeechSynthesisUtterance("{msg_voz}");
@@ -375,10 +397,12 @@ def mostrar_resultados(top3, t, idm, umbral):
         st.download_button(
             f"↓  {t['boton_dl']}",
             data=reporte,
-            file_name="reporte_objectvision.txt",
+            file_name=f"reporte_{key_prefix}.txt",
             mime="text/plain",
-            key=f"dl_{nombre_top}_{idm}"
+            key=f"dl_{key_prefix}"
         )
+    return nombre_top, top3.values[0].item()
+
 
 t = TEXTOS[idioma]
 
@@ -406,6 +430,7 @@ if es_admin:
 
 tabs_render = st.tabs(lista_tabs)
 
+# ── TAB 0: Analizar ────────────────────────────────────────────────────────────
 with tabs_render[0]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -423,19 +448,19 @@ with tabs_render[0]:
                 top3 = predecir(imagen, mobilenet)
                 ms = (time.time() - t0) * 1000
             st.markdown(f"<span style='font-family:DM Mono;font-size:0.72rem;color:#00d4aa;letter-spacing:1px'><i class='fa-solid fa-bolt'></i> INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
-            mostrar_resultados(top3, t, idioma, umbral_sel)
-            buf = io.BytesIO()
-            imagen.save(buf, format="JPEG")
-            img_b64 = base64.b64encode(buf.getvalue()).decode()
-            nombre_top = traducir(etiquetas[top3.indices[0].item()], idioma)
-            prob_top = top3.values[0].item()
-            if not st.session_state.historial or st.session_state.historial[0]["nombre"] != nombre_top:
-                st.session_state.historial.insert(0, {"nombre": nombre_top, "prob": prob_top, "img": img_b64, "hora": datetime.now().strftime("%H:%M")})
-                st.session_state.historial = st.session_state.historial[:5]
+            nombre_top, prob_top = mostrar_resultados(top3, t, idioma, umbral_sel, key_prefix="tab0_mobile")
+            if nombre_top and prob_top is not None:
+                buf = io.BytesIO()
+                imagen.save(buf, format="JPEG")
+                img_b64 = base64.b64encode(buf.getvalue()).decode()
+                if not st.session_state.historial or st.session_state.historial[0]["nombre"] != nombre_top:
+                    st.session_state.historial.insert(0, {"nombre": nombre_top, "prob": prob_top, "img": img_b64, "hora": datetime.now().strftime("%H:%M")})
+                    st.session_state.historial = st.session_state.historial[:5]
         else:
             st.markdown(f'<div class="empty-state"><div class="empty-icon"><i class="fa-regular fa-image"></i></div><div class="empty-text">{t["esperando"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# ── TAB 1: Cámara ──────────────────────────────────────────────────────────────
 with tabs_render[1]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2, gap="large")
@@ -451,11 +476,12 @@ with tabs_render[1]:
                 top3_cam = predecir(img_cam, mobilenet)
                 ms = (time.time() - t0) * 1000
             st.markdown(f"<span style='font-family:DM Mono;font-size:0.72rem;color:#00d4aa;letter-spacing:1px'><i class='fa-solid fa-bolt'></i> INFERENCIA: {ms:.0f}ms</span>", unsafe_allow_html=True)
-            mostrar_resultados(top3_cam, t, idioma, umbral_sel)
+            mostrar_resultados(top3_cam, t, idioma, umbral_sel, key_prefix="tab1_camara")
         else:
             st.markdown(f'<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-camera"></i></div><div class="empty-text">{t["camara_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# ── TAB 2: Comparar ────────────────────────────────────────────────────────────
 with tabs_render[2]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     archivo_comp = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="collapsed", key="up2")
@@ -468,17 +494,20 @@ with tabs_render[2]:
             st.markdown(f'<div class="zone-label">{t["modelo_a"]}</div>', unsafe_allow_html=True)
             with st.spinner(t["procesando"]):
                 top3_mob = predecir(img_comp, mobilenet)
-            mostrar_resultados(top3_mob, t, idioma, umbral_sel)
+            # key_prefix único: "tab2_mobile"
+            mostrar_resultados(top3_mob, t, idioma, umbral_sel, key_prefix="tab2_mobile")
         with col_b:
             st.markdown(f'<div class="zone-label">{t["modelo_b"]}</div>', unsafe_allow_html=True)
             resnet = cargar_resnet()
             with st.spinner(t["procesando"]):
                 top3_res = predecir(img_comp, resnet)
-            mostrar_resultados(top3_res, t, idioma, umbral_sel)
+            # key_prefix único: "tab2_resnet"
+            mostrar_resultados(top3_res, t, idioma, umbral_sel, key_prefix="tab2_resnet")
     else:
         st.markdown(f'<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-code-compare"></i></div><div class="empty-text">{t["comparar_info"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# ── TAB 3: Historial ───────────────────────────────────────────────────────────
 with tabs_render[3]:
     st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
     st.markdown(f'<div class="zone-label">{t["tab_historial"]}</div>', unsafe_allow_html=True)
@@ -496,6 +525,7 @@ with tabs_render[3]:
         st.markdown(f'<div class="empty-state"><div class="empty-icon"><i class="fa-regular fa-clock"></i></div><div class="empty-text">{t["historial_vacio"]}</div></div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# ── TAB 4: Admin ───────────────────────────────────────────────────────────────
 if es_admin:
     with tabs_render[4]:
         st.markdown("<div style='padding: 40px 80px;'>", unsafe_allow_html=True)
