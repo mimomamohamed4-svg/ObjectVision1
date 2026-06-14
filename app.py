@@ -26,8 +26,6 @@ def cargar_usuarios():
             return json.load(f)
     return {
         "mohamed": {"clave": "admin2026", "rol": "MOHAMED (ADMIN)"},
-        "profesora": {"clave": "tribunal10", "rol": "PROFESORA (EVALUADOR)"},
-        "invitado": {"clave": "invitado123", "rol": "INVITADO"}
     }
 
 def guardar_usuarios(db):
